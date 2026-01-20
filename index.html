@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tanz Monitor 12.0</title>
+    <title>Tanz Monitor 13.0</title>
     <style>
         :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #000; }
         body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -15,8 +15,15 @@
         #dance-name { font-size: clamp(2rem, 12vw, 8rem); font-weight: 900; text-transform: uppercase; margin: 0; width: 100%; color: white; }
         
         /* SVG Bereich */
-        #step-viz { height: 250px; width: 100%; display: flex; justify-content: center; align-items: center; }
-        .step-svg { filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); max-height: 100%; }
+        #step-viz { height: 300px; width: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
+        .step-svg { max-height: 100%; width: auto; max-width: 100%; }
+
+        /* NEU: CSS für die Walzer Animation */
+        .step-circle { opacity: 0.2; transition: all 0.3s ease-out; }
+        .step-circle.active { opacity: 1; filter: drop-shadow(0 0 15px currentColor); transform: scale(1.1); }
+        .step-num { fill: white; font-size: 24px; font-weight: bold; pointer-events: none; }
+        .red-step { color: var(--red); fill: var(--red); }
+        .blue-step { color: var(--blue); fill: var(--blue); }
 
         #bpm-display { display: flex; align-items: baseline; gap: 15px; }
         #bpm-val { font-size: 7rem; font-weight: 900; font-family: monospace; color: var(--green); }
@@ -75,7 +82,7 @@
                 <span class="label-text">OpenAI API Key</span>
                 <span id="key-check" class="status-badge">✔ GESPEICHERT</span>
             </div>
-            <input type="password" id="api-key" placeholder="Neuen Key eingeben...">
+            <input type="password" id="api-key" placeholder="Neuen Key eingeben..." autocomplete="off">
         </div>
         
         <div class="input-group">
@@ -83,7 +90,7 @@
                 <span class="label-text">Funk-Kanalname</span>
                 <span id="topic-check" class="status-badge">✔ VERBUNDEN</span>
             </div>
-            <input type="text" id="topic-id" placeholder="Neuen Namen eingeben...">
+            <input type="text" id="topic-id" placeholder="Neuen Namen eingeben..." autocomplete="off">
         </div>
 
         <button class="btn btn-blue" onclick="saveSettings()">ÄNDERUNGEN SPEICHERN</button>
@@ -94,10 +101,27 @@
 <script>
     let audioCtx, analyser, processor, isRunning = false, lastB = 0, history = [], aiLock = false;
     let eventSource = null;
+    
+    // Variablen für die Walzer Animation
+    let waltzTimer = null;
+    let stepIndex = 1;
 
-    // SVG Grafiken für Grundschritte
+    // SVG Grafiken
     const steps = {
-        "walzer": `<svg class="step-svg" viewBox="0 0 400 300"><path d="M100,250 L100,50 L300,50 L300,250 Z" fill="none" stroke="var(--yellow)" stroke-width="12" stroke-dasharray="15 10"/><text x="85" y="285" fill="white" font-size="30">1</text><text x="85" y="40" fill="white" font-size="30">2</text><text x="290" y="40" fill="white" font-size="30">3</text></svg>`,
+        // NEU: Animierter Walzer Box-Schritt mit Kreisen
+        "walzer": `
+        <svg class="step-svg" viewBox="0 0 400 400">
+            <circle cx="130" cy="320" r="30" class="step-circle red-step" /><text x="122" y="330" class="step-num">L</text>
+            <circle cx="270" cy="320" r="30" class="step-circle blue-step" /><text x="262" y="330" class="step-num">R</text>
+            
+            <circle id="s1" cx="270" cy="80" r="35" class="step-circle blue-step" /><text x="262" y="90" class="step-num">1</text>
+            <circle id="s2" cx="130" cy="80" r="35" class="step-circle red-step" /><text x="122" y="90" class="step-num">2</text>
+            <circle id="s3" cx="180" cy="130" r="35" class="step-circle blue-step" /><text x="172" y="140" class="step-num">3</text>
+            
+            <circle id="s4" cx="130" cy="320" r="35" class="step-circle red-step" /><text x="122" y="330" class="step-num">4</text>
+            <circle id="s5" cx="270" cy="320" r="35" class="step-circle blue-step" /><text x="262" y="330" class="step-num">5</text>
+            <circle id="s6" cx="220" cy="270" r="35" class="step-circle red-step" /><text x="212" y="280" class="step-num">6</text>
+        </svg>`,
         "rumba": `<svg class="step-svg" viewBox="0 0 400 300"><rect x="100" y="50" width="200" height="200" fill="none" stroke="var(--green)" stroke-width="10"/><text x="60" y="160" fill="white" font-size="30">Slow</text><text x="280" y="40" fill="white" font-size="30">Quick</text><text x="280" y="280" fill="white" font-size="30">Quick</text></svg>`,
         "discofox": `<svg class="step-svg" viewBox="0 0 500 150"><circle cx="100" cy="75" r="30" fill="var(--blue)"/><circle cx="250" cy="75" r="30" fill="var(--blue)"/><circle cx="400" cy="75" r="15" fill="var(--red)"/><text x="90" y="140" fill="white">1</text><text x="240" y="140" fill="white">2</text><text x="385" y="140" fill="white">Tap</text></svg>`,
         "chacha": `<svg class="step-svg" viewBox="0 0 500 200"><path d="M50,100 L150,100 M250,100 L320,100 L400,100" stroke="white" stroke-width="15" stroke-linecap="round"/><text x="45" y="160" fill="white">1</text><text x="145" y="160" fill="white">2</text><text x="310" y="160" fill="white">3 & 4</text></svg>`
@@ -120,7 +144,6 @@
         o.style.display = isOpening ? 'flex' : 'none';
         
         if (isOpening) {
-            // Felder leeren für Privacy
             document.getElementById('api-key').value = "";
             document.getElementById('topic-id').value = "";
             updateStatusBadges();
@@ -130,10 +153,8 @@
     function saveSettings() {
         const key = document.getElementById('api-key').value.trim();
         const topic = document.getElementById('topic-id').value.trim();
-        
         if (key) localStorage.setItem('dm_key', key);
         if (topic) localStorage.setItem('dm_topic', topic);
-        
         toggleSettings();
         location.reload();
     }
@@ -163,10 +184,12 @@
         const key = localStorage.getItem('dm_key');
         if (!key) return;
         try {
+            // Vorherige Animation stoppen
+            clearWaltzAnimation();
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur 1 Wort.`}], max_tokens: 10})
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur 1 Wort (z.B. Walzer, Rumba, Discofox).`}], max_tokens: 10})
             });
             const data = await resp.json();
             const dance = data.choices[0].message.content.trim().replace(".", "");
@@ -179,11 +202,53 @@
     function updateSteps(dance) {
         const d = dance.toLowerCase();
         let html = "";
-        if (d.includes("walzer")) html = steps.walzer;
+        // Animation stoppen, falls sie läuft
+        clearWaltzAnimation();
+
+        if (d.includes("walzer")) {
+            html = steps.walzer;
+            document.getElementById('step-viz').innerHTML = html;
+            // Starte Animation nach kurzem Delay damit SVG geladen ist
+            setTimeout(startWaltzAnimation, 100);
+        }
         else if (d.includes("rumba")) html = steps.rumba;
         else if (d.includes("disco")) html = steps.discofox;
         else if (d.includes("cha")) html = steps.chacha;
-        document.getElementById('step-viz').innerHTML = html;
+        
+        if (!d.includes("walzer")) {
+             document.getElementById('step-viz').innerHTML = html;
+        }
+    }
+
+    // NEU: Animations-Logik für Walzer
+    function startWaltzAnimation() {
+        stepIndex = 1;
+        // Sofort den ersten Schritt anzeigen
+        animateWaltzStep();
+        // Dann alle 700ms (ca. Walzer Tempo) weiterschalten
+        waltzTimer = setInterval(animateWaltzStep, 700);
+    }
+
+    function animateWaltzStep() {
+        // Alle Kreise zurücksetzen
+        for(let i=1; i<=6; i++) {
+            const el = document.getElementById('s'+i);
+            if(el) el.classList.remove('active');
+        }
+        // Aktuellen Kreis aktivieren
+        const current = document.getElementById('s'+stepIndex);
+        if(current) current.classList.add('active');
+
+        // Zähler erhöhen (1->6, dann wieder 1)
+        stepIndex++;
+        if(stepIndex > 6) stepIndex = 1;
+    }
+
+    function clearWaltzAnimation() {
+        if (waltzTimer) {
+            clearInterval(waltzTimer);
+            waltzTimer = null;
+        }
     }
 
     async function toggleMic() {
