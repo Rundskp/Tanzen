@@ -3,42 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tanz das!</title>
+    <title>Tanz Monitor 10.6</title>
     <style>
         :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; }
-        body { background: black; color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { background: black; color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background 0.2s; }
         #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
         #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #dance-name { font-size: clamp(3rem, 18vw, 11rem); font-weight: 900; text-transform: uppercase; line-height: 0.8; margin: 10px 0; }
+        #dance-name { font-size: clamp(3rem, 18vw, 11rem); font-weight: 900; text-transform: uppercase; line-height: 0.8; margin: 10px 0; transition: color 0.3s; }
         #bpm-val { font-size: 9rem; font-weight: bold; font-family: monospace; }
         #status-bar { padding: 8px; font-size: 0.8rem; text-align: center; background: #0a0a0a; color: var(--yellow); border-bottom: 1px solid #222; }
-        #debug-log { font-size: 0.6rem; color: #444; padding: 5px; font-family: monospace; background: #050505; }
+        #debug-log { font-size: 0.6rem; color: #444; padding: 5px; font-family: monospace; text-align: center; background: #050505; height: 1.2rem; overflow: hidden; }
         .btn { background: var(--green); border: none; color: white; padding: 15px 30px; border-radius: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div id="conn-status" style="font-size: 0.7rem;">Funk: Inaktiv</div>
+    <div id="conn-status" style="font-size: 0.7rem; color: #888;">Funk: Initialisiere...</div>
     <button class="btn" id="start-btn" onclick="toggleMic()">START MONITOR</button>
     <button onclick="toggleSettings()" style="background:none; border:none; font-size:1.5rem; color:white;">⚙️</button>
 </div>
 
-<div id="status-bar">BEREIT</div>
+<div id="status-bar">WARTE AUF FUNKSPRUCH</div>
 
-<div id="monitor" style="opacity: 0.3;">
-    <div id="song-tag" style="color:var(--yellow); font-weight:bold; min-height:1.5rem;">---</div>
-    <h1 id="dance-name">WACHLEUTE</h1>
+<div id="monitor" style="opacity: 0.4;">
+    <div id="song-tag" style="color:var(--yellow); font-weight:bold; height:1.5rem;">---</div>
+    <h1 id="dance-name">BEREIT</h1>
     <div id="bpm-val">0</div>
-    <div class="label" style="color:#555; letter-spacing:5px; font-size:0.8rem;">BPM (10s SCHNITT)</div>
+    <div style="letter-spacing:5px; color:#555; font-size:0.8rem;">BPM (LIVE SCAN)</div>
 </div>
 
-<div id="debug-log">Log: Warte auf Funkspruch...</div>
+<div id="debug-log">Log: Leer</div>
 
 <div id="settings" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:100; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-    <input type="text" id="api-key" placeholder="OpenAI Key (sk-...)">
-    <input type="text" id="topic-id" placeholder="Funk-Name">
-    <button class="btn" onclick="toggleSettings()" style="background:var(--blue)">SPEICHERN</button>
+    <h2 style="color:var(--blue)">EINSTELLUNGEN</h2>
+    <input type="text" id="api-key" placeholder="OpenAI Key" style="width:80%; padding:15px; background:#222; color:white; border:1px solid #444; border-radius:10px; margin-bottom:10px;">
+    <input type="text" id="topic-id" placeholder="Funk-Name" style="width:80%; padding:15px; background:#222; color:white; border:1px solid #444; border-radius:10px; margin-bottom:10px;">
+    <button class="btn" onclick="toggleSettings()" style="background:var(--blue); width:80%;">SPEICHERN</button>
 </div>
 
 <script>
@@ -59,42 +60,48 @@
         if (!topic) return;
         if (eventSource) eventSource.close();
         
-        // Verbindung zu ntfy (SSE)
         eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
         
         eventSource.onopen = () => {
-            document.getElementById('conn-status').innerText = "Funk: AKTIV ✅";
+            document.getElementById('conn-status').innerText = "Funk: AKTIV ✅ (" + topic + ")";
             document.getElementById('conn-status').style.color = "var(--green)";
         };
 
         eventSource.onmessage = (e) => {
-            const log = document.getElementById('debug-log');
-            log.innerText = "Empfangen: " + e.data;
+            const data = JSON.parse(e.data);
+            // Logge alles, was reinkommt
+            document.getElementById('debug-log').innerText = "Empfang: " + (data.message || data.event);
             
-            try {
-                const data = JSON.parse(e.data);
-                // ntfy Nachrichten kommen als data.message
-                if (data.message) {
-                    processMessage(data.message);
-                }
-            } catch (err) {
-                // Wenn es kein JSON ist, nimm den Text direkt
-                if (e.data.length > 2) processMessage(e.data);
+            if (data.event === 'message' && data.message) {
+                flashScreen();
+                processIncoming(data.message);
             }
+        };
+
+        eventSource.onerror = () => {
+            document.getElementById('conn-status').innerText = "Funk: Fehler - Reconnect...";
+            document.getElementById('conn-status').style.color = "var(--red)";
         };
     }
 
-    function processMessage(msg) {
-        document.getElementById('status-bar').innerText = "FUNKSPRUCH: " + msg;
+    function flashScreen() {
+        document.body.style.background = "var(--blue)";
+        setTimeout(() => document.body.style.background = "black", 300);
+    }
+
+    function processIncoming(msg) {
+        document.getElementById('status-bar').innerText = "FUNKSPRUCH ERHALTEN: " + msg;
         document.getElementById('monitor').style.opacity = "1";
-        document.getElementById('song-tag').innerText = msg;
+        document.getElementById('song-tag').innerText = "VON UHR: " + msg;
         aiLock = false;
         askAI(msg);
         
+        // Timer für Rückkehr zum Scan
         setTimeout(() => {
-            document.getElementById('monitor').style.opacity = "0.3";
+            document.getElementById('monitor').style.opacity = "0.4";
             document.getElementById('song-tag').innerText = "---";
-        }, 30000);
+            aiLock = false;
+        }, 40000);
     }
 
     function toggleSettings() {
@@ -102,31 +109,35 @@
         if (o.style.display === 'flex') {
             o.style.display = 'none';
             localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
-            localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
-            connectToFunk(document.getElementById('topic-id').value.trim());
+            const topic = document.getElementById('topic-id').value.trim();
+            localStorage.setItem('dm_topic', topic);
+            connectToFunk(topic);
         } else { o.style.display = 'flex'; }
     }
 
     async function toggleMic() {
         if (isRunning) { location.reload(); return; }
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const source = audioCtx.createMediaStreamSource(stream);
-        analyser = audioCtx.createAnalyser();
-        processor = audioCtx.createScriptProcessor(2048, 1, 1);
-        source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
-        processor.onaudioprocess = (e) => {
-            const data = e.inputBuffer.getChannelData(0);
-            let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
-            const rms = Math.sqrt(sum / data.length);
-            if (rms * 30 > 0.4) {
-                const now = Date.now();
-                if (now - lastB > 300) { handleBeat(now); lastB = now; }
-            }
-        };
-        isRunning = true;
-        document.getElementById('start-btn').innerText = "STOP";
-        document.getElementById('start-btn').style.background = "var(--red)";
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            processor = audioCtx.createScriptProcessor(2048, 1, 1);
+            source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
+            processor.onaudioprocess = (e) => {
+                const data = e.inputBuffer.getChannelData(0);
+                let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+                const rms = Math.sqrt(sum / data.length);
+                if (rms * 30 > 0.5) {
+                    const now = Date.now();
+                    if (now - lastB > 300) { handleBeat(now); lastB = now; }
+                }
+            };
+            isRunning = true;
+            document.getElementById('start-btn').innerText = "STOP";
+            document.getElementById('start-btn').style.background = "var(--red)";
+            document.getElementById('status-bar').innerText = "SCAN LÄUFT...";
+        } catch (e) { alert("Mic Error"); }
     }
 
     function handleBeat(now) {
@@ -137,8 +148,9 @@
             history = history.filter(h => now - h.t < 10000);
             const avg = Math.round(history.reduce((a,b)=>a+b.v,0)/history.length);
             document.getElementById('bpm-val').innerText = avg;
+            const is34 = (interval > 510 && interval < 790);
+            document.getElementById('meter').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             if (!aiLock) {
-                const is34 = (interval > 510 && interval < 790);
                 if (is34) document.getElementById('dance-name').innerText = avg > 145 ? "Wiener Walzer" : "Langsamer Walzer";
                 else document.getElementById('dance-name').innerText = avg < 118 ? "Rumba" : "Discofox";
             }
@@ -148,16 +160,17 @@
     async function askAI(song) {
         const key = localStorage.getItem('dm_key');
         if (!key) return;
+        document.getElementById('dance-name').innerText = "...";
         try {
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Tanz zu '${song}'? Nur 1 Wort.`}], max_tokens: 10})
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Standard/Latein Tanz? Nur 1 Wort.`}], max_tokens: 10})
             });
             const data = await resp.json();
             document.getElementById('dance-name').innerText = data.choices[0].message.content.trim();
             aiLock = true;
-        } catch (e) {}
+        } catch (e) { document.getElementById('dance-name').innerText = "KI Fehler"; }
     }
 </script>
 </body>
