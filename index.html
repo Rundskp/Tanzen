@@ -3,59 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tanz Monitor Ultimate</title>
+    <title>Tanz Monitor 12.0</title>
     <style>
-        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; }
-        body { background: var(--bg); color: white; font-family: -apple-system, system-ui, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #000; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Top Bar */
-        #top-bar { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
-        #conn-status { font-size: 0.9rem; font-weight: bold; }
+        #top-bar { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; text-align: center; padding: 20px; transition: 0.5s; }
         
-        /* Hauptanzeige */
-        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; transition: 0.5s; }
-        #song-tag { color: var(--yellow); font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #song-tag { color: var(--yellow); font-size: 1.5rem; font-weight: bold; opacity: 0.8; }
+        #dance-name { font-size: clamp(2rem, 12vw, 8rem); font-weight: 900; text-transform: uppercase; margin: 0; width: 100%; color: white; }
         
-        /* Tanzname - Verhindert Überlauf */
-        #dance-name { 
-            font-size: clamp(2rem, 15vw, 9rem); 
-            font-weight: 900; text-transform: uppercase; line-height: 0.9; margin: 0;
-            width: 100%; overflow-wrap: break-word; 
-        }
-        
-        #bpm-display { display: flex; align-items: baseline; gap: 10px; margin-top: 20px; }
-        #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; color: var(--green); }
-        .bpm-label { color: #555; letter-spacing: 5px; font-size: 1.2rem; }
+        /* SVG Bereich */
+        #step-viz { height: 250px; width: 100%; display: flex; justify-content: center; align-items: center; }
+        .step-svg { filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); max-height: 100%; }
 
-        /* SVG Grundschritte */
-        #step-viz { margin-top: 30px; height: 200px; width: 100%; display: flex; justify-content: center; }
-        .foot { fill: none; stroke-width: 20; stroke-linecap: round; }
-        
+        #bpm-display { display: flex; align-items: baseline; gap: 15px; }
+        #bpm-val { font-size: 7rem; font-weight: 900; font-family: monospace; color: var(--green); }
+        .bpm-label { color: #444; letter-spacing: 5px; font-size: 1rem; }
+
         /* Settings Overlay */
         #settings { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; 
+            background: rgba(0,0,0,0.98); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; 
         }
-        .settings-box { width: 85%; max-width: 500px; background: #1a1a1a; padding: 40px; border-radius: 30px; border: 1px solid #333; }
-        .settings-box h2 { margin-top: 0; color: var(--blue); }
-        .input-group { margin-bottom: 25px; position: relative; }
-        label { display: block; font-size: 0.8rem; color: #888; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 2px; }
+        .settings-box { width: 90%; max-width: 550px; background: #111; padding: 40px; border-radius: 30px; border: 1px solid #333; box-sizing: border-box; }
+        .input-group { margin-bottom: 30px; }
+        
+        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .label-text { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        .status-badge { color: var(--green); font-weight: bold; font-size: 0.9rem; display: none; }
+        
         input { 
-            width: 100%; padding: 18px; background: #222; border: 2px solid #444; color: white; 
+            width: 100%; padding: 20px; background: #1a1a1a; border: 2px solid #333; color: white; 
             border-radius: 15px; font-size: 1.2rem; box-sizing: border-box; 
         }
         input:focus { border-color: var(--blue); outline: none; }
-        .save-btn { background: var(--blue); color: white; border: none; padding: 20px; width: 100%; border-radius: 15px; font-size: 1.3rem; font-weight: bold; cursor: pointer; }
-        .check-mark { color: var(--green); display: none; margin-top: 10px; font-weight: bold; text-align: center; }
-
-        .btn-mic { background: var(--green); border: none; color: white; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-size: 1rem; }
+        
+        .btn { padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; font-size: 1.1rem; }
+        .btn-blue { background: var(--blue); color: white; width: 100%; margin-top: 20px; }
+        .btn-mic { background: var(--green); color: white; }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div id="conn-status" style="color: #666;">Funk: Initialisiere...</div>
-    <button class="btn-mic" id="start-btn" onclick="toggleMic()">START MIC</button>
+    <div id="conn-status" style="font-size: 0.8rem; color: #555;">FUNK: BEREIT</div>
+    <button class="btn btn-mic" id="start-btn" onclick="toggleMic()">START MONITOR</button>
     <button onclick="toggleSettings()" style="background:none; border:none; font-size:2.5rem; color:white;">⚙️</button>
 </div>
 
@@ -74,20 +68,26 @@
 
 <div id="settings">
     <div class="settings-box">
-        <h2>KONFIGURATION</h2>
+        <h2 style="color:var(--blue); margin-top:0;">EINSTELLUNGEN</h2>
         
         <div class="input-group">
-            <label>OpenAI API Key</label>
-            <input type="password" id="api-key" placeholder="sk-...">
+            <div class="label-row">
+                <span class="label-text">OpenAI API Key</span>
+                <span id="key-check" class="status-badge">✔ GESPEICHERT</span>
+            </div>
+            <input type="password" id="api-key" placeholder="Neuen Key eingeben...">
         </div>
         
         <div class="input-group">
-            <label>Funk-Kanalname (Topic)</label>
-            <input type="text" id="topic-id" placeholder="z.B. MeinTanz_2026">
+            <div class="label-row">
+                <span class="label-text">Funk-Kanalname</span>
+                <span id="topic-check" class="status-badge">✔ VERBUNDEN</span>
+            </div>
+            <input type="text" id="topic-id" placeholder="Neuen Namen eingeben...">
         </div>
 
-        <button class="save-btn" onclick="saveSettings()">SPEICHERN & SCHLIESSEN</button>
-        <div id="save-confirm" class="check-mark">✅ GESPEICHERT!</div>
+        <button class="btn btn-blue" onclick="saveSettings()">ÄNDERUNGEN SPEICHERN</button>
+        <button onclick="toggleSettings()" style="background:none; border:none; color:#555; width:100%; margin-top:20px;">Abbrechen</button>
     </div>
 </div>
 
@@ -97,51 +97,59 @@
 
     // SVG Grafiken für Grundschritte
     const steps = {
-        "walzer": `<svg viewBox="0 0 400 200" width="300"><path d="M50,150 L50,50 L150,50 L150,150" fill="none" stroke="#FFCC00" stroke-width="10"/><text x="45" y="180" fill="white">1</text><text x="45" y="40" fill="white">2</text><text x="145" y="40" fill="white">3</text></svg>`,
-        "rumba": `<svg viewBox="0 0 400 200" width="300"><rect x="100" y="50" width="100" height="100" stroke="#34C759" fill="none" stroke-width="8"/><text x="80" y="100" fill="white">S</text><text x="210" y="70" fill="white">Q</text><text x="210" y="130" fill="white">Q</text></svg>`,
-        "discofox": `<svg viewBox="0 0 400 100" width="300"><circle cx="50" cy="50" r="20" fill="#007AFF"/><circle cx="150" cy="50" r="20" fill="#007AFF"/><circle cx="250" cy="50" r="10" fill="#FF3B30"/><text x="45" y="90" fill="white">1</text><text x="145" y="90" fill="white">2</text><text x="240" y="90" fill="white">Tap</text></svg>`,
-        "chacha": `<svg viewBox="0 0 400 200" width="300"><path d="M50,100 L100,100 M180,100 L230,100 L280,100" stroke="white" stroke-width="10"/><text x="45" y="130" fill="white">1</text><text x="95" y="130" fill="white">2</text><text x="175" y="130" fill="white">3</text><text x="220" y="130" fill="white">4&1</text></svg>`
+        "walzer": `<svg class="step-svg" viewBox="0 0 400 300"><path d="M100,250 L100,50 L300,50 L300,250 Z" fill="none" stroke="var(--yellow)" stroke-width="12" stroke-dasharray="15 10"/><text x="85" y="285" fill="white" font-size="30">1</text><text x="85" y="40" fill="white" font-size="30">2</text><text x="290" y="40" fill="white" font-size="30">3</text></svg>`,
+        "rumba": `<svg class="step-svg" viewBox="0 0 400 300"><rect x="100" y="50" width="200" height="200" fill="none" stroke="var(--green)" stroke-width="10"/><text x="60" y="160" fill="white" font-size="30">Slow</text><text x="280" y="40" fill="white" font-size="30">Quick</text><text x="280" y="280" fill="white" font-size="30">Quick</text></svg>`,
+        "discofox": `<svg class="step-svg" viewBox="0 0 500 150"><circle cx="100" cy="75" r="30" fill="var(--blue)"/><circle cx="250" cy="75" r="30" fill="var(--blue)"/><circle cx="400" cy="75" r="15" fill="var(--red)"/><text x="90" y="140" fill="white">1</text><text x="240" y="140" fill="white">2</text><text x="385" y="140" fill="white">Tap</text></svg>`,
+        "chacha": `<svg class="step-svg" viewBox="0 0 500 200"><path d="M50,100 L150,100 M250,100 L320,100 L400,100" stroke="white" stroke-width="15" stroke-linecap="round"/><text x="45" y="160" fill="white">1</text><text x="145" y="160" fill="white">2</text><text x="310" y="160" fill="white">3 & 4</text></svg>`
     };
 
     window.onload = () => {
-        const key = localStorage.getItem('dm_key');
-        if (key) document.getElementById('api-key').value = key;
+        updateStatusBadges();
         const topic = localStorage.getItem('dm_topic');
-        if (topic) {
-            document.getElementById('topic-id').value = topic;
-            connectToFunk(topic);
-        }
+        if (topic) connectToFunk(topic);
     };
+
+    function updateStatusBadges() {
+        document.getElementById('key-check').style.display = localStorage.getItem('dm_key') ? 'block' : 'none';
+        document.getElementById('topic-check').style.display = localStorage.getItem('dm_topic') ? 'block' : 'none';
+    }
+
+    function toggleSettings() {
+        const o = document.getElementById('settings');
+        const isOpening = o.style.display !== 'flex';
+        o.style.display = isOpening ? 'flex' : 'none';
+        
+        if (isOpening) {
+            // Felder leeren für Privacy
+            document.getElementById('api-key').value = "";
+            document.getElementById('topic-id').value = "";
+            updateStatusBadges();
+        }
+    }
+
+    function saveSettings() {
+        const key = document.getElementById('api-key').value.trim();
+        const topic = document.getElementById('topic-id').value.trim();
+        
+        if (key) localStorage.setItem('dm_key', key);
+        if (topic) localStorage.setItem('dm_topic', topic);
+        
+        toggleSettings();
+        location.reload();
+    }
 
     function connectToFunk(topic) {
         if (!topic) return;
         if (eventSource) eventSource.close();
         eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
         eventSource.onopen = () => {
-            document.getElementById('conn-status').innerText = "Funk: AKTIV ✅";
+            document.getElementById('conn-status').innerText = "FUNK: AKTIV ✅";
             document.getElementById('conn-status').style.color = "var(--green)";
         };
         eventSource.onmessage = (e) => {
             const data = JSON.parse(e.data);
             if (data.message) triggerNewSong(data.message);
         };
-    }
-
-    function saveSettings() {
-        localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
-        localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
-        
-        document.getElementById('save-confirm').style.display = 'block';
-        setTimeout(() => {
-            document.getElementById('save-confirm').style.display = 'none';
-            toggleSettings();
-            location.reload();
-        }, 800);
-    }
-
-    function toggleSettings() {
-        const o = document.getElementById('settings');
-        o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
     }
 
     function triggerNewSong(song) {
