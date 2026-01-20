@@ -3,48 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tanz Monitor 10.6</title>
+    <title>Tanz Monitor Ultimate</title>
     <style>
-        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; }
-        body { background: black; color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background 0.2s; }
-        #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
-        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #dance-name { font-size: clamp(3rem, 18vw, 11rem); font-weight: 900; text-transform: uppercase; line-height: 0.8; margin: 10px 0; transition: color 0.3s; }
-        #bpm-val { font-size: 9rem; font-weight: bold; font-family: monospace; }
-        #status-bar { padding: 8px; font-size: 0.8rem; text-align: center; background: #0a0a0a; color: var(--yellow); border-bottom: 1px solid #222; }
-        #debug-log { font-size: 0.6rem; color: #444; padding: 5px; font-family: monospace; text-align: center; background: #050505; height: 1.2rem; overflow: hidden; }
-        .btn { background: var(--green); border: none; color: white; padding: 15px 30px; border-radius: 12px; font-weight: bold; }
+        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; }
+        body { background: var(--bg); color: white; font-family: -apple-system, system-ui, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Top Bar */
+        #top-bar { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
+        #conn-status { font-size: 0.9rem; font-weight: bold; }
+        
+        /* Hauptanzeige */
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; transition: 0.5s; }
+        #song-tag { color: var(--yellow); font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* Tanzname - Verhindert Überlauf */
+        #dance-name { 
+            font-size: clamp(2rem, 15vw, 9rem); 
+            font-weight: 900; text-transform: uppercase; line-height: 0.9; margin: 0;
+            width: 100%; overflow-wrap: break-word; 
+        }
+        
+        #bpm-display { display: flex; align-items: baseline; gap: 10px; margin-top: 20px; }
+        #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; color: var(--green); }
+        .bpm-label { color: #555; letter-spacing: 5px; font-size: 1.2rem; }
+
+        /* SVG Grundschritte */
+        #step-viz { margin-top: 30px; height: 200px; width: 100%; display: flex; justify-content: center; }
+        .foot { fill: none; stroke-width: 20; stroke-linecap: round; }
+        
+        /* Settings Overlay */
+        #settings { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .settings-box { width: 85%; max-width: 500px; background: #1a1a1a; padding: 40px; border-radius: 30px; border: 1px solid #333; }
+        .settings-box h2 { margin-top: 0; color: var(--blue); }
+        .input-group { margin-bottom: 25px; position: relative; }
+        label { display: block; font-size: 0.8rem; color: #888; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 2px; }
+        input { 
+            width: 100%; padding: 18px; background: #222; border: 2px solid #444; color: white; 
+            border-radius: 15px; font-size: 1.2rem; box-sizing: border-box; 
+        }
+        input:focus { border-color: var(--blue); outline: none; }
+        .save-btn { background: var(--blue); color: white; border: none; padding: 20px; width: 100%; border-radius: 15px; font-size: 1.3rem; font-weight: bold; cursor: pointer; }
+        .check-mark { color: var(--green); display: none; margin-top: 10px; font-weight: bold; text-align: center; }
+
+        .btn-mic { background: var(--green); border: none; color: white; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-size: 1rem; }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div id="conn-status" style="font-size: 0.7rem; color: #888;">Funk: Initialisiere...</div>
-    <button class="btn" id="start-btn" onclick="toggleMic()">START MONITOR</button>
-    <button onclick="toggleSettings()" style="background:none; border:none; font-size:1.5rem; color:white;">⚙️</button>
+    <div id="conn-status" style="color: #666;">Funk: Initialisiere...</div>
+    <button class="btn-mic" id="start-btn" onclick="toggleMic()">START MIC</button>
+    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2.5rem; color:white;">⚙️</button>
 </div>
-
-<div id="status-bar">WARTE AUF FUNKSPRUCH</div>
 
 <div id="monitor" style="opacity: 0.4;">
-    <div id="song-tag" style="color:var(--yellow); font-weight:bold; height:1.5rem;">---</div>
+    <div id="song-tag">---</div>
     <h1 id="dance-name">BEREIT</h1>
-    <div id="bpm-val">0</div>
-    <div style="letter-spacing:5px; color:#555; font-size:0.8rem;">BPM (LIVE SCAN)</div>
+    
+    <div id="step-viz">
+        </div>
+
+    <div id="bpm-display">
+        <div id="bpm-val">0</div>
+        <div class="bpm-label">BPM</div>
+    </div>
 </div>
 
-<div id="debug-log">Log: Leer</div>
+<div id="settings">
+    <div class="settings-box">
+        <h2>KONFIGURATION</h2>
+        
+        <div class="input-group">
+            <label>OpenAI API Key</label>
+            <input type="password" id="api-key" placeholder="sk-...">
+        </div>
+        
+        <div class="input-group">
+            <label>Funk-Kanalname (Topic)</label>
+            <input type="text" id="topic-id" placeholder="z.B. MeinTanz_2026">
+        </div>
 
-<div id="settings" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:100; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-    <h2 style="color:var(--blue)">EINSTELLUNGEN</h2>
-    <input type="text" id="api-key" placeholder="OpenAI Key" style="width:80%; padding:15px; background:#222; color:white; border:1px solid #444; border-radius:10px; margin-bottom:10px;">
-    <input type="text" id="topic-id" placeholder="Funk-Name" style="width:80%; padding:15px; background:#222; color:white; border:1px solid #444; border-radius:10px; margin-bottom:10px;">
-    <button class="btn" onclick="toggleSettings()" style="background:var(--blue); width:80%;">SPEICHERN</button>
+        <button class="save-btn" onclick="saveSettings()">SPEICHERN & SCHLIESSEN</button>
+        <div id="save-confirm" class="check-mark">✅ GESPEICHERT!</div>
+    </div>
 </div>
 
 <script>
     let audioCtx, analyser, processor, isRunning = false, lastB = 0, history = [], aiLock = false;
     let eventSource = null;
+
+    // SVG Grafiken für Grundschritte
+    const steps = {
+        "walzer": `<svg viewBox="0 0 400 200" width="300"><path d="M50,150 L50,50 L150,50 L150,150" fill="none" stroke="#FFCC00" stroke-width="10"/><text x="45" y="180" fill="white">1</text><text x="45" y="40" fill="white">2</text><text x="145" y="40" fill="white">3</text></svg>`,
+        "rumba": `<svg viewBox="0 0 400 200" width="300"><rect x="100" y="50" width="100" height="100" stroke="#34C759" fill="none" stroke-width="8"/><text x="80" y="100" fill="white">S</text><text x="210" y="70" fill="white">Q</text><text x="210" y="130" fill="white">Q</text></svg>`,
+        "discofox": `<svg viewBox="0 0 400 100" width="300"><circle cx="50" cy="50" r="20" fill="#007AFF"/><circle cx="150" cy="50" r="20" fill="#007AFF"/><circle cx="250" cy="50" r="10" fill="#FF3B30"/><text x="45" y="90" fill="white">1</text><text x="145" y="90" fill="white">2</text><text x="240" y="90" fill="white">Tap</text></svg>`,
+        "chacha": `<svg viewBox="0 0 400 200" width="300"><path d="M50,100 L100,100 M180,100 L230,100 L280,100" stroke="white" stroke-width="10"/><text x="45" y="130" fill="white">1</text><text x="95" y="130" fill="white">2</text><text x="175" y="130" fill="white">3</text><text x="220" y="130" fill="white">4&1</text></svg>`
+    };
 
     window.onload = () => {
         const key = localStorage.getItem('dm_key');
@@ -59,85 +116,89 @@
     function connectToFunk(topic) {
         if (!topic) return;
         if (eventSource) eventSource.close();
-        
         eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
-        
         eventSource.onopen = () => {
-            document.getElementById('conn-status').innerText = "Funk: AKTIV ✅ (" + topic + ")";
+            document.getElementById('conn-status').innerText = "Funk: AKTIV ✅";
             document.getElementById('conn-status').style.color = "var(--green)";
         };
-
         eventSource.onmessage = (e) => {
             const data = JSON.parse(e.data);
-            // Logge alles, was reinkommt
-            document.getElementById('debug-log').innerText = "Empfang: " + (data.message || data.event);
-            
-            if (data.event === 'message' && data.message) {
-                flashScreen();
-                processIncoming(data.message);
-            }
-        };
-
-        eventSource.onerror = () => {
-            document.getElementById('conn-status').innerText = "Funk: Fehler - Reconnect...";
-            document.getElementById('conn-status').style.color = "var(--red)";
+            if (data.message) triggerNewSong(data.message);
         };
     }
 
-    function flashScreen() {
-        document.body.style.background = "var(--blue)";
-        setTimeout(() => document.body.style.background = "black", 300);
-    }
-
-    function processIncoming(msg) {
-        document.getElementById('status-bar').innerText = "FUNKSPRUCH ERHALTEN: " + msg;
-        document.getElementById('monitor').style.opacity = "1";
-        document.getElementById('song-tag').innerText = "VON UHR: " + msg;
-        aiLock = false;
-        askAI(msg);
+    function saveSettings() {
+        localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
+        localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
         
-        // Timer für Rückkehr zum Scan
+        document.getElementById('save-confirm').style.display = 'block';
         setTimeout(() => {
-            document.getElementById('monitor').style.opacity = "0.4";
-            document.getElementById('song-tag').innerText = "---";
-            aiLock = false;
-        }, 40000);
+            document.getElementById('save-confirm').style.display = 'none';
+            toggleSettings();
+            location.reload();
+        }, 800);
     }
 
     function toggleSettings() {
         const o = document.getElementById('settings');
-        if (o.style.display === 'flex') {
-            o.style.display = 'none';
-            localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
-            const topic = document.getElementById('topic-id').value.trim();
-            localStorage.setItem('dm_topic', topic);
-            connectToFunk(topic);
-        } else { o.style.display = 'flex'; }
+        o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function triggerNewSong(song) {
+        document.getElementById('song-tag').innerText = song;
+        document.getElementById('monitor').style.opacity = "1";
+        aiLock = false;
+        askAI(song);
+    }
+
+    async function askAI(song) {
+        const key = localStorage.getItem('dm_key');
+        if (!key) return;
+        try {
+            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur 1 Wort.`}], max_tokens: 10})
+            });
+            const data = await resp.json();
+            const dance = data.choices[0].message.content.trim().replace(".", "");
+            document.getElementById('dance-name').innerText = dance;
+            updateSteps(dance);
+            aiLock = true;
+        } catch (e) {}
+    }
+
+    function updateSteps(dance) {
+        const d = dance.toLowerCase();
+        let html = "";
+        if (d.includes("walzer")) html = steps.walzer;
+        else if (d.includes("rumba")) html = steps.rumba;
+        else if (d.includes("disco")) html = steps.discofox;
+        else if (d.includes("cha")) html = steps.chacha;
+        document.getElementById('step-viz').innerHTML = html;
     }
 
     async function toggleMic() {
         if (isRunning) { location.reload(); return; }
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const source = audioCtx.createMediaStreamSource(stream);
-            analyser = audioCtx.createAnalyser();
-            processor = audioCtx.createScriptProcessor(2048, 1, 1);
-            source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
-            processor.onaudioprocess = (e) => {
-                const data = e.inputBuffer.getChannelData(0);
-                let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
-                const rms = Math.sqrt(sum / data.length);
-                if (rms * 30 > 0.5) {
-                    const now = Date.now();
-                    if (now - lastB > 300) { handleBeat(now); lastB = now; }
-                }
-            };
-            isRunning = true;
-            document.getElementById('start-btn').innerText = "STOP";
-            document.getElementById('start-btn').style.background = "var(--red)";
-            document.getElementById('status-bar').innerText = "SCAN LÄUFT...";
-        } catch (e) { alert("Mic Error"); }
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        processor = audioCtx.createScriptProcessor(2048, 1, 1);
+        source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
+        processor.onaudioprocess = (e) => {
+            const data = e.inputBuffer.getChannelData(0);
+            let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+            const rms = Math.sqrt(sum / data.length);
+            if (rms * 40 > 0.5) {
+                const now = Date.now();
+                if (now - lastB > 300) { handleBeat(now); lastB = now; }
+            }
+        };
+        isRunning = true;
+        document.getElementById('start-btn').innerText = "STOP";
+        document.getElementById('start-btn').style.background = "var(--red)";
+        document.getElementById('monitor').style.opacity = "1";
     }
 
     function handleBeat(now) {
@@ -148,29 +209,7 @@
             history = history.filter(h => now - h.t < 10000);
             const avg = Math.round(history.reduce((a,b)=>a+b.v,0)/history.length);
             document.getElementById('bpm-val').innerText = avg;
-            const is34 = (interval > 510 && interval < 790);
-            document.getElementById('meter').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
-            if (!aiLock) {
-                if (is34) document.getElementById('dance-name').innerText = avg > 145 ? "Wiener Walzer" : "Langsamer Walzer";
-                else document.getElementById('dance-name').innerText = avg < 118 ? "Rumba" : "Discofox";
-            }
         }
-    }
-
-    async function askAI(song) {
-        const key = localStorage.getItem('dm_key');
-        if (!key) return;
-        document.getElementById('dance-name').innerText = "...";
-        try {
-            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Standard/Latein Tanz? Nur 1 Wort.`}], max_tokens: 10})
-            });
-            const data = await resp.json();
-            document.getElementById('dance-name').innerText = data.choices[0].message.content.trim();
-            aiLock = true;
-        } catch (e) { document.getElementById('dance-name').innerText = "KI Fehler"; }
     }
 </script>
 </body>
