@@ -115,7 +115,7 @@
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                     body: JSON.stringify({
                         model: "gpt-4o-mini",
-                        messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur der Name.`}],
+                        messages: [{role: "user", content: "Lied: '${song}'. Welcher Standard- oder Lateintanz passt am besten? (Langsamer Walzer, Wiener Walzer, Rumba, Cha-Cha-Cha, Salsa, Tango, Discofox, Jive, Boogie, Foxtrott). Antworte NUR mit dem Namen des Tanzes."}],
                         max_tokens: 10
                     })
                 });
@@ -130,3 +130,4 @@
     </script>
 </body>
 </html>
+
