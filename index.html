@@ -3,37 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tanz Monitor Pro 10.3</title>
+    <title>Tanz das!</title>
     <style>
         :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; }
         body { background: black; color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
-        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: all 0.5s ease; }
-        .mode-scan { opacity: 0.4; filter: blur(2px); }
-        .mode-active { opacity: 1; filter: blur(0); transform: scale(1.05); }
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         #dance-name { font-size: clamp(3rem, 18vw, 11rem); font-weight: 900; text-transform: uppercase; line-height: 0.8; margin: 10px 0; }
         #bpm-val { font-size: 9rem; font-weight: bold; font-family: monospace; }
-        #status-bar { padding: 8px; font-size: 0.8rem; text-align: center; background: #0a0a0a; color: var(--yellow); border-bottom: 1px solid #222; transition: background 0.3s; }
+        #status-bar { padding: 8px; font-size: 0.8rem; text-align: center; background: #0a0a0a; color: var(--yellow); border-bottom: 1px solid #222; }
+        #debug-log { font-size: 0.6rem; color: #444; padding: 5px; font-family: monospace; text-align: center; background: #050505; }
         .btn { background: var(--green); border: none; color: white; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        input { width: 80%; max-width: 400px; padding: 15px; background: #222; color: white; border: 1px solid #444; border-radius: 10px; margin-bottom: 15px; font-size: 1rem; }
+        input { width: 80%; max-width: 400px; padding: 15px; background: #222; color: white; border: 1px solid #444; border-radius: 10px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div id="conn-status" style="font-size: 0.7rem; color: #888;">Funk: Prüfe...</div>
+    <div id="conn-status" style="font-size: 0.7rem; color: #888;">Funk: Initialisiere...</div>
     <button class="btn" id="start-btn" onclick="toggleMic()">START MONITOR</button>
     <button onclick="toggleSettings()" style="background:none; border:none; font-size:1.5rem; color:white;">⚙️</button>
 </div>
 
-<div id="status-bar">SYSTEM BEREIT</div>
+<div id="status-bar">WARTE AUF START</div>
 
-<div id="monitor" class="mode-scan">
+<div id="monitor" style="opacity: 0.4;">
     <div id="song-tag" style="color:var(--yellow); font-weight:bold; height:1.5rem;">---</div>
     <h1 id="dance-name">BEREIT</h1>
     <div id="bpm-val">0</div>
     <div style="letter-spacing:5px; color:#555; font-size:0.8rem;">BPM (10s SCHNITT)</div>
 </div>
+
+<div id="debug-log">Log: Warte auf Daten...</div>
 
 <div id="settings" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:100; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
     <h2 style="color:var(--blue)">EINSTELLUNGEN</h2>
@@ -60,7 +61,7 @@
         if (!topic) return;
         if (eventSource) eventSource.close();
         
-        // Verbindung zum ntfy Server aufbauen
+        // Verbindung zum ntfy Server (SSE)
         eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
         
         eventSource.onopen = () => {
@@ -68,39 +69,45 @@
             document.getElementById('conn-status').style.color = "var(--green)";
         };
 
-        eventSource.onerror = () => {
-            document.getElementById('conn-status').innerText = "Funk: Fehler ❌";
-            document.getElementById('conn-status').style.color = "var(--red)";
+        eventSource.onmessage = (e) => {
+            // DEBUG: Jede Nachricht im Log anzeigen
+            document.getElementById('debug-log').innerText = "Rohdaten erhalten: " + e.data.substring(0, 50);
+            
+            try {
+                const data = JSON.parse(e.data);
+                // ntfy schickt 'message' events für echte Nachrichten
+                if (data.message) {
+                    processIncomingMessage(data.message);
+                }
+            } catch (err) {
+                // Fallback: Falls es kein JSON ist, probiere den Rohtext
+                if (e.data && e.data.length > 2) processIncomingMessage(e.data);
+            }
         };
 
-        // Hier passiert die Magie: Nachrichten-Empfang
-        eventSource.addEventListener('message', (e) => {
-            const data = JSON.parse(e.data);
-            
-            // Nur reagieren, wenn es eine echte Nachricht (event: message) ist
-            if (data.event === 'message' && data.message) {
-                // Kurzes optisches Feedback (Blitzen)
-                const sb = document.getElementById('status-bar');
-                sb.style.background = "var(--blue)";
-                setTimeout(() => sb.style.background = "#0a0a0a", 500);
-                
-                triggerNewSong(data.message);
-            }
-        });
+        eventSource.onerror = () => {
+            document.getElementById('conn-status').innerText = "Funk: Reconnect...";
+            document.getElementById('conn-status').style.color = "var(--yellow)";
+        };
     }
 
-    function triggerNewSong(song) {
-        document.getElementById('song-tag').innerText = "SCAN: " + song;
-        document.getElementById('monitor').className = "mode-active";
-        document.getElementById('status-bar').innerText = "NACHRICHT ERHALTEN: " + song;
-        aiLock = false; // Sperre kurz lösen für neues Lied
-        askAI(song);
+    function processIncomingMessage(msg) {
+        // Optisches Feedback
+        document.getElementById('status-bar').style.background = "var(--blue)";
+        document.getElementById('status-bar').innerText = "NEUER SCAN: " + msg;
+        setTimeout(() => document.getElementById('status-bar').style.background = "#0a0a0a", 1000);
         
-        // Nach 30 Sek zurück in den Sparmodus
+        document.getElementById('monitor').style.opacity = "1";
+        document.getElementById('song-tag').innerText = "SCAN: " + msg;
+        aiLock = false;
+        askAI(msg);
+        
+        // Nach 40 Sek zurück in den Scan-Modus (etwas länger für den Tisch-Monitor)
         setTimeout(() => {
-            document.getElementById('monitor').className = "mode-scan";
+            document.getElementById('monitor').style.opacity = "0.4";
             document.getElementById('song-tag').innerText = "---";
-        }, 30000);
+            document.getElementById('status-bar').innerText = "MIKROFON AKTIV";
+        }, 40000);
     }
 
     function toggleSettings() {
@@ -128,8 +135,7 @@
             const data = e.inputBuffer.getChannelData(0);
             let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
             const rms = Math.sqrt(sum / data.length);
-            document.getElementById('conn-status').innerText = "Funk: AKTIV ✅ | Pegel: " + rms.toFixed(4);
-            if (rms * 40 > 0.5) {
+            if (rms * 30 > 0.4) {
                 const now = Date.now();
                 if (now - lastB > 300) { handleBeat(now); lastB = now; }
             }
@@ -137,7 +143,7 @@
         isRunning = true;
         document.getElementById('start-btn').innerText = "STOP";
         document.getElementById('start-btn').style.background = "var(--red)";
-        document.getElementById('status-bar').innerText = "MIKROFON & FUNK AKTIV";
+        document.getElementById('status-bar').innerText = "MIKROFON AKTIV";
     }
 
     function handleBeat(now) {
@@ -163,7 +169,7 @@
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Standard/Latein Tanz? Nur 1 Wort.`}], max_tokens: 10})
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur 1 Wort.`}], max_tokens: 10})
             });
             const data = await resp.json();
             if (data.choices) {
