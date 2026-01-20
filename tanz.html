@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dance Master Pro 2026</title>
+    <style>
+        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; }
+        body { 
+            background-color: black; color: white; 
+            font-family: -apple-system, sans-serif;
+            margin: 0; overflow: hidden; height: 100vh;
+            display: flex; flex-direction: column;
+        }
+        #top-bar { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; }
+        #main-ui { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        
+        /* Tanz Anzeige */
+        #dance-name { font-size: clamp(3rem, 15vw, 10rem); font-weight: 900; text-transform: uppercase; line-height: 0.9; margin: 10px 0; }
+        #meter-info { font-size: 2rem; font-weight: bold; color: var(--blue); letter-spacing: 10px; }
+        #status-msg { color: var(--yellow); font-size: 1rem; height: 1.2rem; margin-bottom: 20px; }
+
+        /* BPM & Signal */
+        #footer { padding: 30px; display: flex; justify-content: space-around; width: 100%; border-top: 1px solid #333; background: #050505; }
+        .stat-value { font-size: 4rem; font-weight: bold; font-family: monospace; }
+        .stat-label { font-size: 0.8rem; color: #888; text-transform: uppercase; }
+
+        /* Haxen (Füße) - Standard aus */
+        #footprints { display: none; gap: 80px; margin: 30px 0; }
+        .foot { width: 60px; height: 100px; opacity: 0.1; transition: opacity 0.1s; }
+
+        button { 
+            background: var(--green); border: none; color: white; padding: 15px 30px; 
+            border-radius: 12px; font-weight: bold; font-size: 1.2rem; cursor: pointer;
+        }
+        button.stop { background: var(--red); }
+        .settings-btn { background: #333; padding: 10px; border-radius: 50%; width: 50px; height: 50px; border: none; color: white; cursor: pointer; }
+
+        /* Modal Settings */
+        #settings-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 100; padding: 30px; box-sizing: border-box;
+        }
+        input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="top-bar">
+    <div id="diagnose" style="font-size: 0.8rem; color: #555;">Pegel: 0.0000</div>
+    <button id="start-btn" onclick="toggleEngine()">START</button>
+    <button class="settings-btn" onclick="openSettings()">⚙️</button>
+</div>
+
+<div id="main-ui">
+    <div id="status-msg">BEREIT</div>
+    <h1 id="dance-name">---</h1>
+    <div id="meter-info">---</div>
+
+    <div id="footprints">
+        <div id="foot-left" class="foot" style="color: var(--yellow); transform: rotate(-15deg);">
+            <svg viewBox="0 0 200 400"><path d="M50 0C20 0 0 50 0 150s20 250 50 250 50-50 50-150S80 0 50 0z"/></svg>
+        </div>
+        <div id="foot-right" class="foot" style="color: var(--red); transform: rotate(15deg);">
+            <svg viewBox="0 0 200 400"><path d="M50 0C20 0 0 50 0 150s20 250 50 250 50-50 50-150S80 0 50 0z"/></svg>
+        </div>
+    </div>
+</div>
+
+<div id="footer">
+    <div style="text-align: center;">
+        <div id="bpm-val" class="stat-value">0</div>
+        <div class="stat-label">BPM</div>
+    </div>
+    <div style="text-align: center; max-width: 50%;">
+        <div id="song-display" style="font-size: 1.2rem; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Kein Lied</div>
+        <div class="stat-label">Automatische Erkennung</div>
+    </div>
+</div>
+
+<div id="settings-modal">
+    <h2>Einstellungen</h2>
+    <label>OpenAI API Key (Klartext)</label>
+    <input type="text" id="api-key-input" placeholder="sk-...">
+    
+    <label>Mikrofon Empfindlichkeit</label>
+    <input type="range" id="gain-slider" min="1" max="100" value="20">
+    
+    <label>Optionen</label>
+    <button onclick="toggleHaxen()" style="background: #444; width: 100%; margin-bottom: 20px;">Füße (Haxen) AN/AUS</button>
+    <button onclick="testAI()" style="background: var(--blue); width: 100%; margin-bottom: 20px;">Verbindung Testen</button>
+    
+    <button onclick="closeSettings()" style="width: 100%; background: var(--green);">SPEICHERN & FERTIG</button>
+</div>
+
+<script>
+    let audioCtx, analyser, source, processor;
+    let isRunning = false, lastBeat = 0, bpmBuf = [], showHaxen = false, beats = 0;
+
+    // 1. Automatische Erkennung beim Start (via URL vom Kurzbefehl)
+    window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        const song = params.get('song');
+        if (song) {
+            document.getElementById('song-display').innerText = song;
+            askAI(song);
+        }
+        document.getElementById('api-key-input').value = localStorage.getItem('api_key') || '';
+    };
+
+    function openSettings() { document.getElementById('settings-modal').style.display = 'block'; }
+    function closeSettings() { 
+        localStorage.setItem('api_key', document.getElementById('api-key-input').value);
+        document.getElementById('settings-modal').style.display = 'none'; 
+    }
+    function toggleHaxen() { 
+        showHaxen = !showHaxen; 
+        document.getElementById('footprints').style.display = showHaxen ? 'flex' : 'none';
+    }
+
+    async function toggleEngine() {
+        if (isRunning) { location.reload(); return; }
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            processor = audioCtx.createScriptProcessor(2048, 1, 1);
+            
+            source.connect(analyser);
+            analyser.connect(processor);
+            processor.connect(audioCtx.destination);
+
+            processor.onaudioprocess = (e) => {
+                const data = e.inputBuffer.getChannelData(0);
+                let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+                const rms = Math.sqrt(sum / data.length);
+                const gain = document.getElementById('gain-slider').value;
+                const vol = rms * gain * 15;
+                
+                document.getElementById('diagnose').innerText = "Signal: " + rms.toFixed(5);
+                
+                const now = Date.now();
+                if (vol > 0.4 && (now - lastBeat) > 300) {
+                    handleBeat(now);
+                    lastBeat = now;
+                }
+            };
+            isRunning = true;
+            document.getElementById('start-btn').innerText = "STOP";
+            document.getElementById('start-btn').classList.add('stop');
+            document.getElementById('status-msg').innerText = "ANALYSE LÄUFT...";
+        } catch (e) { alert("Mic-Zugriff fehlt!"); }
+    }
+
+    function handleBeat(now) {
+        if (lastBeat > 0) {
+            const interval = now - lastBeat;
+            const bpm = Math.round(60000 / interval);
+            bpmBuf.push(bpm); if(bpmBuf.length > 5) bpmBuf.shift();
+            const avgBpm = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
+            document.getElementById('bpm-val').innerText = avgBpm;
+            
+            const is34 = (interval > 510 && interval < 790);
+            document.getElementById('meter-info').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
+            
+            beats = (beats % (is34 ? 3 : 4)) + 1;
+            if (showHaxen) {
+                document.getElementById('foot-left').style.opacity = (beats%2==0) ? "1" : "0.1";
+                document.getElementById('foot-right').style.opacity = (beats%2!=0) ? "1" : "0.1";
+            }
+            if (!window.aiConfirmed) estimateDance(avgBpm, is34);
+        }
+    }
+
+    function estimateDance(bpm, is34) {
+        const d = document.getElementById('dance-name');
+        if (is34) d.innerText = bpm > 145 ? "Wiener Walzer" : "Langsamer Walzer";
+        else d.innerText = bpm < 115 ? "Rumba/Tango" : "Cha-Cha/Discofox";
+    }
+
+    async function askAI(title) {
+        const key = localStorage.getItem('api_key');
+        if (!key) return;
+        document.getElementById('status-msg').innerText = "KI ANALYSIERT...";
+        try {
+            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [{role: "user", content: `Tanz zu '${title}'? Nur Name.`}],
+                    max_tokens: 10
+                })
+            });
+            const data = await resp.json();
+            document.getElementById('dance-name').innerText = data.choices[0].message.content.trim();
+            document.getElementById('status-msg').innerText = "✨ KI BESTÄTIGT";
+            window.aiConfirmed = true;
+        } catch (e) { document.getElementById('status-msg').innerText = "KI FEHLER"; }
+    }
+
+    async function testAI() {
+        const key = document.getElementById('api-key-input').value;
+        if (!key) { alert("Key fehlt!"); return; }
+        try {
+            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: "Hi"}], max_tokens: 5})
+            });
+            if (resp.status === 200) alert("Verbindung OK! ✅");
+            else alert("Fehler: " + resp.status);
+        } catch (e) { alert("Netzwerkfehler"); }
+    }
+</script>
+</body>
+</html>
