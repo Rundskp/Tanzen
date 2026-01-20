@@ -3,49 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dance Master Pro 18.0 - Foot Edition</title>
+    <title>Dance Master 19.0</title>
     <style>
         :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #000; }
         body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        #top-bar { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
-        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 20px; }
+        /* Top Bar - Höchste Priorität für Klicks */
+        #top-bar { 
+            position: relative; z-index: 3000; 
+            padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; 
+            background: #111; border-bottom: 1px solid #333; 
+        }
         
-        #takt-label { font-size: 1.2rem; color: var(--blue); font-weight: bold; letter-spacing: 5px; text-transform: uppercase; }
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; text-align: center; padding: 10px; z-index: 10; }
+        
+        #takt-label { font-size: 1.2rem; color: var(--blue); font-weight: bold; letter-spacing: 5px; }
         #song-display { font-size: 1.4rem; color: var(--yellow); font-weight: bold; height: 2rem; opacity: 0; transition: opacity 20s linear; }
         
-        #dance-name { font-size: clamp(2.5rem, 12vw, 8rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1; transition: all 0.5s; }
+        #dance-name { font-size: clamp(2rem, 10vw, 7rem); font-weight: 900; text-transform: uppercase; margin: 0; transition: 0.5s; }
         .ai-verified { color: var(--yellow) !important; text-shadow: 0 0 30px rgba(255, 204, 0, 0.5); }
-        .ai-badge { display: none; margin-left: 15px; font-size: 2rem; }
+        .ai-badge { display: none; margin-left: 10px; font-size: 1.5rem; }
         .ai-verified .ai-badge { display: inline; }
 
-        #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; color: var(--green); margin: -10px 0; }
+        #bpm-val { font-size: 7rem; font-weight: 900; font-family: monospace; color: var(--green); margin: 0; }
         
-        /* SVG Fuß-Animation Styles */
-        #step-area { height: 45vh; width: 100%; display: flex; justify-content: center; align-items: center; }
-        .foot-path { opacity: 0.1; transition: all 0.2s ease; fill: #333; }
-        
-        /* Aktive Füße leuchten in ihren Farben */
-        .left-foot.active { fill: var(--red); filter: drop-shadow(0 0 15px var(--red)); opacity: 1; }
-        .right-foot.active { fill: var(--blue); filter: drop-shadow(0 0 15px var(--blue)); opacity: 1; }
+        /* Fuß-Animation Styles */
+        #step-area { height: 40vh; width: 100%; display: flex; justify-content: center; align-items: center; }
+        .foot-path { opacity: 0.05; transition: all 0.2s ease; }
+        .left-foot { fill: var(--red); }
+        .right-foot { fill: var(--blue); }
+        .active { opacity: 1 !important; filter: drop-shadow(0 0 20px currentColor); }
 
-        /* Settings */
-        #settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; flex-direction: column; padding: 30px; overflow-y: auto; }
+        /* Settings Overlay - Muss über allem liegen */
+        #settings { 
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.98); z-index: 4000; 
+            flex-direction: column; padding: 30px; overflow-y: auto; 
+        }
         .settings-card { background: #151515; padding: 30px; border-radius: 30px; width: 100%; max-width: 600px; margin: auto; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #222; }
-        input[type="text"], input[type="password"] { background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; font-size: 1rem; width: 50%; }
-        input[type="checkbox"] { width: 35px; height: 35px; }
-        .pref-tag { display: inline-flex; align-items: center; background: #222; border: 1px solid #444; padding: 5px 12px; border-radius: 20px; margin: 5px; font-size: 0.9rem; }
-        .btn-del { margin-left: 8px; color: var(--red); cursor: pointer; font-weight: bold; }
-        .btn-main { background: var(--blue); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; font-size: 1.2rem; font-weight: bold; margin-top: 20px; }
+        
+        input { background: #222; border: 1px solid #444; color: white; padding: 15px; border-radius: 12px; font-size: 1.1rem; width: 50%; }
+        .btn-main { background: var(--blue); color: white; border: none; padding: 20px; border-radius: 15px; width: 100%; font-size: 1.3rem; font-weight: bold; margin-top: 20px; }
+        .pref-tag { display: inline-flex; align-items: center; background: #333; padding: 8px 15px; border-radius: 20px; margin: 5px; font-size: 0.9rem; }
+        .btn-del { margin-left: 10px; color: var(--red); cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div id="conn-info" style="font-size: 0.7rem; color: #555;">FUNK: BEREIT</div>
-    <button onclick="toggleMic()" id="mic-btn" style="background:var(--green); border:none; color:white; padding:10px 20px; border-radius:10px; font-weight:bold;">START MONITOR</button>
-    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2rem; color:white;">⚙️</button>
+    <div id="conn-info" style="font-size: 0.8rem; color: #555;">FUNK: BEREIT</div>
+    <button onclick="toggleMic()" id="mic-btn" style="background:var(--green); border:none; color:white; padding:12px 25px; border-radius:12px; font-weight:bold;">START MONITOR</button>
+    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2.5rem; color:white; padding:10px; cursor:pointer;">⚙️</button>
 </div>
 
 <div id="monitor">
@@ -59,142 +68,157 @@
     </div>
 
     <div id="step-area">
-        <svg id="walzer-svg" viewBox="0 0 737.63 662.53" style="display:none; width:80%; height:80%;">
-            <path id="f1" class="foot-path left-foot" d="M691.18,662.03c-16.08,0-37.28-3.02-47-17.42-2.3-3.41-3.38-6.56-4.06-8.93-5.63-19.57-3.14-43.35-.5-68.52..."/>
-            <path id="f2" class="foot-path right-foot" d="M505.8,662.03c-2.51,0-5.13-.07-7.8-.21-4.24-1.81-7.85-4.45-10.74-7.83..."/>
-            <path id="f3" class="foot-path left-foot" d="M691.18,281.27c-16.08,0-37.28-3.02-46.99-17.42..."/>
-            <path id="f4" class="foot-path right-foot" d="M231.79,281.27c-16.08,0-37.28-3.02-46.99-17.42..."/>
-            <path id="f5" class="foot-path left-foot" d="M46.41,281.27c-2.51,0-5.13-.07-7.8-.21..."/>
-            <path id="f6" class="foot-path right-foot" d="M46.41,662.04c-2.51,0-5.13-.07-7.8-.21..."/>
+        <svg id="walzer-svg" viewBox="0 0 737.63 662.53" style="display:none; width:90%; height:90%;">
+            <path id="f1" class="foot-path right-foot" d="M691.18,662.03c-16.08,0-37.28-3.02-47-17.42-2.3-3.41-3.38-6.56-4.06-8.93-5.63-19.57-3.14-43.35-.5-68.52,3.17-30.24,6.75-64.52-3.69-97.01-2.17-6.75-4.99-13.5-8.4-20.06-16.84-32.52-15.85-59.28-5.17-66.36,2.43-1.61,5.69-2.47,9.43-2.47,10.12,0,21.84,6.03,27.89,14.34,4.64,6.38,6.84,15.06,6.54,25.81l-.08,2.81,1.04-2.61c3.19-8,7.51-13.33,12.83-15.85,2.61-1.24,5.76-1.98,8.44-1.98s4.72.64,6.32,1.92c5.21,4.15,5.36,15.85.43,33.84l.93.36c3.23-6.48,6.95-10.21,11.05-11.1.7-.15,1.45-.23,2.22-.23,3.01,0,5.81,1.17,7.29,3.05,4.36,5.55-1.6,17.96-4.8,24.62-2.06,4.29-2.57,5.43-1.77,5.88l.11.06.21.02c.7,0,1.44-1.01,3.65-4.22,3.42-4.96,9.16-13.26,14.13-13.26.26,0,.52.02.77.07,1.57.29,3.82,1.68,5.62,6.68,1.98,5.51.36,12.17-4.35,17.82l.72.69c2.04-1.9,3.25-2.29,3.9-2.29.19,0,.36.03.52.1,3.42,1.38,3.46,16.97-15.81,83.39l-.02.06-3,80.06c.34,4.04.36,14.21-6.88,22.69-2.89,3.38-6.5,6.02-10.74,7.83-2.67.14-5.29.21-7.8.21h.03ZM688.84,458.99c-.2.57-.25.74-.14.96l.1.19.28.08h.08c.42,0,.5-.32.65-.96l-.96-.28h-.01ZM660.56,450.41l.26.43h.73l.05-.46-.98-.19-.06.22Z"/>
+            <path id="f2" class="foot-path left-foot" d="M505.8,662.03c-2.51,0-5.13-.07-7.8-.21-4.24-1.81-7.85-4.45-10.74-7.83-7.23-8.48-7.22-18.65-6.88-22.63l-3-80.12-.02-.06c-19.27-66.41-19.23-82-15.81-83.39.16-.06.33-.1.52-.1.65,0,1.86.4,3.9,2.29l.72-.69c-4.7-5.65-6.33-12.31-4.35-17.81,1.8-5,4.05-6.39,5.62-6.68.25-.05.51-.07.77-.07,4.97,0,10.7,8.3,14.13,13.26,2.21,3.2,2.95,4.22,3.65,4.22h.13l.2-.08c.8-.45.29-1.59-1.77-5.88-3.2-6.67-9.16-19.08-4.8-24.62,1.48-1.88,4.27-3.05,7.29-3.05.77,0,1.51.08,2.22.23,4.11.89,7.83,4.62,11.05,11.1l.93-.36c-4.93-17.99-4.78-29.69.43-33.84,1.6-1.27,3.72-1.92,6.32-1.92s5.83.74,8.44,1.98c5.32,2.52,9.64,7.86,12.83,15.85l1.04,2.61-.08-2.81c-.3-10.75,1.9-19.44,6.54-25.81,6.05-8.31,17.78-14.34,27.89-14.34,3.74,0,7,.85,9.43,2.47,10.68,7.08,11.67,33.84-5.17,66.36-3.4,6.55-6.23,13.3-8.4,20.06-10.44,32.49-6.85,66.77-3.69,97.01,2.63,25.17,5.12,48.95-.5,68.52-.68,2.37-1.76,5.52-4.06,8.93-9.71,14.4-30.92,17.42-47,17.42h.02ZM507.18,459.27c.15.63.23.96.65.96h.08l.27-.08.1-.19c.12-.23.05-.41-.14-.96l-.96.28h0ZM535.39,450.38l.05.45h.73l.27-.42-.06-.23-.98.19h-.01Z"/>
+            <path id="f3" class="foot-path right-foot" d="M691.18,281.27c-16.08,0-37.28-3.02-46.99-17.42-2.3-3.41-3.38-6.56-4.06-8.93-5.63-19.57-3.14-43.35-.5-68.52,3.17-30.24,6.75-64.52-3.69-97.01-2.17-6.75-4.99-13.5-8.4-20.06-16.84-32.52-15.85-59.28-5.17-66.36,2.43-1.61,5.69-2.47,9.43-2.47,10.11,0,21.84,6.03,27.89,14.34,4.64,6.38,6.84,15.06,6.54,25.81l-.08,2.81,1.04-2.61c3.19-7.99,7.51-13.33,12.83-15.85,2.61-1.24,5.76-1.98,8.44-1.98s4.72.64,6.32,1.91c5.21,4.15,5.36,15.85.43,33.84l.93.35c3.23-6.48,6.95-10.21,11.05-11.1.7-.15,1.45-.23,2.22-.23,3.01,0,5.81,1.17,7.29,3.05,4.36,5.55-1.6,17.96-4.8,24.62-2.06,4.29-2.57,5.43-1.77,5.88l.11.06.21.02c.7,0,1.44-1.01,3.65-4.22,3.42-4.96,9.16-13.26,14.13-13.26.26,0,.52.02.77.07,1.57.29,3.82,1.68,5.62,6.68,1.98,5.51.36,12.17-4.35,17.82l.72.69c2.04-1.9,3.25-2.3,3.9-2.3.19,0,.36.03.52.1,3.42,1.38,3.46,16.97-15.81,83.39l-.02.06-3,80.06c.34,4.04.36,14.21-6.88,22.69-2.89,3.38-6.5,6.02-10.74,7.83-2.67.14-5.29.21-7.8.21l.02.03ZM688.84,78.23c-.2.57-.25.74-.14.96l.1.19.28.08h.08c.42,0,.5-.32.65-.96l-.96-.28h-.01ZM660.56,69.64l.12.2.15.23h.73l.05-.45-.98-.19-.06.21h-.01Z"/>
+            <path id="f4" class="foot-path left-foot" d="M231.79,281.27c-16.08,0-37.28-3.02-46.99-17.42-2.3-3.41-3.38-6.56-4.06-8.93-5.63-19.57-3.14-43.35-.5-68.52,3.16-30.24,6.75-64.52-3.69-97.01-2.17-6.75-4.99-13.5-8.4-20.06-16.84-32.52-15.85-59.28-5.17-66.36,2.43-1.61,5.69-2.47,9.43-2.47,10.11,0,21.84,6.03,27.89,14.34,4.64,6.38,6.84,15.06,6.54,25.81l-.08,2.81,1.04-2.61c3.19-7.99,7.51-13.33,12.83-15.85,2.61-1.24,5.76-1.98,8.44-1.98s4.72.64,6.32,1.91c5.21,4.15,5.36,15.85.43,33.84l.93.35c3.23-6.47,6.95-10.21,11.05-11.09.7-.15,1.45-.23,2.22-.23,3.02,0,5.81,1.17,7.28,3.05,4.36,5.55-1.6,17.96-4.8,24.62-2.06,4.29-2.57,5.43-1.77,5.88l.11.06.21.02c.7,0,1.44-1.01,3.65-4.22,3.42-4.96,9.16-13.26,14.13-13.26.26,0,.52.02.77.07,1.57.29,3.82,1.68,5.62,6.68,1.98,5.51.36,12.17-4.35,17.82l.72.69c2.04-1.9,3.25-2.3,3.9-2.3.19,0,.36.03.52.1,3.42,1.38,3.46,16.97-15.81,83.39l-.02.06-3,80.06c.34,4.04.36,14.21-6.88,22.69-2.89,3.38-6.5,6.02-10.73,7.83-2.67.14-5.29.21-7.8.21l.02.02ZM229.45,78.23c-.2.57-.26.74-.14.96l.1.19.28.08h.08c.42,0,.5-.32.65-.96l-.96-.28h0ZM201.17,69.64l.12.2.15.23h.73l.05-.46-.98-.19-.06.21h0Z"/>
+            <path id="f5" class="foot-path right-foot" d="M46.41,281.27c-2.51,0-5.13-.07-7.8-.21-4.23-1.81-7.85-4.45-10.73-7.83-7.24-8.48-7.22-18.65-6.88-22.63l-3-80.12-.02-.06C-1.29,104.01-1.25,88.42,2.17,87.03c.16-.06.33-.1.52-.1.65,0,1.86.4,3.9,2.29l.72-.69c-4.71-5.65-6.33-12.31-4.35-17.82,1.8-5,4.05-6.39,5.62-6.68.25-.05.51-.07.77-.07,4.97,0,10.7,8.3,14.13,13.26,2.21,3.2,2.95,4.22,3.65,4.22h.13l.2-.09c.8-.45.29-1.59-1.77-5.88-3.2-6.67-9.16-19.08-4.8-24.62,1.48-1.88,4.27-3.05,7.28-3.05.77,0,1.52.08,2.22.23,4.11.89,7.83,4.62,11.06,11.1l.93-.36c-4.93-17.99-4.78-29.69.43-33.84,1.6-1.27,3.72-1.91,6.32-1.91s5.83.74,8.44,1.98c5.32,2.52,9.64,7.86,12.83,15.85l1.04,2.61-.08-2.81c-.3-10.75,1.9-19.44,6.54-25.81C83.95,6.53,95.68.5,105.79.5c3.74,0,7,.85,9.43,2.47,10.68,7.08,11.67,33.84-5.17,66.36-3.4,6.56-6.23,13.31-8.4,20.06-10.44,32.49-6.85,66.77-3.69,97.01,2.63,25.17,5.12,48.95-.5,68.52-.68,2.37-1.76,5.52-4.06,8.93-9.71,14.4-30.92,17.42-46.99,17.42h0ZM47.79,78.51c.15.64.23.96.65.96h.07l.27-.08.1-.19c.12-.23.05-.41-.14-.96l-.96.28h.01ZM75.99,69.62l.05.45h.73l.26-.42-.06-.22-.98.19h0Z"/>
+            <path id="f6" class="foot-path left-foot" d="M46.41,662.04c-2.51,0-5.13-.07-7.8-.21-4.23-1.81-7.85-4.45-10.73-7.83-7.24-8.48-7.22-18.65-6.88-22.63l-3-80.12-.02-.06C-1.29,484.78-1.25,469.19,2.17,467.8c.16-.06.33-.1.52-.1.65,0,1.86.4,3.9,2.29l.72-.69c-4.7-5.65-6.33-12.31-4.35-17.82,1.8-5,4.05-6.39,5.62-6.68.25-.05.51-.07.77-.07,4.97,0,10.7,8.3,14.13,13.26,2.21,3.2,2.95,4.22,3.65,4.22h.13l.2-.08c.8-.45.29-1.59-1.77-5.88-3.2-6.67-9.16-19.08-4.8-24.62,1.48-1.88,4.27-3.05,7.29-3.05.77,0,1.51.08,2.22.23,4.11.89,7.83,4.62,11.05,11.1l.93-.36c-4.93-17.99-4.78-29.69.43-33.84,1.6-1.27,3.72-1.92,6.32-1.92s5.83.74,8.44,1.98c5.32,2.52,9.64,7.86,12.83,15.85l1.04,2.61-.08-2.81c-.3-10.75,1.9-19.44,6.54-25.81,6.05-8.31,17.78-14.34,27.89-14.34,3.74,0,7,.85,9.43,2.47,10.68,7.08,11.67,33.84-5.17,66.36-3.4,6.56-6.23,13.31-8.4,20.06-10.44,32.49-6.85,66.77-3.69,97.01,2.63,25.17,5.12,48.95-.51,68.52-.68,2.37-1.76,5.52-4.06,8.93-9.71,14.4-30.92,17.42-46.99,17.42h.01ZM47.8,459.28c.15.64.23.96.65.96h.08l.27-.08.1-.19c.12-.23.05-.41-.14-.96l-.96.28h0ZM76,450.39l.05.45h.73l.27-.42-.06-.23-.98.19h0Z"/>
         </svg>
     </div>
 </div>
 
 <div id="settings">
     <div class="settings-card">
-        <h2 style="color:var(--blue)">EINSTELLUNGEN</h2>
-        <div class="row"><span>OpenAI Key</span><input type="password" id="api-key" placeholder="Vorhanden"></div>
+        <h2 style="color:var(--blue); margin-top:0;">KONFIGURATION</h2>
+        <div class="row"><span>OpenAI Key</span><input type="password" id="api-key" placeholder="Unverändert"></div>
         <div class="row"><span>Funk-Kanal</span><input type="text" id="topic-id"></div>
         <div class="row"><span>Schritte anzeigen</span><input type="checkbox" id="show-steps" checked></div>
         <div class="row"><span>Auto-KI (10s)</span><input type="checkbox" id="auto-check"></div>
-        <div style="margin-top:20px;">
-            <label style="font-size:0.8rem; color:#888;">BEVORZUGTE TÄNZE</label>
-            <div id="pref-list" style="margin:10px 0;"></div>
-            <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; width:40px; border-radius:10px;">+</button></div>
-        </div>
+        <div id="pref-list" style="margin:20px 0; border-top:1px solid #333; padding-top:10px;"></div>
+        <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); color:white; border:none; width:50px; border-radius:10px;">+</button></div>
         <button class="btn-main" onclick="saveSettings()">ZURÜCK & SPEICHERN</button>
     </div>
 </div>
 
 <script>
-    // Logik zur Steuerung der Füße
-    let audioCtx, analyser, processor, isRunning = false;
-    let lastBeat = 0, bpmBuf = [], aiOverride = false, timerOverride = null;
-    let preferredDances = ["Langsamer Walzer", "Wiener Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Samba"];
+    let audioCtx, analyser, processor, isRunning = false, lastBeat = 0, bpmBuf = [], aiOverride = false, timerOverride = null;
+    let preferredDances = ["Langsamer Walzer", "Wiener Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa"];
 
     window.onload = () => {
-        const savedPrefs = localStorage.getItem('dm_prefs');
-        if(savedPrefs) preferredDances = JSON.parse(savedPrefs);
+        if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
         renderPrefs();
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('topic-id').value = topic; connectFunk(topic); }
     };
 
+    function toggleSettings() {
+        const s = document.getElementById('settings');
+        // Robusterer Toggle-Check
+        if(s.style.display === 'flex') {
+            s.style.display = 'none';
+        } else {
+            s.style.display = 'flex';
+        }
+    }
+
+    function saveSettings() {
+        const k = document.getElementById('api-key').value.trim();
+        if(k) localStorage.setItem('dm_key', k);
+        localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
+        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+        location.reload();
+    }
+
+    function addPref() {
+        const v = document.getElementById('new-pref').value;
+        if(v) { preferredDances.push(v); document.getElementById('new-pref').value=""; renderPrefs(); }
+    }
+
+    function renderPrefs() {
+        document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
+            `<span class="pref-tag">${d}<span class="btn-del" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></span>`
+        ).join('');
+    }
+
     function connectFunk(topic) {
         const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        ev.onopen = () => document.getElementById('conn-info').innerText = "FUNK: AKTIV ✅";
         ev.onmessage = (e) => {
-            const data = JSON.parse(e.data);
-            if(data.message) handleShortcut(data.message);
+            const d = JSON.parse(e.data);
+            if(d.message) handleShortcut(d.message);
         };
     }
 
     function handleShortcut(song) {
         aiOverride = true;
         const disp = document.getElementById('song-display');
-        disp.innerText = "UHR-SCAN: " + song;
-        disp.style.transition = "none";
-        disp.style.opacity = "1";
+        disp.innerText = "UHR: " + song;
+        disp.style.transition = "none"; disp.style.opacity = "1";
         askAI(song);
         if(timerOverride) clearTimeout(timerOverride);
         timerOverride = setTimeout(() => {
-            disp.style.transition = "opacity 20s linear";
-            disp.style.opacity = "0";
+            disp.style.transition = "opacity 20s linear"; disp.style.opacity = "0";
             setTimeout(() => { aiOverride = false; }, 20000);
         }, 1000);
     }
 
     async function askAI(song) {
-        const key = localStorage.getItem('dm_key');
-        if(!key) return;
-        const prompt = `Lied: '${song}'. Liste: ${preferredDances.join(", ")}. Welcher Tanz? Nur 1-2 Worte.`;
+        const key = localStorage.getItem('dm_key'); if(!key) return;
         try {
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: prompt}], max_tokens: 20})
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Tanz zu '${song}'? Aus Liste: ${preferredDances.join(",")}. Nur 1-2 Worte.`}], max_tokens: 20})
             });
-            const data = await resp.json();
-            updateDisplay(data.choices[0].message.content.trim(), true);
+            const d = await resp.json();
+            updateDisplay(d.choices[0].message.content.trim(), true);
         } catch(e) { aiOverride = false; }
     }
 
     function updateDisplay(dance, fromAI = false) {
-        const nameEl = document.getElementById('dance-name');
-        nameEl.innerText = dance;
-        if(fromAI) nameEl.classList.add('ai-verified'); else nameEl.classList.remove('ai-verified');
-
-        const isWalzer = dance.toLowerCase().includes("walzer");
-        const showSteps = document.getElementById('show-steps').checked;
-        document.getElementById('walzer-svg').style.display = (isWalzer && showSteps) ? "block" : "none";
-        if(isWalzer && showSteps) startWaltzAnim(); else stopWaltzAnim();
+        const n = document.getElementById('dance-name');
+        n.innerText = dance;
+        if(fromAI) n.classList.add('ai-verified'); else n.classList.remove('ai-verified');
+        const isW = dance.toLowerCase().includes("walzer");
+        const show = document.getElementById('show-steps').checked;
+        document.getElementById('walzer-svg').style.display = (isW && show) ? "block" : "none";
+        if(isW && show) startWaltzAnim(); else stopWaltzAnim();
     }
 
     let waltzInt = null, wStep = 1;
     function startWaltzAnim() {
         if(waltzInt) return;
         waltzInt = setInterval(() => {
-            for(let i=1; i<=6; i++) {
-                const el = document.getElementById('f'+i);
-                if(el) el.classList.remove('active');
-            }
-            const activeEl = document.getElementById('f'+wStep);
-            if(activeEl) activeEl.classList.add('active');
+            for(let i=1; i<=6; i++) document.getElementById('f'+i).classList.remove('active');
+            document.getElementById('f'+wStep).classList.add('active');
             wStep = (wStep % 6) + 1;
-        }, 700); 
+        }, 700);
     }
     function stopWaltzAnim() { clearInterval(waltzInt); waltzInt = null; }
 
-    // (Mic und Beat-Handling wie zuvor...)
     async function toggleMic() {
         if(isRunning) { location.reload(); return; }
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-        const source = audioCtx.createMediaStreamSource(stream);
-        analyser = audioCtx.createAnalyser();
-        processor = audioCtx.createScriptProcessor(2048, 1, 1);
-        source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
-        processor.onaudioprocess = (e) => {
-            const data = e.inputBuffer.getChannelData(0);
-            let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
-            const rms = Math.sqrt(sum/data.length);
-            if(rms * 40 > 0.7) {
-                const now = Date.now();
-                if(now - lastBeat > 250) { handleBeat(now); lastBeat = now; }
-            }
-        };
-        isRunning = true;
-        document.getElementById('mic-btn').innerText = "STOP";
-        document.getElementById('mic-btn').style.background = "var(--red)";
+        try {
+            audioCtx = new AudioContext();
+            const s = await navigator.mediaDevices.getUserMedia({audio: true});
+            const src = audioCtx.createMediaStreamSource(s);
+            analyser = audioCtx.createAnalyser();
+            processor = audioCtx.createScriptProcessor(2048, 1, 1);
+            src.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
+            processor.onaudioprocess = (e) => {
+                const d = e.inputBuffer.getChannelData(0);
+                let sum = 0; for(let i=0; i<d.length; i++) sum += d[i]*d[i];
+                const rms = Math.sqrt(sum/d.length);
+                if(rms * 40 > 0.75) {
+                    const now = Date.now();
+                    if(now - lastBeat > 260) { handleBeat(now); lastBeat = now; }
+                }
+            };
+            isRunning = true;
+            document.getElementById('mic-btn').innerText = "STOP";
+            document.getElementById('mic-btn').style.background = "var(--red)";
+        } catch(e) { alert("Mic Error"); }
     }
 
     function handleBeat(now) {
         if(lastBeat > 0) {
-            const interval = now - lastBeat;
-            const bpm = Math.round(60000 / interval);
+            const bpm = Math.round(60000 / (now - lastBeat));
             bpmBuf.push(bpm); if(bpmBuf.length > 15) bpmBuf.shift();
             const avg = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
             document.getElementById('bpm-val').innerText = avg;
-            const is34 = (interval > 510 && interval < 860);
+            const is34 = (now - lastBeat > 510 && now - lastBeat < 860);
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             if(!aiOverride) {
                 if(is34) updateDisplay(avg > 152 ? "Wiener Walzer" : "Langsamer Walzer");
@@ -205,24 +229,6 @@
                 }
             }
         }
-    }
-
-    function renderPrefs() {
-        document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
-            `<span class="pref-tag">${d}<span class="btn-del" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></span>`
-        ).join('');
-    }
-    function addPref() {
-        const v = document.getElementById('new-pref').value.trim();
-        if(v) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); }
-    }
-    function saveSettings() {
-        const key = document.getElementById('api-key').value.trim();
-        if(key) localStorage.setItem('dm_key', key);
-        localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
-        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
-        toggleSettings();
-        location.reload();
     }
 </script>
 </body>
