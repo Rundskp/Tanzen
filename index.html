@@ -9,7 +9,194 @@
         body { 
             background: black; color: white; font-family: -apple-system, sans-serif;
             margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+        }<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tanz das! Ultimate</title>
+    <style>
+        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --dark: #0A0A0A; }
+        body { 
+            background: black; color: white; font-family: -apple-system, sans-serif;
+            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
+        /* Dashboard Design */
+        #top-bar { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 2px solid #222; }
+        #main-display { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
+        
+        #dance-name { font-size: clamp(3rem, 18vw, 10rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.8; text-align: center; }
+        #sub-info { font-size: 1.5rem; color: var(--yellow); font-weight: bold; margin-bottom: 20px; min-height: 1.8rem; }
+        
+        #bpm-circle { 
+            width: 250px; height: 250px; border: 8px solid #222; border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin: 30px 0; transition: border-color 0.1s;
+        }
+        .beat-active { border-color: var(--blue) !important; box-shadow: 0 0 30px var(--blue); }
+        
+        #bpm-val { font-size: 6rem; font-weight: 900; font-family: 'Courier New', Courier, monospace; }
+        .label { color: #555; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 5px; }
+
+        /* Große Control-Tasten */
+        #controls { padding: 30px; display: flex; gap: 20px; width: 100%; box-sizing: border-box; background: #050505; }
+        .btn { flex: 1; padding: 25px; border: none; border-radius: 20px; font-size: 1.5rem; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; }
+        .btn-start { background: var(--green); box-shadow: 0 5px 15px rgba(52, 199, 89, 0.3); }
+        .btn-stop { background: var(--red); box-shadow: 0 5px 15px rgba(255, 59, 48, 0.3); }
+        
+        #settings-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:1000; flex-direction:column; align-items:center; justify-content:center; }
+        input { width: 80%; background: #222; border: 1px solid #444; color: white; padding: 15px; border-radius: 12px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div id="top-bar">
+    <div id="signal" style="font-family: monospace; color: #444;">SIG: 0.0000</div>
+    <div class="label" id="meter">Analyse...</div>
+    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2rem; cursor:pointer;">⚙️</button>
+</div>
+
+<div id="main-display">
+    <div id="sub-info">BEREIT ZUM TANZ</div>
+    <h1 id="dance-name">---</h1>
+    
+    <div id="bpm-circle">
+        <div class="label">BPM</div>
+        <div id="bpm-val">0</div>
+        <div class="label" id="avg-info" style="letter-spacing:1px; font-size:0.6rem;">10s Schnitt</div>
+    </div>
+</div>
+
+<div id="controls">
+    <button id="main-btn" class="btn btn-start" onclick="handleMainAction()">START MIC</button>
+</div>
+
+<div id="settings-overlay">
+    <h2>Konfiguration</h2>
+    <input type="password" id="api-input" placeholder="OpenAI Key (sk-...)" onchange="saveKey(this.value)">
+    <div class="label">Empfindlichkeit</div>
+    <input type="range" id="gain-slider" min="1" max="100" value="30">
+    <br><br>
+    <button class="btn btn-start" onclick="toggleSettings()" style="width:80%">Speichern & Zu</button>
+</div>
+
+<script>
+    let audioCtx, analyser, processor, isRunning = false;
+    let lastBeat = 0, bpmHistory = [];
+    let aiConfirmed = false;
+
+    window.onload = () => {
+        const key = localStorage.getItem('dance_master_key');
+        if (key) document.getElementById('api-input').value = key;
+
+        // URL Check (Vom Kurzbefehl)
+        const song = new URLSearchParams(window.location.search).get('song');
+        if (song) {
+            const title = decodeURIComponent(song);
+            document.getElementById('sub-info').innerText = "LIED: " + title;
+            askAI(title);
+            // Auto-Start versuchen (geht nur wenn vorher schon mal Interaktion war)
+            handleMainAction();
+        }
+    };
+
+    function saveKey(v) { localStorage.setItem('dance_master_key', v.trim()); }
+    function toggleSettings() {
+        const o = document.getElementById('settings-overlay');
+        o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    async function handleMainAction() {
+        if (isRunning) {
+            location.href = window.location.pathname; // Reset ohne Parameter
+            return;
+        }
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            processor = audioCtx.createScriptProcessor(2048, 1, 1);
+            source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
+            
+            processor.onaudioprocess = (e) => {
+                const data = e.inputBuffer.getChannelData(0);
+                let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+                const rms = Math.sqrt(sum / data.length);
+                document.getElementById('signal').innerText = "SIG: " + rms.toFixed(4);
+                
+                const gain = document.getElementById('gain-slider').value;
+                if (rms * gain > 0.5) {
+                    const now = Date.now();
+                    if (now - lastBeat > 300) { 
+                        animateBeat();
+                        handleBeat(now); 
+                        lastBeat = now; 
+                    }
+                }
+            };
+            isRunning = true;
+            const btn = document.getElementById('main-btn');
+            btn.innerText = "RESET / STOP";
+            btn.className = "btn btn-stop";
+        } catch (e) { alert("Mic-Zugriff verweigert!"); }
+    }
+
+    function animateBeat() {
+        const circle = document.getElementById('bpm-circle');
+        circle.classList.add('beat-active');
+        setTimeout(() => circle.classList.remove('beat-active'), 100);
+    }
+
+    function handleBeat(now) {
+        if (lastBeat > 0) {
+            const interval = now - lastBeat;
+            const bpm = Math.round(60000 / interval);
+            
+            // 10-Sekunden Durchschnitt (Gleitendes Fenster)
+            bpmHistory.push({ t: now, val: bpm });
+            bpmHistory = bpmHistory.filter(b => now - b.t < 10000);
+            
+            const avgBpm = Math.round(bpmHistory.reduce((a,b) => a + b.val, 0) / bpmHistory.length);
+            document.getElementById('bpm-val').innerText = avgBpm;
+            
+            const is34 = (interval > 510 && interval < 790);
+            document.getElementById('meter').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
+            
+            // Logik: KI gewinnt, sonst Analyse
+            if (!aiConfirmed) {
+                document.getElementById('sub-info').innerText = "LOKALE ANALYSE (10s)";
+                if (is34) document.getElementById('dance-name').innerText = avgBpm > 145 ? "Wiener Walzer" : "Langsamer Walzer";
+                else document.getElementById('dance-name').innerText = avgBpm < 118 ? "Rumba" : "Discofox";
+            }
+        }
+    }
+
+    async function askAI(song) {
+        const key = localStorage.getItem('dance_master_key');
+        if (!key) return;
+        aiConfirmed = false;
+        document.getElementById('sub-info').innerText = "KI PRÜFT: " + song + "...";
+        try {
+            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur der Name.`}],
+                    max_tokens: 10
+                })
+            });
+            const data = await resp.json();
+            const result = data.choices[0].message.content.trim().replace(".", "");
+            document.getElementById('dance-name').innerText = result;
+            document.getElementById('sub-info').innerText = "✨ KI BESTÄTIGT: " + song;
+            aiConfirmed = true;
+        } catch (e) { document.getElementById('sub-info').innerText = "KI FEHLER"; }
+    }
+</script>
+</body>
+</html>
         #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
         #main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; }
         
@@ -173,3 +360,4 @@
 </script>
 </body>
 </html>
+
