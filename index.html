@@ -3,91 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tanz Master Pro</title>
+    <title>Dance Master 2026 SECURE</title>
     <style>
         :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; }
         body { background: black; color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 2px solid #222; }
-        #main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #dance-name { font-size: clamp(3rem, 16vw, 10rem); font-weight: 900; text-transform: uppercase; margin: 10px 0; line-height: 0.8; }
-        #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; }
-        .label { color: #555; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 5px; }
-        #status { color: var(--yellow); font-weight: bold; font-size: 1.2rem; min-height: 1.5rem; margin-bottom: 10px; }
-        .btn { background: var(--green); border: none; color: white; padding: 20px; width: 80%; border-radius: 20px; font-size: 1.5rem; font-weight: bold; cursor: pointer; margin: 20px; }
-        .btn-stop { background: var(--red); }
+        
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: all 0.8s ease; }
+        .mode-scan { opacity: 0.3; transform: scale(0.9); filter: blur(2px); }
+        .mode-active { opacity: 1; transform: scale(1.1); filter: blur(0); }
+
+        #dance-name { font-size: clamp(3rem, 18vw, 11rem); font-weight: 900; text-transform: uppercase; line-height: 0.8; margin: 10px 0; color: white; text-shadow: 0 0 20px rgba(0,122,255,0.5); }
+        #bpm-val { font-size: 9rem; font-weight: bold; font-family: monospace; }
+        .label { color: #444; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 5px; }
+        #song-tag { color: var(--yellow); font-size: 1.4rem; font-weight: bold; min-height: 2rem; }
+
+        #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
+        .btn { background: var(--green); border: none; color: white; padding: 12px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div id="sig" style="font-family:monospace; color:#444;">SIG: 0.0000</div>
-    <div class="label" id="meter">ANALYSE...</div>
-    <button onclick="toggleSettings()" style="background:none; border:none; font-size:1.5rem;">⚙️</button>
+    <div id="status" style="font-size: 0.7rem; color: #555;">Funk-Kanal: Inaktiv</div>
+    <button class="btn" id="start-btn" onclick="toggleMic()">START MONITOR</button>
+    <button onclick="toggleSettings()" style="background:none; border:none; font-size:1.5rem; color:white;">⚙️</button>
 </div>
 
-<div id="main">
-    <div id="status">BEREIT</div>
-    <h1 id="dance-name">---</h1>
+<div id="monitor" class="mode-scan">
+    <div id="song-tag">---</div>
+    <h1 id="dance-name">BEREIT</h1>
     <div id="bpm-val">0</div>
-    <div class="label">BPM (10s Schnitt)</div>
+    <div class="label" id="meter">BPM ANALYSE</div>
 </div>
 
-<button id="main-btn" class="btn" onclick="toggleMic()">START MIC</button>
-
-<div id="settings-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100; flex-direction:column; align-items:center; justify-content:center;">
-    <input type="text" id="api-key" placeholder="OpenAI Key" style="width:80%; padding:15px; border-radius:10px; background:#222; color:white; border:1px solid #444;">
-    <br>
-    <button class="btn" onclick="toggleSettings()" style="background:var(--blue)">SPEICHERN</button>
+<div id="settings" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:100; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <h2 style="color:var(--blue)">SICHERE KONFIGURATION</h2>
+    <p style="font-size:0.8rem; color:#888;">Dein Key und Funk-Kanal werden nur auf diesem iPad gespeichert.</p>
+    
+    <input type="text" id="api-key" placeholder="OpenAI Key (sk-...)" style="width:100%; max-width:400px; padding:15px; background:#222; color:white; border:1px solid #444; border-radius:10px; margin-bottom:15px;">
+    
+    <input type="text" id="topic-id" placeholder="Geheimer Kanal-Name (z.B. Tanz_772_X)" style="width:100%; max-width:400px; padding:15px; background:#222; color:white; border:1px solid #444; border-radius:10px; margin-bottom:15px;">
+    
+    <div class="label">Mikro-Empfindlichkeit</div>
+    <input type="range" id="gain-slider" min="1" max="100" value="30" style="width:100%; max-width:400px;">
+    
+    <br><br>
+    <button class="btn" onclick="toggleSettings()" style="width:100%; max-width:400px; background:var(--blue)">SPEICHERN & STARTEN</button>
 </div>
 
 <script>
     let audioCtx, analyser, processor, isRunning = false, lastB = 0, history = [], aiLock = false;
+    let eventSource = null;
 
     window.onload = () => {
         const key = localStorage.getItem('dm_key');
         if (key) document.getElementById('api-key').value = key;
-        
-        const song = new URLSearchParams(window.location.search).get('song');
-        if (song) {
-            const title = decodeURIComponent(song);
-            document.getElementById('status').innerText = "VON UHR/iCLOUD: " + title;
-            // Wenn ein neues Lied kommt, löschen wir den alten BPM-Schnitt
-            history = [];
-            askAI(title);
+        const topic = localStorage.getItem('dm_topic');
+        if (topic) {
+            document.getElementById('topic-id').value = topic;
+            connectToFunk(topic);
         }
     };
 
     function toggleSettings() {
-        const o = document.getElementById('settings-overlay');
-        o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
-        localStorage.setItem('dm_key', document.getElementById('api-key').value);
+        const o = document.getElementById('settings');
+        const isOpening = o.style.display !== 'flex';
+        o.style.display = isOpening ? 'flex' : 'none';
+        
+        if (!isOpening) {
+            localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
+            const topic = document.getElementById('topic-id').value.trim();
+            localStorage.setItem('dm_topic', topic);
+            connectToFunk(topic);
+        }
+    }
+
+    function connectToFunk(topic) {
+        if (!topic || topic.length < 5) return;
+        if (eventSource) eventSource.close();
+        
+        document.getElementById('status').innerText = "Kanal [" + topic + "] verbunden.";
+        
+        eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        eventSource.onmessage = (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                if (data.message && data.message.length > 2) {
+                    triggerNewSong(data.message);
+                }
+            } catch (err) { console.log("System-Meldung ignoriert."); }
+        };
+    }
+
+    function triggerNewSong(song) {
+        document.getElementById('song-tag').innerText = "FUNK-EMPFANG: " + song;
+        document.getElementById('monitor').className = "mode-active";
+        aiLock = false;
+        askAI(song);
+
+        // Nach 30 Sekunden Highlight-Modus beenden
+        setTimeout(() => {
+            document.getElementById('monitor').className = "mode-scan";
+            document.getElementById('song-tag').innerText = "---";
+        }, 30000);
     }
 
     async function toggleMic() {
         if (isRunning) { location.reload(); return; }
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const source = audioCtx.createMediaStreamSource(stream);
-        analyser = audioCtx.createAnalyser();
-        processor = audioCtx.createScriptProcessor(2048, 1, 1);
-        source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
-        
-        processor.onaudioprocess = (e) => {
-            const data = e.inputBuffer.getChannelData(0);
-            let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
-            const rms = Math.sqrt(sum / data.length);
-            document.getElementById('sig').innerText = "SIG: " + rms.toFixed(4);
-            if (rms * 30 > 0.5) {
-                const now = Date.now();
-                if (now - lastB > 300) { 
-                    handleBeat(now); 
-                    lastB = now; 
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            processor = audioCtx.createScriptProcessor(2048, 1, 1);
+            source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
+            
+            processor.onaudioprocess = (e) => {
+                const data = e.inputBuffer.getChannelData(0);
+                let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+                const rms = Math.sqrt(sum / data.length);
+                const gain = document.getElementById('gain-slider').value;
+                if (rms * gain > 0.5) {
+                    const now = Date.now();
+                    if (now - lastB > 300) { handleBeat(now); lastB = now; }
                 }
-            }
-        };
-        isRunning = true;
-        document.getElementById('main-btn').innerText = "STOP / RESET";
-        document.getElementById('main-btn').classList.add('btn-stop');
+            };
+            isRunning = true;
+            document.getElementById('start-btn').innerText = "STOP";
+            document.getElementById('start-btn').style.background = "var(--red)";
+        } catch (e) { alert("Mic-Zugriff verweigert!"); }
     }
 
     function handleBeat(now) {
@@ -100,6 +144,7 @@
             document.getElementById('bpm-val').innerText = avg;
             const is34 = (interval > 510 && interval < 790);
             document.getElementById('meter').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
+            
             if (!aiLock) {
                 if (is34) document.getElementById('dance-name').innerText = avg > 145 ? "Wiener Walzer" : "Langsamer Walzer";
                 else document.getElementById('dance-name').innerText = avg < 118 ? "Rumba" : "Discofox";
@@ -114,7 +159,11 @@
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Standard/Latein Tanz? Nur 1 Wort.`}], max_tokens: 10})
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur 1 Wort.`}],
+                    max_tokens: 10
+                })
             });
             const data = await resp.json();
             document.getElementById('dance-name').innerText = data.choices[0].message.content.trim();
