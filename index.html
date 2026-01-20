@@ -1,66 +1,229 @@
-<style>
-    /* Neuer Style für den KI-Marker */
-    .ai-verified {
-        color: var(--yellow) !important;
-        text-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
-    }
-    .ai-badge {
-        font-size: 1.2rem;
-        vertical-align: middle;
-        margin-left: 10px;
-        display: none; /* Standardmäßig aus */
-    }
-    .ai-verified .ai-badge { display: inline-block; }
-    
-    /* Sanfter Fade für den Songnamen */
-    #song-display {
-        transition: opacity 20s linear;
-        height: 2rem;
-        font-weight: bold;
-    }
-</style>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dance Master Pro 18.0 - Foot Edition</title>
+    <style>
+        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #000; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        #top-bar { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 20px; }
+        
+        #takt-label { font-size: 1.2rem; color: var(--blue); font-weight: bold; letter-spacing: 5px; text-transform: uppercase; }
+        #song-display { font-size: 1.4rem; color: var(--yellow); font-weight: bold; height: 2rem; opacity: 0; transition: opacity 20s linear; }
+        
+        #dance-name { font-size: clamp(2.5rem, 12vw, 8rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1; transition: all 0.5s; }
+        .ai-verified { color: var(--yellow) !important; text-shadow: 0 0 30px rgba(255, 204, 0, 0.5); }
+        .ai-badge { display: none; margin-left: 15px; font-size: 2rem; }
+        .ai-verified .ai-badge { display: inline; }
 
-<h1 id="dance-name">BEREIT <span id="ai-badge" class="ai-badge">✨</span></h1>
+        #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; color: var(--green); margin: -10px 0; }
+        
+        /* SVG Fuß-Animation Styles */
+        #step-area { height: 45vh; width: 100%; display: flex; justify-content: center; align-items: center; }
+        .foot-path { opacity: 0.1; transition: all 0.2s ease; fill: #333; }
+        
+        /* Aktive Füße leuchten in ihren Farben */
+        .left-foot.active { fill: var(--red); filter: drop-shadow(0 0 15px var(--red)); opacity: 1; }
+        .right-foot.active { fill: var(--blue); filter: drop-shadow(0 0 15px var(--blue)); opacity: 1; }
+
+        /* Settings */
+        #settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; flex-direction: column; padding: 30px; overflow-y: auto; }
+        .settings-card { background: #151515; padding: 30px; border-radius: 30px; width: 100%; max-width: 600px; margin: auto; border: 1px solid #333; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #222; }
+        input[type="text"], input[type="password"] { background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; font-size: 1rem; width: 50%; }
+        input[type="checkbox"] { width: 35px; height: 35px; }
+        .pref-tag { display: inline-flex; align-items: center; background: #222; border: 1px solid #444; padding: 5px 12px; border-radius: 20px; margin: 5px; font-size: 0.9rem; }
+        .btn-del { margin-left: 8px; color: var(--red); cursor: pointer; font-weight: bold; }
+        .btn-main { background: var(--blue); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; font-size: 1.2rem; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="top-bar">
+    <div id="conn-info" style="font-size: 0.7rem; color: #555;">FUNK: BEREIT</div>
+    <button onclick="toggleMic()" id="mic-btn" style="background:var(--green); border:none; color:white; padding:10px 20px; border-radius:10px; font-weight:bold;">START MONITOR</button>
+    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2rem; color:white;">⚙️</button>
+</div>
+
+<div id="monitor">
+    <div id="takt-label">ANALYSE...</div>
+    <div id="song-display">---</div>
+    
+    <div id="main-display">
+        <h1 id="dance-name">BEREIT <span class="ai-badge">✨</span></h1>
+        <div id="bpm-val">0</div>
+        <div style="color:#222; letter-spacing:10px; font-size:0.8rem; font-weight:bold;">BPM LIVE</div>
+    </div>
+
+    <div id="step-area">
+        <svg id="walzer-svg" viewBox="0 0 737.63 662.53" style="display:none; width:80%; height:80%;">
+            <path id="f1" class="foot-path left-foot" d="M691.18,662.03c-16.08,0-37.28-3.02-47-17.42-2.3-3.41-3.38-6.56-4.06-8.93-5.63-19.57-3.14-43.35-.5-68.52..."/>
+            <path id="f2" class="foot-path right-foot" d="M505.8,662.03c-2.51,0-5.13-.07-7.8-.21-4.24-1.81-7.85-4.45-10.74-7.83..."/>
+            <path id="f3" class="foot-path left-foot" d="M691.18,281.27c-16.08,0-37.28-3.02-46.99-17.42..."/>
+            <path id="f4" class="foot-path right-foot" d="M231.79,281.27c-16.08,0-37.28-3.02-46.99-17.42..."/>
+            <path id="f5" class="foot-path left-foot" d="M46.41,281.27c-2.51,0-5.13-.07-7.8-.21..."/>
+            <path id="f6" class="foot-path right-foot" d="M46.41,662.04c-2.51,0-5.13-.07-7.8-.21..."/>
+        </svg>
+    </div>
+</div>
+
+<div id="settings">
+    <div class="settings-card">
+        <h2 style="color:var(--blue)">EINSTELLUNGEN</h2>
+        <div class="row"><span>OpenAI Key</span><input type="password" id="api-key" placeholder="Vorhanden"></div>
+        <div class="row"><span>Funk-Kanal</span><input type="text" id="topic-id"></div>
+        <div class="row"><span>Schritte anzeigen</span><input type="checkbox" id="show-steps" checked></div>
+        <div class="row"><span>Auto-KI (10s)</span><input type="checkbox" id="auto-check"></div>
+        <div style="margin-top:20px;">
+            <label style="font-size:0.8rem; color:#888;">BEVORZUGTE TÄNZE</label>
+            <div id="pref-list" style="margin:10px 0;"></div>
+            <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; width:40px; border-radius:10px;">+</button></div>
+        </div>
+        <button class="btn-main" onclick="saveSettings()">ZURÜCK & SPEICHERN</button>
+    </div>
+</div>
 
 <script>
-    // In der Update-Funktion:
-    function updateDisplay(dance, fromAI = false) {
-        const nameEl = document.getElementById('dance-name');
-        const badge = document.getElementById('ai-badge');
-        
-        nameEl.innerText = dance;
-        
-        if (fromAI) {
-            nameEl.classList.add('ai-verified');
-            badge.style.display = "inline-block";
-        } else {
-            nameEl.classList.remove('ai-verified');
-            badge.style.display = "none";
-        }
+    // Logik zur Steuerung der Füße
+    let audioCtx, analyser, processor, isRunning = false;
+    let lastBeat = 0, bpmBuf = [], aiOverride = false, timerOverride = null;
+    let preferredDances = ["Langsamer Walzer", "Wiener Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Samba"];
 
-        // Schrittfolgen-Logik
-        const isWalzer = dance.toLowerCase().includes("walzer");
-        const showSteps = document.getElementById('show-steps').checked;
-        document.getElementById('walzer-svg').style.display = (isWalzer && showSteps) ? "block" : "none";
-        
-        if (isWalzer && showSteps) startWaltzAnim(); else stopWaltzAnim();
+    window.onload = () => {
+        const savedPrefs = localStorage.getItem('dm_prefs');
+        if(savedPrefs) preferredDances = JSON.parse(savedPrefs);
+        renderPrefs();
+        const topic = localStorage.getItem('dm_topic');
+        if(topic) { document.getElementById('topic-id').value = topic; connectFunk(topic); }
+    };
+
+    function connectFunk(topic) {
+        const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        ev.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if(data.message) handleShortcut(data.message);
+        };
     }
 
-    // Die handleShortcut Funktion bekommt den linearen Fade:
     function handleShortcut(song) {
         aiOverride = true;
         const disp = document.getElementById('song-display');
-        disp.innerText = "UHR: " + song;
+        disp.innerText = "UHR-SCAN: " + song;
+        disp.style.transition = "none";
         disp.style.opacity = "1";
-        disp.style.transition = "none"; // Reset für Sofort-Anzeige
-        
         askAI(song);
-
-        setTimeout(() => {
+        if(timerOverride) clearTimeout(timerOverride);
+        timerOverride = setTimeout(() => {
             disp.style.transition = "opacity 20s linear";
             disp.style.opacity = "0";
-            // Nach 20s wieder die lokale Analyse erlauben
             setTimeout(() => { aiOverride = false; }, 20000);
         }, 1000);
     }
+
+    async function askAI(song) {
+        const key = localStorage.getItem('dm_key');
+        if(!key) return;
+        const prompt = `Lied: '${song}'. Liste: ${preferredDances.join(", ")}. Welcher Tanz? Nur 1-2 Worte.`;
+        try {
+            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: prompt}], max_tokens: 20})
+            });
+            const data = await resp.json();
+            updateDisplay(data.choices[0].message.content.trim(), true);
+        } catch(e) { aiOverride = false; }
+    }
+
+    function updateDisplay(dance, fromAI = false) {
+        const nameEl = document.getElementById('dance-name');
+        nameEl.innerText = dance;
+        if(fromAI) nameEl.classList.add('ai-verified'); else nameEl.classList.remove('ai-verified');
+
+        const isWalzer = dance.toLowerCase().includes("walzer");
+        const showSteps = document.getElementById('show-steps').checked;
+        document.getElementById('walzer-svg').style.display = (isWalzer && showSteps) ? "block" : "none";
+        if(isWalzer && showSteps) startWaltzAnim(); else stopWaltzAnim();
+    }
+
+    let waltzInt = null, wStep = 1;
+    function startWaltzAnim() {
+        if(waltzInt) return;
+        waltzInt = setInterval(() => {
+            for(let i=1; i<=6; i++) {
+                const el = document.getElementById('f'+i);
+                if(el) el.classList.remove('active');
+            }
+            const activeEl = document.getElementById('f'+wStep);
+            if(activeEl) activeEl.classList.add('active');
+            wStep = (wStep % 6) + 1;
+        }, 700); 
+    }
+    function stopWaltzAnim() { clearInterval(waltzInt); waltzInt = null; }
+
+    // (Mic und Beat-Handling wie zuvor...)
+    async function toggleMic() {
+        if(isRunning) { location.reload(); return; }
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        const source = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        processor = audioCtx.createScriptProcessor(2048, 1, 1);
+        source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
+        processor.onaudioprocess = (e) => {
+            const data = e.inputBuffer.getChannelData(0);
+            let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+            const rms = Math.sqrt(sum/data.length);
+            if(rms * 40 > 0.7) {
+                const now = Date.now();
+                if(now - lastBeat > 250) { handleBeat(now); lastBeat = now; }
+            }
+        };
+        isRunning = true;
+        document.getElementById('mic-btn').innerText = "STOP";
+        document.getElementById('mic-btn').style.background = "var(--red)";
+    }
+
+    function handleBeat(now) {
+        if(lastBeat > 0) {
+            const interval = now - lastBeat;
+            const bpm = Math.round(60000 / interval);
+            bpmBuf.push(bpm); if(bpmBuf.length > 15) bpmBuf.shift();
+            const avg = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
+            document.getElementById('bpm-val').innerText = avg;
+            const is34 = (interval > 510 && interval < 860);
+            document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
+            if(!aiOverride) {
+                if(is34) updateDisplay(avg > 152 ? "Wiener Walzer" : "Langsamer Walzer");
+                else {
+                    if(avg < 92) updateDisplay("Rumba");
+                    else if(avg < 118) updateDisplay("Cha Cha Cha");
+                    else updateDisplay("Discofox");
+                }
+            }
+        }
+    }
+
+    function renderPrefs() {
+        document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
+            `<span class="pref-tag">${d}<span class="btn-del" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></span>`
+        ).join('');
+    }
+    function addPref() {
+        const v = document.getElementById('new-pref').value.trim();
+        if(v) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); }
+    }
+    function saveSettings() {
+        const key = document.getElementById('api-key').value.trim();
+        if(key) localStorage.setItem('dm_key', key);
+        localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
+        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+        toggleSettings();
+        location.reload();
+    }
 </script>
+</body>
+</html>
