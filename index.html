@@ -3,361 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dance Master 2026 Pro</title>
+    <title>Tanz Master Pro</title>
     <style>
         :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; }
-        body { 
-            background: black; color: white; font-family: -apple-system, sans-serif;
-            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-        }<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tanz das! Ultimate</title>
-    <style>
-        :root { --blue: #007AFF; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --dark: #0A0A0A; }
-        body { 
-            background: black; color: white; font-family: -apple-system, sans-serif;
-            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-        }
-        /* Dashboard Design */
-        #top-bar { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 2px solid #222; }
-        #main-display { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
-        
-        #dance-name { font-size: clamp(3rem, 18vw, 10rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.8; text-align: center; }
-        #sub-info { font-size: 1.5rem; color: var(--yellow); font-weight: bold; margin-bottom: 20px; min-height: 1.8rem; }
-        
-        #bpm-circle { 
-            width: 250px; height: 250px; border: 8px solid #222; border-radius: 50%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            margin: 30px 0; transition: border-color 0.1s;
-        }
-        .beat-active { border-color: var(--blue) !important; box-shadow: 0 0 30px var(--blue); }
-        
-        #bpm-val { font-size: 6rem; font-weight: 900; font-family: 'Courier New', Courier, monospace; }
+        body { background: black; color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 2px solid #222; }
+        #main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #dance-name { font-size: clamp(3rem, 16vw, 10rem); font-weight: 900; text-transform: uppercase; margin: 10px 0; line-height: 0.8; }
+        #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; }
         .label { color: #555; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 5px; }
-
-        /* Große Control-Tasten */
-        #controls { padding: 30px; display: flex; gap: 20px; width: 100%; box-sizing: border-box; background: #050505; }
-        .btn { flex: 1; padding: 25px; border: none; border-radius: 20px; font-size: 1.5rem; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; }
-        .btn-start { background: var(--green); box-shadow: 0 5px 15px rgba(52, 199, 89, 0.3); }
-        .btn-stop { background: var(--red); box-shadow: 0 5px 15px rgba(255, 59, 48, 0.3); }
-        
-        #settings-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:1000; flex-direction:column; align-items:center; justify-content:center; }
-        input { width: 80%; background: #222; border: 1px solid #444; color: white; padding: 15px; border-radius: 12px; margin: 10px 0; }
+        #status { color: var(--yellow); font-weight: bold; font-size: 1.2rem; min-height: 1.5rem; margin-bottom: 10px; }
+        .btn { background: var(--green); border: none; color: white; padding: 20px; width: 80%; border-radius: 20px; font-size: 1.5rem; font-weight: bold; cursor: pointer; margin: 20px; }
+        .btn-stop { background: var(--red); }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div id="signal" style="font-family: monospace; color: #444;">SIG: 0.0000</div>
-    <div class="label" id="meter">Analyse...</div>
-    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2rem; cursor:pointer;">⚙️</button>
+    <div id="sig" style="font-family:monospace; color:#444;">SIG: 0.0000</div>
+    <div class="label" id="meter">ANALYSE...</div>
+    <button onclick="toggleSettings()" style="background:none; border:none; font-size:1.5rem;">⚙️</button>
 </div>
 
-<div id="main-display">
-    <div id="sub-info">BEREIT ZUM TANZ</div>
+<div id="main">
+    <div id="status">BEREIT</div>
     <h1 id="dance-name">---</h1>
-    
-    <div id="bpm-circle">
-        <div class="label">BPM</div>
-        <div id="bpm-val">0</div>
-        <div class="label" id="avg-info" style="letter-spacing:1px; font-size:0.6rem;">10s Schnitt</div>
-    </div>
+    <div id="bpm-val">0</div>
+    <div class="label">BPM (10s Schnitt)</div>
 </div>
 
-<div id="controls">
-    <button id="main-btn" class="btn btn-start" onclick="handleMainAction()">START MIC</button>
-</div>
+<button id="main-btn" class="btn" onclick="toggleMic()">START MIC</button>
 
-<div id="settings-overlay">
-    <h2>Konfiguration</h2>
-    <input type="password" id="api-input" placeholder="OpenAI Key (sk-...)" onchange="saveKey(this.value)">
-    <div class="label">Empfindlichkeit</div>
-    <input type="range" id="gain-slider" min="1" max="100" value="30">
-    <br><br>
-    <button class="btn btn-start" onclick="toggleSettings()" style="width:80%">Speichern & Zu</button>
+<div id="settings-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100; flex-direction:column; align-items:center; justify-content:center;">
+    <input type="text" id="api-key" placeholder="OpenAI Key" style="width:80%; padding:15px; border-radius:10px; background:#222; color:white; border:1px solid #444;">
+    <br>
+    <button class="btn" onclick="toggleSettings()" style="background:var(--blue)">SPEICHERN</button>
 </div>
 
 <script>
-    let audioCtx, analyser, processor, isRunning = false;
-    let lastBeat = 0, bpmHistory = [];
-    let aiConfirmed = false;
+    let audioCtx, analyser, processor, isRunning = false, lastB = 0, history = [], aiLock = false;
 
     window.onload = () => {
-        const key = localStorage.getItem('dance_master_key');
-        if (key) document.getElementById('api-input').value = key;
-
-        // URL Check (Vom Kurzbefehl)
+        const key = localStorage.getItem('dm_key');
+        if (key) document.getElementById('api-key').value = key;
+        
         const song = new URLSearchParams(window.location.search).get('song');
         if (song) {
             const title = decodeURIComponent(song);
-            document.getElementById('sub-info').innerText = "LIED: " + title;
+            document.getElementById('status').innerText = "VON UHR/iCLOUD: " + title;
+            // Wenn ein neues Lied kommt, löschen wir den alten BPM-Schnitt
+            history = [];
             askAI(title);
-            // Auto-Start versuchen (geht nur wenn vorher schon mal Interaktion war)
-            handleMainAction();
         }
     };
 
-    function saveKey(v) { localStorage.setItem('dance_master_key', v.trim()); }
     function toggleSettings() {
         const o = document.getElementById('settings-overlay');
         o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
+        localStorage.setItem('dm_key', document.getElementById('api-key').value);
     }
 
-    async function handleMainAction() {
-        if (isRunning) {
-            location.href = window.location.pathname; // Reset ohne Parameter
-            return;
-        }
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const source = audioCtx.createMediaStreamSource(stream);
-            analyser = audioCtx.createAnalyser();
-            processor = audioCtx.createScriptProcessor(2048, 1, 1);
-            source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
-            
-            processor.onaudioprocess = (e) => {
-                const data = e.inputBuffer.getChannelData(0);
-                let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
-                const rms = Math.sqrt(sum / data.length);
-                document.getElementById('signal').innerText = "SIG: " + rms.toFixed(4);
-                
-                const gain = document.getElementById('gain-slider').value;
-                if (rms * gain > 0.5) {
-                    const now = Date.now();
-                    if (now - lastBeat > 300) { 
-                        animateBeat();
-                        handleBeat(now); 
-                        lastBeat = now; 
-                    }
-                }
-            };
-            isRunning = true;
-            const btn = document.getElementById('main-btn');
-            btn.innerText = "RESET / STOP";
-            btn.className = "btn btn-stop";
-        } catch (e) { alert("Mic-Zugriff verweigert!"); }
-    }
-
-    function animateBeat() {
-        const circle = document.getElementById('bpm-circle');
-        circle.classList.add('beat-active');
-        setTimeout(() => circle.classList.remove('beat-active'), 100);
-    }
-
-    function handleBeat(now) {
-        if (lastBeat > 0) {
-            const interval = now - lastBeat;
-            const bpm = Math.round(60000 / interval);
-            
-            // 10-Sekunden Durchschnitt (Gleitendes Fenster)
-            bpmHistory.push({ t: now, val: bpm });
-            bpmHistory = bpmHistory.filter(b => now - b.t < 10000);
-            
-            const avgBpm = Math.round(bpmHistory.reduce((a,b) => a + b.val, 0) / bpmHistory.length);
-            document.getElementById('bpm-val').innerText = avgBpm;
-            
-            const is34 = (interval > 510 && interval < 790);
-            document.getElementById('meter').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
-            
-            // Logik: KI gewinnt, sonst Analyse
-            if (!aiConfirmed) {
-                document.getElementById('sub-info').innerText = "LOKALE ANALYSE (10s)";
-                if (is34) document.getElementById('dance-name').innerText = avgBpm > 145 ? "Wiener Walzer" : "Langsamer Walzer";
-                else document.getElementById('dance-name').innerText = avgBpm < 118 ? "Rumba" : "Discofox";
-            }
-        }
-    }
-
-    async function askAI(song) {
-        const key = localStorage.getItem('dance_master_key');
-        if (!key) return;
-        aiConfirmed = false;
-        document.getElementById('sub-info').innerText = "KI PRÜFT: " + song + "...";
-        try {
-            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({
-                    model: "gpt-4o-mini",
-                    messages: [{role: "user", content: `Lied: '${song}'. Welcher Tanz? Nur der Name.`}],
-                    max_tokens: 10
-                })
-            });
-            const data = await resp.json();
-            const result = data.choices[0].message.content.trim().replace(".", "");
-            document.getElementById('dance-name').innerText = result;
-            document.getElementById('sub-info').innerText = "✨ KI BESTÄTIGT: " + song;
-            aiConfirmed = true;
-        } catch (e) { document.getElementById('sub-info').innerText = "KI FEHLER"; }
-    }
-</script>
-</body>
-</html>
-        #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #333; }
-        #main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; }
-        
-        #dance-name { font-size: clamp(2.5rem, 14vw, 8rem); font-weight: 900; text-transform: uppercase; margin: 10px; line-height: 0.9; color: white; }
-        #bpm-display { font-size: 8rem; font-weight: bold; font-family: monospace; line-height: 1; }
-        .label { color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 4px; }
-        
-        button { background: var(--green); border: none; color: white; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        button.stop { background: var(--red); }
-        
-        #status-bar { padding: 8px; font-size: 0.8rem; text-align: center; background: #0a0a0a; color: var(--yellow); font-weight: bold; border-bottom: 1px solid #222; }
-        
-        /* Haxen View */
-        #footprints { display: none; gap: 60px; margin: 20px 0; }
-        .foot { width: 50px; height: 90px; opacity: 0.1; transition: opacity 0.1s; }
-
-        #settings-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); z-index: 100; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .config-box { width: 85%; max-width: 400px; }
-        input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 15px; border-radius: 10px; margin-top: 10px; box-sizing: border-box; }
-    </style>
-</head>
-<body>
-
-<div id="top-bar">
-    <div id="signal-diag" style="color: #444; font-size: 0.7rem;">Signal: 0.0000</div>
-    <button id="start-btn" onclick="toggleEngine()">START MIC</button>
-    <button style="background:none; font-size:1.5rem;" onclick="toggleSettings()">⚙️</button>
-</div>
-
-<div id="status-bar">BEREIT FÜR NEUEN SCAN</div>
-
-<div id="main">
-    <div class="label" id="meter">---</div>
-    <h1 id="dance-name">WACHLEUTE</h1>
-    <div id="bpm-display">0</div>
-    <div class="label">BPM</div>
-
-    <div id="footprints">
-        <div id="foot-left" class="foot" style="color: var(--yellow); transform: rotate(-15deg);">
-            <svg viewBox="0 0 200 400"><path d="M50 0C20 0 0 50 0 150s20 250 50 250 50-50 50-150S80 0 50 0z" fill="currentColor"/></svg>
-        </div>
-        <div id="foot-right" class="foot" style="color: var(--red); transform: rotate(15deg);">
-            <svg viewBox="0 0 200 400"><path d="M50 0C20 0 0 50 0 150s20 250 50 250 50-50 50-150S80 0 50 0z" fill="currentColor"/></svg>
-        </div>
-    </div>
-</div>
-
-<div id="settings-overlay">
-    <div class="config-box">
-        <h2 style="color:var(--blue)">EINSTELLUNGEN</h2>
-        <label class="label">OpenAI Key (Lokal auf iPad)</label>
-        <input type="text" id="api-key-input" placeholder="sk-..." onchange="saveKey(this.value)">
-        <br><br>
-        <label class="label">Empfindlichkeit</label>
-        <input type="range" id="gain-slider" min="1" max="100" value="25">
-        <br><br>
-        <button onclick="toggleHaxen()" style="width:100%; background:#333; margin-bottom:10px;">FÜSSE AN/AUS</button>
-        <button onclick="toggleSettings()" style="width:100%; background:var(--blue);">FERTIG</button>
-    </div>
-</div>
-
-<script>
-    let audioCtx, analyser, processor, isRunning = false, lastBeat = 0, bpmBuf = [];
-    let showHaxen = false, beats = 0, aiLocked = false;
-
-    window.onload = () => {
-        const key = localStorage.getItem('dance_master_key');
-        if (key) document.getElementById('api-key-input').value = key;
-
-        // URL prüfen
-        const song = new URLSearchParams(window.location.search).get('song');
-        if (song) {
-            const cleanSong = decodeURIComponent(song);
-            document.getElementById('status-bar').innerText = "NEUES LIED: " + cleanSong;
-            askAI(cleanSong);
-        }
-    };
-
-    function saveKey(v) { localStorage.setItem('dance_master_key', v.trim()); }
-    function toggleSettings() {
-        const o = document.getElementById('settings-overlay');
-        o.style.display = (o.style.display === 'flex') ? 'none' : 'flex';
-    }
-    function toggleHaxen() {
-        showHaxen = !showHaxen;
-        document.getElementById('footprints').style.display = showHaxen ? 'flex' : 'none';
-    }
-
-    async function toggleEngine() {
+    async function toggleMic() {
         if (isRunning) { location.reload(); return; }
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const source = audioCtx.createMediaStreamSource(stream);
-            analyser = audioCtx.createAnalyser();
-            processor = audioCtx.createScriptProcessor(2048, 1, 1);
-            source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
-            
-            processor.onaudioprocess = (e) => {
-                const data = e.inputBuffer.getChannelData(0);
-                let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
-                const rms = Math.sqrt(sum / data.length);
-                document.getElementById('signal-diag').innerText = "Signal: " + rms.toFixed(5);
-                const gain = document.getElementById('gain-slider').value;
-                if (rms * gain > 0.5) {
-                    const now = Date.now();
-                    if (now - lastBeat > 300) { handleBeat(now); lastBeat = now; }
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        processor = audioCtx.createScriptProcessor(2048, 1, 1);
+        source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
+        
+        processor.onaudioprocess = (e) => {
+            const data = e.inputBuffer.getChannelData(0);
+            let sum = 0; for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+            const rms = Math.sqrt(sum / data.length);
+            document.getElementById('sig').innerText = "SIG: " + rms.toFixed(4);
+            if (rms * 30 > 0.5) {
+                const now = Date.now();
+                if (now - lastB > 300) { 
+                    handleBeat(now); 
+                    lastB = now; 
                 }
-            };
-            isRunning = true;
-            document.getElementById('start-btn').innerText = "STOP";
-            document.getElementById('start-btn').className = "stop";
-        } catch (e) { alert("Mic Error"); }
+            }
+        };
+        isRunning = true;
+        document.getElementById('main-btn').innerText = "STOP / RESET";
+        document.getElementById('main-btn').classList.add('btn-stop');
     }
 
     function handleBeat(now) {
-        if (lastBeat > 0) {
-            const interval = now - lastBeat;
+        if (lastB > 0) {
+            const interval = now - lastB;
             const bpm = Math.round(60000 / interval);
-            bpmBuf.push(bpm); if(bpmBuf.length > 5) bpmBuf.shift();
-            const avgBpm = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
-            document.getElementById('bpm-display').innerText = avgBpm;
-            
+            history.push({t: now, v: bpm});
+            history = history.filter(h => now - h.t < 10000);
+            const avg = Math.round(history.reduce((a,b)=>a+b.v,0)/history.length);
+            document.getElementById('bpm-val').innerText = avg;
             const is34 = (interval > 510 && interval < 790);
             document.getElementById('meter').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
-            
-            beats = (beats % (is34 ? 3 : 4)) + 1;
-            if (showHaxen) {
-                document.getElementById('foot-left').style.opacity = (beats%2==0) ? "1" : "0.1";
-                document.getElementById('foot-right').style.opacity = (beats%2!=0) ? "1" : "0.1";
-            }
-
-            if (!aiLocked) {
-                if (is34) document.getElementById('dance-name').innerText = avgBpm > 145 ? "Wiener Walzer" : "Langsamer Walzer";
-                else document.getElementById('dance-name').innerText = avgBpm < 118 ? "Rumba" : "Discofox";
+            if (!aiLock) {
+                if (is34) document.getElementById('dance-name').innerText = avg > 145 ? "Wiener Walzer" : "Langsamer Walzer";
+                else document.getElementById('dance-name').innerText = avg < 118 ? "Rumba" : "Discofox";
             }
         }
     }
 
     async function askAI(song) {
-        const key = localStorage.getItem('dance_master_key');
+        const key = localStorage.getItem('dm_key');
         if (!key) return;
         try {
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({
-                    model: "gpt-4o-mini",
-                    messages: [{role: "user", content: `Lied: '${song}'. Welcher Standard/Latein Tanz passt? (Walzer, Rumba, Cha-Cha, Samba, Tango, Jive, Discofox). Nur 1 Wort.`}],
-                    max_tokens: 10
-                })
+                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Welcher Standard/Latein Tanz? Nur 1 Wort.`}], max_tokens: 10})
             });
             const data = await resp.json();
             document.getElementById('dance-name').innerText = data.choices[0].message.content.trim();
-            aiLocked = true;
-        } catch (e) { console.error(e); }
+            aiLock = true;
+        } catch (e) {}
     }
 </script>
 </body>
 </html>
-
