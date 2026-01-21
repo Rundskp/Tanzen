@@ -5,30 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
-        #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; line-height: 1.1; margin-bottom: 5px; }
-        #song { font-size: 0.8rem; color: #FFCC00; padding: 0 10px; }
+        #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; line-height: 1.1; }
+        #song { font-size: 0.8rem; color: #FFCC00; margin-top: 10px; padding: 0 10px; font-weight: bold; }
         #status { position: fixed; bottom: 5px; font-size: 0.5rem; opacity: 0.3; }
     </style>
 </head>
 <body>
     <div id="dance">BEREIT</div>
     <div id="song">Warte auf Scan...</div>
-    <div id="status">LIVE 🔴</div>
+    <div id="status">LIVE 🟢</div>
 
     <script>
         const topic = "Tanz_8392_Haxen_2026_XyZ";
+        
+        function pulse(pattern) {
+            if ("vibrate" in navigator) {
+                navigator.vibrate(pattern);
+            }
+        }
+
         function connect() {
             const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
-            ev.onopen = () => document.getElementById('status').innerText = "LIVE 🟢";
             ev.onmessage = (e) => {
                 const d = JSON.parse(e.data);
                 if (d.message) {
                     if (d.message.includes("💃")) {
-                        document.getElementById('dance').innerText = d.message.replace("💃", "").trim();
+                        const danceName = d.message.replace("💃", "").trim();
+                        document.getElementById('dance').innerText = danceName;
                         document.getElementById('dance').style.color = "#34C759";
-                        document.getElementById('song').innerText = "KI Bestätigt ✨";
+                        
+                        // Rhythmus-Vibration basierend auf Metadaten
+                        const takt = d.attachment ? d.attachment.name : ""; // Wir nutzen hier einen Trick via Metadata/Attachment
+                        
+                        if (danceName.toLowerCase().includes("walzer")) {
+                            // Walzer: Lang (400), Pause (100), Kurz (150), Pause (100), Kurz (150)
+                            pulse([400, 100, 150, 100, 150]);
+                        } else {
+                            // 4/4 Takt: Gleichmäßig kurz
+                            pulse([200, 100, 200, 100, 200, 100, 200]);
+                        }
                     } else {
-                        document.getElementById('song').innerText = d.message;
+                        // Fixierter Song-Titel
+                        document.getElementById('song').innerText = "🎵 " + d.message;
                         document.getElementById('dance').innerText = "SCAN...";
                         document.getElementById('dance').style.color = "#2b7cff";
                     }
