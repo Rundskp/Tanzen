@@ -5,36 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; overflow: hidden; }
-        #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; line-height: 1; }
-        #song { font-size: 0.8rem; color: #FFCC00; margin-top: 10px; font-weight: bold; opacity: 0.8; }
-        #vib-btn { position: fixed; inset: 0; background: #34C759; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 9999; font-size: 1.2rem; border: none; width: 100%; height: 100%; cursor: pointer; }
+        #dance { font-size: 2.2rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; line-height: 1.1; padding: 0 10px; }
+        #song { font-size: 0.9rem; color: #FFCC00; margin-top: 15px; font-weight: bold; opacity: 0.8; padding: 0 10px; }
     </style>
 </head>
 <body>
-    <button id="vib-btn" onclick="activateVibration()">RHYTHMUS AN</button>
     <div id="dance">BEREIT</div>
     <div id="song">Warte auf Scan...</div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const topic = urlParams.get('t') || "Tanz_8392_Haxen_2026_XyZ";
-        
-        // Check, ob wir in dieser Session den Button schon gedrückt hatten
-        if (sessionStorage.getItem('vib_enabled') === 'true') {
-            document.getElementById('vib-btn').style.display = 'none';
-        }
-
-        function activateVibration() {
-            if ("vibrate" in navigator) navigator.vibrate(200);
-            sessionStorage.setItem('vib_enabled', 'true');
-            document.getElementById('vib-btn').style.display = 'none';
-        }
 
         const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
         ev.onmessage = (e) => {
             try {
                 const d = JSON.parse(e.data);
-                // Nur reagieren, wenn es eine Nachricht ist und kein Keep-Alive (leere Daten)
                 if (!d.message) return;
 
                 if (d.message.includes("💃")) {
@@ -42,19 +28,20 @@
                     document.getElementById('dance').innerText = name;
                     document.getElementById('dance').style.color = "#34C759";
                     
-                    // Vibration auslösen
-                    if (name.toLowerCase().includes("walzer")) {
-                        navigator.vibrate([400, 200, 400]); // Walzer Takt
-                    } else {
-                        navigator.vibrate([200, 100, 200, 100, 200]);
+                    // Vibration (kann von Safari blockiert werden ohne Interaktion)
+                    if ("vibrate" in navigator) {
+                        if (name.toLowerCase().includes("walzer")) {
+                            navigator.vibrate([400, 200, 400]);
+                        } else {
+                            navigator.vibrate([200, 100, 200, 100, 200]);
+                        }
                     }
                 } else if (!d.message.includes("Test-Erfolg")) {
-                    // Das ist die Phase, in der das iPad den Songnamen empfängt
-                    document.getElementById('song').innerText = "📡 " + d.message;
+                    document.getElementById('song').innerText = d.message;
                     document.getElementById('dance').innerText = "KI PRÜFT...";
                     document.getElementById('dance').style.color = "#2b7cff";
                 }
-            } catch (err) { console.log("System-Ping"); }
+            } catch (err) {}
         };
     </script>
 </body>
