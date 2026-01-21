@@ -3,34 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dance Master Pro 21.0</title>
+    <title>Dance Master Pro 22.0</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #0b0c10; --card: rgba(255,255,255,0.06); }
         body { background: var(--bg); color: #e8e8e8; font-family: system-ui, -apple-system, sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        
         #top-bar { position: relative; z-index: 3000; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
         #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; z-index: 10; gap: 10px; }
-        
         #takt-label { font-size: 1rem; color: var(--blue); font-weight: bold; letter-spacing: 4px; text-transform: uppercase; }
         #song-display { font-size: 1.2rem; color: var(--yellow); font-weight: bold; height: 1.5rem; opacity: 0; transition: opacity 20s linear; }
         #dance-name { font-size: clamp(2rem, 8vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; transition: 0.5s; line-height: 1; }
         .ai-verified { color: var(--yellow) !important; text-shadow: 0 0 20px rgba(255, 204, 0, 0.4); }
         .ai-badge { display: none; margin-left: 10px; }
         .ai-verified .ai-badge { display: inline; }
-        
         #bpm-val { font-size: 5rem; font-weight: 900; font-family: monospace; color: var(--green); margin: 0; }
-
         #video-container { display: none; width: min(700px, 95%); background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; margin-top: 15px; }
         video { width: 100%; height: auto; border-radius: 12px; }
-
         #settings { display: none; position: fixed; inset: 0; background: rgba(11,12,16,0.98); z-index: 4000; flex-direction: column; padding: 30px; overflow-y: auto; }
-        .settings-card { background: #1a1b20; padding: 30px; border-radius: 25px; width: 100%; max-width: 600px; margin: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .settings-card { background: #1a1b20; padding: 30px; border-radius: 25px; width: 100%; max-width: 550px; margin: auto; border: 1px solid rgba(255,255,255,0.1); }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
         .input-box { width: 50%; display: flex; align-items: center; gap: 10px; }
         input[type="text"], input[type="password"] { background: #0b0c10; border: 1px solid #333; color: white; padding: 12px; border-radius: 10px; flex: 1; }
         .check-badge { color: var(--green); font-weight: bold; font-size: 1.2rem; display: none; margin-left: 5px; }
-        
         .btn-test { background: rgba(255,255,255,0.1); border: 0; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
         .btn-main { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
         .pref-tag { display: inline-flex; align-items: center; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; margin: 4px; font-size: 0.85rem; }
@@ -47,45 +40,21 @@
 <div id="monitor">
     <div id="takt-label">ANALYSE...</div>
     <div id="song-display">---</div>
-    
     <div id="main-display">
         <h1 id="dance-name">BEREIT <span class="ai-badge">✨</span></h1>
         <div id="bpm-val">0</div>
     </div>
-
-    <div id="video-container">
-        <video id="dance-video" playsinline muted loop autoplay></video>
-    </div>
+    <div id="video-container"><video id="dance-video" playsinline muted loop autoplay></video></div>
 </div>
 
 <div id="settings">
     <div class="settings-card">
-        <h2 style="color:var(--blue); margin-top:0;">EINSTELLUNGEN</h2>
-        
-        <div class="row">
-            <span>OpenAI Key <span id="key-check" class="check-badge">✔</span></span>
-            <div class="input-box">
-                <button class="btn-test" onclick="testAI()">TEST KI</button>
-                <input type="password" id="api-key" placeholder="Key eingeben...">
-            </div>
-        </div>
-        
-        <div class="row">
-            <span>Funk-Kanal <span id="topic-check" class="check-badge">✔</span></span>
-            <div class="input-box">
-                <button class="btn-test" onclick="testFunk()">TEST FUNK</button>
-                <input type="text" id="topic-id" placeholder="Name...">
-            </div>
-        </div>
-
-        <div class="row">
-            <span>Schrittfolgen anzeigen</span>
-            <input type="checkbox" id="show-steps" checked>
-        </div>
-
+        <h2 style="color:var(--blue); margin-top:0;">KONFIGURATION</h2>
+        <div class="row"><span>OpenAI Key <span id="key-check" class="check-badge">✔</span></span><div class="input-box"><button class="btn-test" onclick="testAI()">TEST KI</button><input type="password" id="api-key" placeholder="Key..."></div></div>
+        <div class="row"><span>Funk-Kanal <span id="topic-check" class="check-badge">✔</span></span><div class="input-box"><button class="btn-test" onclick="testFunk()">TEST FUNK</button><input type="text" id="topic-id" placeholder="Name..."></div></div>
+        <div class="row"><span>Schritte anzeigen</span><input type="checkbox" id="show-steps" checked></div>
         <div id="pref-list" style="margin:15px 0;"></div>
         <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; width:40px; border-radius:10px;">+</button></div>
-        
         <button class="btn-main" onclick="saveSettings()" style="margin-top:20px;">SPEICHERN & ZURÜCK</button>
     </div>
 </div>
@@ -109,24 +78,22 @@
 
     function testFunk() {
         const topic = document.getElementById('topic-id').value.trim() || localStorage.getItem('dm_topic');
-        if(!topic) return alert("Zuerst Name eingeben!");
-        fetch(`https://ntfy.sh/${topic}/publish?message=Test-Erfolg!`).then(() => {
-            alert("Test-Signal gesendet!");
-        });
+        if(!topic) return alert("Name fehlt!");
+        fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: 'Test-Erfolg!' });
     }
 
     async function testAI() {
         const key = document.getElementById('api-key').value.trim() || localStorage.getItem('dm_key');
-        if(!key) return alert("Kein Key vorhanden!");
+        if(!key) return alert("Key fehlt!");
         try {
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: "Antworte nur mit dem Wort 'OK'"}], max_tokens: 5})
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: "Antworte 'OK'"}], max_tokens: 5})
             });
             const d = await resp.json();
-            if(d.choices) alert("KI-Verbindung steht: " + d.choices[0].message.content);
-        } catch(e) { alert("KI-Fehler."); }
+            alert("KI sagt: " + d.choices[0].message.content);
+        } catch(e) { alert("KI Fehler."); }
     }
 
     function toggleSettings() {
@@ -149,6 +116,7 @@
         ev.onopen = () => document.getElementById('conn-info').innerText = "FUNK: AKTIV ✅";
         ev.onmessage = (e) => {
             const d = JSON.parse(e.data);
+            // Verhindert, dass das iPad auf seine eigenen Echos (💃) reagiert
             if(d.message && !d.message.includes("💃")) handleShortcut(d.message);
         };
     }
@@ -175,18 +143,14 @@
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
                 body: JSON.stringify({
                     model: "gpt-4o-mini", 
-                    messages: [{role: "user", content: `Lied: '${song}'. Wähle NUR den passenden Tanz aus dieser Liste: ${preferredDances.join(", ")}. Antworte NUR mit dem Namen, keine Beschreibungen wie 'gefühlvoll'.`}], 
-                    max_tokens: 20
+                    messages: [{role: "user", content: `Lied: '${song}'. Wähle den passenden Tanz aus dieser Liste: ${preferredDances.join(", ")}. Antworte STRIKT nur mit dem Namen aus der Liste. Keine Beschreibungen, keine Adjektive.`}], 
+                    max_tokens: 15
                 })
             });
             const d = await resp.json();
             const danceResult = d.choices[0].message.content.trim();
             updateDisplay(danceResult, true);
-            
-            // ECHO an die Uhr senden (mit 💃 Emoji)
-            if(topic) {
-                fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${danceResult}` });
-            }
+            if(topic) fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${danceResult}` });
         } catch(e) { aiOverride = false; }
     }
 
@@ -194,16 +158,10 @@
         const n = document.getElementById('dance-name');
         n.innerText = dance;
         if(fromAI) n.classList.add('ai-verified'); else n.classList.remove('ai-verified');
-        
         const vcont = document.getElementById('video-container');
         const v = document.getElementById('dance-video');
-        if (dance.toLowerCase().includes('walzer')) {
-            vcont.style.display = 'block';
-            v.src = './Walzer_Grundschritt_1200.mp4';
-        } else {
-            vcont.style.display = 'none';
-            v.pause();
-        }
+        if (dance.toLowerCase().includes('walzer')) { vcont.style.display = 'block'; v.src = './Walzer_Grundschritt_1200.mp4'; } 
+        else { vcont.style.display = 'none'; v.pause(); }
     }
 
     async function toggleMic() {
@@ -232,11 +190,12 @@
 
     function handleBeat(now) {
         if(lastBeat > 0) {
-            const bpm = Math.round(60000 / (now - lastBeat));
+            const interval = now - lastBeat;
+            const bpm = Math.round(60000 / interval);
             bpmBuf.push(bpm); if(bpmBuf.length > 15) bpmBuf.shift();
             const avg = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
             document.getElementById('bpm-val').innerText = avg;
-            const is34 = (now - lastBeat > 510 && now - lastBeat < 860);
+            const is34 = (interval > 510 && interval < 860);
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             if(!aiOverride) {
                 if(is34) updateDisplay(avg > 152 ? "Wiener Walzer" : "Langsamer Walzer");
