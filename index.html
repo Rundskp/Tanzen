@@ -61,23 +61,25 @@
         if(saved) preferredDances = JSON.parse(saved);
         renderPrefs();
         const topic = localStorage.getItem('dm_topic');
-        if(topic) { document.getElementById('topic-id').value = topic; connectFunk(topic); }
+        if(topic) { 
+            document.getElementById('topic-id').value = topic; 
+            connectFunk(topic); 
+        }
     };
 
     function setMode(mode) {
         currentMode = mode;
         document.getElementById('btn-lokal').classList.toggle('active-lokal', mode === 'lokal');
         document.getElementById('btn-ki').classList.toggle('active-ki', mode === 'ki');
-        document.getElementById('btn-aus').style.borderColor = (mode === 'aus') ? 'var(--red)' : '#333';
         
         if (mode === 'lokal') {
-            document.getElementById('song-title').innerText = "Lokale Analyse...";
+            document.getElementById('song-title').innerText = "Lokale Analyse aktiv";
             startMic();
         } else if (mode === 'ki') {
             document.getElementById('song-title').innerText = "Warte auf Uhr-Scan...";
             if(audioCtx) audioCtx.suspend();
         } else {
-            document.getElementById('song-title').innerText = "Mikrofon aus";
+            document.getElementById('song-title').innerText = "Mikrofon pausiert";
             document.getElementById('bpm-val').innerText = "0";
             if(audioCtx) audioCtx.suspend();
         }
@@ -116,12 +118,7 @@
             
             let d = is34 ? (avg > 152 ? "Wiener Walzer" : "Langsamer Walzer") : (avg < 95 ? "Rumba" : (avg < 118 ? "Cha Cha Cha" : "Discofox"));
             updateUI(d, false);
-            
-            // Nur senden, wenn sich der Tanz ändert, um Funk nicht zu fluten
-            if(d !== lastSentDance) {
-                sendToWatch(d);
-                lastSentDance = d;
-            }
+            if(d !== lastSentDance) { sendToWatch(d); lastSentDance = d; }
         }
     }
 
@@ -131,7 +128,7 @@
             const d = JSON.parse(e.data);
             if (d.message && !d.message.includes("💃")) {
                 if (currentMode === 'ki') {
-                    document.getElementById('song-title').innerText = "📡 Scan: " + d.message;
+                    document.getElementById('song-title').innerText = "📡 Scan empfangen: " + d.message;
                     askAI(d.message);
                 }
             }
@@ -150,17 +147,13 @@
             const result = data.choices[0].message.content.trim();
             updateUI(result, true);
             sendToWatch(result);
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("KI-Fehler:", e); }
     }
 
     function sendToWatch(dance) {
         const topic = localStorage.getItem('dm_topic');
         const pattern = dance.toLowerCase().includes("walzer") ? "W" : "4";
-        fetch(`https://ntfy.sh/${topic}`, { 
-            method: 'POST', 
-            body: `💃 ${dance}`, 
-            headers: { 'X-Tags': pattern } 
-        });
+        fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${dance}`, headers: { 'X-Tags': pattern } });
     }
 
     function updateUI(dance, isAI) {
