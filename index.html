@@ -8,18 +8,18 @@
         :root { --blue: #2b7cff; --bg: #0b0c10; --green: #34C759; --yellow: #FFCC00; --red: #FF3B30; }
         body { background: var(--bg); color: #fff; font-family: system-ui, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         #top-bar { padding-top: calc(15px + env(safe-area-inset-top, 20px)); padding-bottom: 15px; display: flex; justify-content: space-around; background: rgba(0,0,0,0.8); z-index: 100; }
-        .mode-btn { border: 2px solid #333; background: #1a1b20; color: #fff; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; }
+        .mode-btn { border: 2px solid #333; background: #1a1b20; color: #fff; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; transition: 0.2s; }
         .active-lokal { border-color: var(--green) !important; background: var(--green) !important; }
         .active-ki { border-color: var(--blue) !important; background: var(--blue) !important; }
         #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; }
         #dance-name { font-size: clamp(2.5rem, 12vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; }
         #bpm-val { font-size: 7rem; color: var(--green); font-family: monospace; font-weight: 900; line-height: 1; }
         #song-title { font-size: 1.2rem; color: var(--yellow); font-weight: bold; min-height: 1.5em; }
-        #debug-log { font-size: 0.7rem; color: #666; background: #111; padding: 10px; width: 85%; border-radius: 8px; max-height: 80px; overflow-y: auto; text-align: left; }
-        #video-container { display: none; width: min(400px, 85%); margin-top: 10px; }
-        video { width: 100%; border-radius: 15px; border: 1px solid #333; }
-        #settings { display: none; position: fixed; inset: 0; background: #000; z-index: 4000; padding: 40px 20px; flex-direction: column; align-items: center; }
-        input { background: #1a1b20; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; width: 85%; margin-bottom: 10px; }
+        #debug-log { font-size: 0.7rem; color: #666; background: #111; padding: 10px; width: 85%; border-radius: 8px; max-height: 60px; overflow-y: auto; text-align: left; }
+        #settings { display: none; position: fixed; inset: 0; background: #000; z-index: 4000; padding: 40px 20px; flex-direction: column; align-items: center; overflow-y: auto; }
+        .settings-card { background: #1a1b20; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; }
+        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-size: 16px; }
+        .pref-tag { display: inline-flex; align-items: center; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; margin: 4px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -36,55 +36,72 @@
     <div id="takt-label" style="color:var(--blue); font-weight:bold;">---</div>
     <h1 id="dance-name">OFF</h1>
     <div id="bpm-val">0</div>
-    <div id="video-container"><video id="dance-video" playsinline muted loop autoplay></video></div>
-    <div id="debug-log">System gestartet. Bitte Modus wählen.</div>
+    <div id="debug-log">System bereit.</div>
 </div>
 
 <div id="settings">
-    <div style="background:#1a1b20; padding:25px; border-radius:20px; width:90%; max-width:400px;">
-        <h2 style="color:var(--blue); margin-top:0;">SETTINGS</h2>
+    <div class="settings-card">
+        <h2 style="color:var(--blue); margin-top:0;">EINSTELLUNGEN</h2>
         <input type="password" id="api-key" placeholder="OpenAI Key">
         <input type="text" id="topic-id" placeholder="Funk-Kanal">
-        <button onclick="saveSettings()" style="background:var(--blue); color:#fff; padding:15px; border-radius:10px; width:100%; border:none; font-weight:bold;">SPEICHERN</button>
+        
+        <div style="margin: 20px 0;">
+            <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--blue);">ERLAUBTE TÄNZE:</p>
+            <div id="pref-list"></div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <input type="text" id="new-pref" placeholder="Tanz hinzufügen..." style="margin-bottom:0;">
+                <button onclick="addPref()" style="background:var(--green); border:none; color:white; padding:0 15px; border-radius:10px; font-weight:bold;">+</button>
+            </div>
+        </div>
+
+        <button onclick="saveSettings()" style="background:var(--blue); color:#fff; padding:15px; border-radius:10px; width:100%; border:none; font-weight:bold; font-size: 1rem;">SPEICHERN & RELOAD</button>
+        <button onclick="toggleSettings()" style="background:none; border:none; color:#666; width:100%; margin-top:15px;">Abbrechen</button>
     </div>
 </div>
 
 <script>
     let audioCtx, analyser, processor, lastBeat = 0, bpmBuf = [], currentMode = 'aus';
+    let preferredDances = ["Langsamer Walzer", "Wiener Walzer", "Rumba", "Cha Cha Cha", "Discofox"];
     const log = (m) => { const d = document.getElementById('debug-log'); d.innerHTML = m + "<br>" + d.innerHTML; };
 
     window.onload = () => {
+        const saved = localStorage.getItem('dm_prefs');
+        if(saved) preferredDances = JSON.parse(saved);
+        renderPrefs();
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('topic-id').value = topic; connectFunk(topic); }
     };
+
+    function renderPrefs() {
+        document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
+            `<span class="pref-tag">${d}<span style="margin-left:8px;color:var(--red);cursor:pointer" onclick="removePref(${i})">×</span></span>`
+        ).join('');
+    }
+
+    function addPref() {
+        const v = document.getElementById('new-pref').value.trim();
+        if(v) { preferredDances.push(v); document.getElementById('new-pref').value=""; renderPrefs(); }
+    }
+
+    function removePref(i) { preferredDances.splice(i, 1); renderPrefs(); }
 
     async function activateMode(mode) {
         currentMode = mode;
         document.getElementById('btn-lokal').className = 'mode-btn' + (mode === 'lokal' ? ' active-lokal' : '');
         document.getElementById('btn-ki').className = 'mode-btn' + (mode === 'ki' ? ' active-ki' : '');
-        
-        if (mode === 'lokal') {
-            log("Lokal-Modus gestartet...");
-            await startAudio();
-        } else if (mode === 'ki') {
-            log("KI-Modus: Warte auf Uhr...");
-            if(audioCtx) audioCtx.suspend();
-        } else {
-            log("System gestoppt.");
-            if(audioCtx) audioCtx.suspend();
-        }
+        if (mode === 'lokal') { log("Lokal-Analyse aktiv..."); startAudio(); }
+        else { if(audioCtx) audioCtx.suspend(); log(mode === 'ki' ? "Warte auf Uhr-Funk..." : "Pausiert."); }
     }
 
     async function startAudio() {
-        try {
-            if (!audioCtx) {
+        if (!audioCtx) {
+            try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const source = audioCtx.createMediaStreamSource(stream);
                 analyser = audioCtx.createAnalyser();
                 processor = audioCtx.createScriptProcessor(2048, 1, 1);
                 source.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
-                
                 processor.onaudioprocess = (e) => {
                     if (currentMode !== 'lokal') return;
                     const input = e.inputBuffer.getChannelData(0);
@@ -95,10 +112,9 @@
                         if (now - lastBeat > 280) { handleBeat(now); lastBeat = now; }
                     }
                 };
-                log("Mikrofon aktiv!");
-            }
-            await audioCtx.resume();
-        } catch (err) { log("FEHLER: " + err.message); }
+            } catch (err) { log("Mikro-Fehler: " + err.message); }
+        }
+        audioCtx.resume();
     }
 
     function handleBeat(now) {
@@ -109,9 +125,8 @@
             document.getElementById('bpm-val').innerText = avg;
             const is34 = (now - lastBeat > 500 && now - lastBeat < 880);
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
-            
-            const dance = is34 ? (avg > 152 ? "Wiener Walzer" : "Langsamer Walzer") : (avg < 118 ? "Rumba" : "Discofox");
-            updateUI(dance, false);
+            document.getElementById('dance-name').innerText = is34 ? "WALZER" : "4/4 TANZ";
+            document.getElementById('dance-name').style.color = "#fff";
         }
     }
 
@@ -120,11 +135,8 @@
         ev.onmessage = (e) => {
             const d = JSON.parse(e.data);
             if (d.message && !d.message.includes("💃")) {
-                log("Signal: " + d.message);
-                if (currentMode === 'ki') {
-                    document.getElementById('song-title').innerText = d.message;
-                    askAI(d.message);
-                }
+                log("📡 Signal: " + d.message);
+                if (currentMode === 'ki') { document.getElementById('song-title').innerText = d.message; askAI(d.message); }
             }
         };
     }
@@ -135,31 +147,21 @@
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: `Tanz zu '${song}'? Nur Name.` }], max_tokens: 20 })
+                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: `Welcher Tanz zu '${song}'? Aus: ${preferredDances.join(", ")}. Nur Name.` }], max_tokens: 20 })
             });
             const data = await resp.json();
             const result = data.choices[0].message.content.trim();
-            updateUI(result, true);
+            document.getElementById('dance-name').innerText = result;
+            document.getElementById('dance-name').style.color = "var(--yellow)";
             fetch(`https://ntfy.sh/${localStorage.getItem('dm_topic')}`, { method: 'POST', body: `💃 ${result}` });
         } catch (e) { log("AI-Fehler"); }
     }
 
-    function updateUI(dance, isAI) {
-        document.getElementById('dance-name').innerText = dance;
-        document.getElementById('dance-name').style.color = isAI ? 'var(--yellow)' : '#fff';
-        const vc = document.getElementById('video-container');
-        const vid = document.getElementById('dance-video');
-        if (dance.toLowerCase().includes("walzer")) {
-            vc.style.display = 'block'; vid.src = "./Walzer_Grundschritt_1200.mp4"; vid.play().catch(() => {});
-        } else { vc.style.display = 'none'; vid.pause(); }
-    }
-
-    function toggleSettings() {
-        const s = document.getElementById('settings'); s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
-    }
+    function toggleSettings() { const s = document.getElementById('settings'); s.style.display = (s.style.display === 'flex') ? 'none' : 'flex'; }
     function saveSettings() {
         localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
         localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
+        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
         location.reload();
     }
 </script>
