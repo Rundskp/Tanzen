@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
+        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; overflow: hidden; }
         #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; }
-        #song { font-size: 0.85rem; color: #FFCC00; margin-top: 10px; font-weight: bold; min-height: 1em; }
-        #vib-btn { position: fixed; inset: 0; background: rgba(52, 199, 89, 0.8); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 1000; padding: 20px; }
+        #song { font-size: 0.8rem; color: #FFCC00; margin-top: 10px; font-weight: bold; }
+        #vib-btn { 
+            position: fixed; inset: 0; background: #34C759; color: #000; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; z-index: 9999; font-size: 1.2rem;
+            border: none; width: 100%; height: 100%;
+        }
     </style>
 </head>
 <body>
-    <div id="vib-btn" onclick="enableVib()">VIBRATION STARTEN<br>(HIER TIPPEN)</div>
+    <button id="vib-btn" onclick="activateVibration()">RHYTHMUS AN</button>
     <div id="dance">BEREIT</div>
     <div id="song">Warte auf Scan...</div>
 
@@ -19,8 +24,10 @@
         const urlParams = new URLSearchParams(window.location.search);
         const topic = urlParams.get('t') || "Tanz_8392_Haxen_2026_XyZ";
         
-        function enableVib() {
-            navigator.vibrate(200);
+        function activateVibration() {
+            if ("vibrate" in navigator) {
+                navigator.vibrate(200);
+            }
             document.getElementById('vib-btn').style.display = 'none';
         }
 
@@ -29,21 +36,18 @@
             ev.onmessage = (e) => {
                 const d = JSON.parse(e.data);
                 if (d.message && d.message.includes("💃")) {
-                    const name = d.message.replace("💃", "").trim();
-                    document.getElementById('dance').innerText = name;
+                    const result = d.message.replace("💃", "").trim();
+                    document.getElementById('dance').innerText = result;
                     document.getElementById('dance').style.color = "#34C759";
                     
-                    // Rhythmus-Vibration
-                    if (d.tags && d.tags.includes("W")) {
-                        navigator.vibrate([500, 150, 200, 150, 200]);
+                    if (result.toLowerCase().includes("walzer")) {
+                        navigator.vibrate([400, 200, 150, 200, 150]);
                     } else {
                         navigator.vibrate([200, 150, 200, 150, 200, 150, 200]);
                     }
-                } else if(d.message) {
-                    // Titel wird hier festgesetzt und bleibt stehen!
-                    document.getElementById('song').innerText = "🎵 " + d.message;
+                } else if (d.message) {
+                    document.getElementById('song').innerText = "📡 Scan: " + d.message;
                     document.getElementById('dance').innerText = "KI PRÜFT...";
-                    document.getElementById('dance').style.color = "#2b7cff";
                 }
             };
             ev.onerror = () => setTimeout(connect, 2000);
