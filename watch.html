@@ -6,46 +6,30 @@
     <style>
         body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
         #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; line-height: 1.1; }
-        #song { font-size: 0.8rem; color: #FFCC00; margin-top: 10px; padding: 0 10px; font-weight: bold; }
-        #status { position: fixed; bottom: 5px; font-size: 0.5rem; opacity: 0.3; }
+        #song { font-size: 0.9rem; color: #FFCC00; margin-top: 10px; font-weight: bold; padding: 0 5px; }
     </style>
 </head>
 <body>
     <div id="dance">BEREIT</div>
     <div id="song">Warte auf Scan...</div>
-    <div id="status">LIVE 🟢</div>
-
     <script>
         const topic = "Tanz_8392_Haxen_2026_XyZ";
-        
-        function pulse(pattern) {
-            if ("vibrate" in navigator) {
-                navigator.vibrate(pattern);
-            }
-        }
-
         function connect() {
             const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
             ev.onmessage = (e) => {
                 const d = JSON.parse(e.data);
                 if (d.message) {
                     if (d.message.includes("💃")) {
-                        const danceName = d.message.replace("💃", "").trim();
-                        document.getElementById('dance').innerText = danceName;
+                        const name = d.message.replace("💃", "").trim();
+                        document.getElementById('dance').innerText = name;
                         document.getElementById('dance').style.color = "#34C759";
-                        
-                        // Rhythmus-Vibration basierend auf Metadaten
-                        const takt = d.attachment ? d.attachment.name : ""; // Wir nutzen hier einen Trick via Metadata/Attachment
-                        
-                        if (danceName.toLowerCase().includes("walzer")) {
-                            // Walzer: Lang (400), Pause (100), Kurz (150), Pause (100), Kurz (150)
-                            pulse([400, 100, 150, 100, 150]);
+                        // Rhythmus Vibration: Tippe einmal auf die Uhr-Seite, damit es erlaubt wird!
+                        if (name.toLowerCase().includes("walzer")) {
+                            navigator.vibrate([400, 200, 150, 200, 150]); // Lang - Kurz - Kurz
                         } else {
-                            // 4/4 Takt: Gleichmäßig kurz
-                            pulse([200, 100, 200, 100, 200, 100, 200]);
+                            navigator.vibrate([200, 150, 200, 150, 200, 150, 200]); // 4/4
                         }
                     } else {
-                        // Fixierter Song-Titel
                         document.getElementById('song').innerText = "🎵 " + d.message;
                         document.getElementById('dance').innerText = "SCAN...";
                         document.getElementById('dance').style.color = "#2b7cff";
@@ -55,6 +39,8 @@
             ev.onerror = () => setTimeout(connect, 3000);
         }
         connect();
+        // WICHTIG: Einmal auf den Screen tippen nach dem Öffnen für Vibration!
+        window.onclick = () => navigator.vibrate(100);
     </script>
 </body>
 </html>
