@@ -5,15 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
-        #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; line-height: 1.1; }
-        #song { font-size: 0.9rem; color: #FFCC00; margin-top: 10px; font-weight: bold; padding: 0 5px; }
+        #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; }
+        #song { font-size: 0.8rem; color: #FFCC00; margin-top: 10px; font-weight: bold; }
+        #vib-hint { font-size: 0.6rem; color: #34C759; margin-top: 20px; border: 1px solid #34C759; padding: 5px; border-radius: 5px; }
     </style>
 </head>
 <body>
     <div id="dance">BEREIT</div>
     <div id="song">Warte auf Scan...</div>
+    <div id="vib-hint">TAP TO ENABLE VIBRATION</div>
+
     <script>
         const topic = "Tanz_8392_Haxen_2026_XyZ";
+        
+        // Vibration freischalten durch Klick
+        window.onclick = () => {
+            navigator.vibrate(100);
+            document.getElementById('vib-hint').style.display = 'none';
+        };
+
         function connect() {
             const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
             ev.onmessage = (e) => {
@@ -23,11 +33,14 @@
                         const name = d.message.replace("💃", "").trim();
                         document.getElementById('dance').innerText = name;
                         document.getElementById('dance').style.color = "#34C759";
-                        // Rhythmus Vibration: Tippe einmal auf die Uhr-Seite, damit es erlaubt wird!
-                        if (name.toLowerCase().includes("walzer")) {
-                            navigator.vibrate([400, 200, 150, 200, 150]); // Lang - Kurz - Kurz
+                        
+                        // Rhythmus Vibration
+                        if (d.tags && d.tags.includes("W")) {
+                            // Walzer: Lang - Pause - Kurz - Pause - Kurz
+                            navigator.vibrate([400, 200, 150, 150, 150]);
                         } else {
-                            navigator.vibrate([200, 150, 200, 150, 200, 150, 200]); // 4/4
+                            // 4/4 Takt: 4x gleichmäßig
+                            navigator.vibrate([200, 150, 200, 150, 200, 150, 200]);
                         }
                     } else {
                         document.getElementById('song').innerText = "🎵 " + d.message;
@@ -39,8 +52,6 @@
             ev.onerror = () => setTimeout(connect, 3000);
         }
         connect();
-        // WICHTIG: Einmal auf den Screen tippen nach dem Öffnen für Vibration!
-        window.onclick = () => navigator.vibrate(100);
     </script>
 </body>
 </html>
