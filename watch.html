@@ -1,41 +1,20 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
-        #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; line-height: 1.1; margin-bottom: 5px; }
-        #song { font-size: 0.8rem; color: #FFCC00; padding: 0 10px; }
-        #status { position: fixed; bottom: 5px; font-size: 0.5rem; opacity: 0.3; }
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+        #dance { font-size: 1.5rem; color: #2b7cff; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div id="dance">BEREIT</div>
-    <div id="song">Warte auf Scan...</div>
-    <div id="status">FUNK: OFF</div>
-
+    <div id="dance">WARTE...</div>
     <script>
-        const topic = new URLSearchParams(window.location.search).get('t') || "Tanz_8392_Haxen_2026_XyZ";
-        function connect() {
-            const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
-            ev.onopen = () => document.getElementById('status').innerText = "LIVE ✅";
-            ev.onmessage = (e) => {
-                const d = JSON.parse(e.data);
-                if (d.message) {
-                    if (d.message.includes("💃")) {
-                        document.getElementById('dance').innerText = d.message.replace("💃", "").trim();
-                        document.getElementById('dance').style.color = "#34C759";
-                    } else {
-                        document.getElementById('song').innerText = d.message;
-                        document.getElementById('dance').innerText = "ANALYSE...";
-                        document.getElementById('dance').style.color = "#2b7cff";
-                    }
-                }
-            };
-            ev.onerror = () => setTimeout(connect, 3000);
-        }
-        connect();
+        const ev = new EventSource("https://ntfy.sh/Tanz_8392_Haxen_2026_XyZ/sse");
+        ev.onmessage = (e) => {
+            const d = JSON.parse(e.data);
+            if(d.message.includes("💃")) document.getElementById('dance').innerText = d.message.replace("💃","");
+        };
     </script>
 </body>
 </html>
