@@ -20,21 +20,17 @@
         
         #bpm-val { font-size: 5rem; font-weight: 900; font-family: monospace; color: var(--green); margin: 0; }
 
-        /* Video Player Section */
         #video-container { display: none; width: min(700px, 95%); background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; margin-top: 15px; }
         video { width: 100%; height: auto; border-radius: 12px; }
 
-        /* Settings Overlay */
         #settings { display: none; position: fixed; inset: 0; background: rgba(11,12,16,0.98); z-index: 4000; flex-direction: column; padding: 30px; overflow-y: auto; }
         .settings-card { background: #1a1b20; padding: 30px; border-radius: 25px; width: 100%; max-width: 600px; margin: auto; border: 1px solid rgba(255,255,255,0.1); }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* Input & Badges */
         .input-box { width: 50%; display: flex; align-items: center; gap: 10px; }
         input[type="text"], input[type="password"] { background: #0b0c10; border: 1px solid #333; color: white; padding: 12px; border-radius: 10px; flex: 1; }
-        .check-badge { color: var(--green); font-weight: bold; font-size: 1.2rem; display: none; }
+        .check-badge { color: var(--green); font-weight: bold; font-size: 1.2rem; display: none; margin-left: 5px; }
         
-        /* Buttons */
         .btn-test { background: rgba(255,255,255,0.1); border: 0; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
         .btn-main { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
         .pref-tag { display: inline-flex; align-items: center; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; margin: 4px; font-size: 0.85rem; }
@@ -111,13 +107,11 @@
         document.getElementById('topic-check').style.display = localStorage.getItem('dm_topic') ? 'inline' : 'none';
     }
 
-    // --- TEST FUNKTIONEN ---
     function testFunk() {
         const topic = document.getElementById('topic-id').value.trim() || localStorage.getItem('dm_topic');
         if(!topic) return alert("Zuerst Name eingeben!");
-        // Wir schicken einen Test-Funkspruch an uns selbst
         fetch(`https://ntfy.sh/${topic}/publish?message=Test-Erfolg!`).then(() => {
-            alert("Test abgeschickt! Schließe die Settings um zu sehen ob das iPad reagiert.");
+            alert("Test-Signal gesendet!");
         });
     }
 
@@ -128,12 +122,11 @@
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: "Sag das Wort 'Funktioniert'"}], max_tokens: 5})
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: "Antworte nur mit dem Wort 'OK'"}], max_tokens: 5})
             });
             const d = await resp.json();
-            if(d.choices) alert("KI antwortet: " + d.choices[0].message.content);
-            else alert("KI Fehler: " + d.error.message);
-        } catch(e) { alert("Verbindung zur KI fehlgeschlagen."); }
+            if(d.choices) alert("KI-Verbindung steht: " + d.choices[0].message.content);
+        } catch(e) { alert("KI-Fehler."); }
     }
 
     function toggleSettings() {
@@ -156,18 +149,16 @@
         ev.onopen = () => document.getElementById('conn-info').innerText = "FUNK: AKTIV ✅";
         ev.onmessage = (e) => {
             const d = JSON.parse(e.data);
-            if(d.message) handleShortcut(d.message);
+            if(d.message && !d.message.includes("💃")) handleShortcut(d.message);
         };
     }
 
     function handleShortcut(song) {
         aiOverride = true;
         const disp = document.getElementById('song-display');
-        disp.innerText = "SCANN: " + song;
+        disp.innerText = "SCAN: " + song;
         disp.style.transition = "none"; disp.style.opacity = "1";
-        
         askAI(song);
-
         if(timerOverride) clearTimeout(timerOverride);
         timerOverride = setTimeout(() => {
             disp.style.transition = "opacity 20s linear"; disp.style.opacity = "0";
@@ -177,14 +168,25 @@
 
     async function askAI(song) {
         const key = localStorage.getItem('dm_key'); if(!key) return;
+        const topic = localStorage.getItem('dm_topic');
         try {
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Tanz zu '${song}'? Nur 1-2 Worte.`}], max_tokens: 20})
+                body: JSON.stringify({
+                    model: "gpt-4o-mini", 
+                    messages: [{role: "user", content: `Lied: '${song}'. Wähle NUR den passenden Tanz aus dieser Liste: ${preferredDances.join(", ")}. Antworte NUR mit dem Namen, keine Beschreibungen wie 'gefühlvoll'.`}], 
+                    max_tokens: 20
+                })
             });
             const d = await resp.json();
-            updateDisplay(d.choices[0].message.content.trim(), true);
+            const danceResult = d.choices[0].message.content.trim();
+            updateDisplay(danceResult, true);
+            
+            // ECHO an die Uhr senden (mit 💃 Emoji)
+            if(topic) {
+                fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${danceResult}` });
+            }
         } catch(e) { aiOverride = false; }
     }
 
@@ -193,7 +195,6 @@
         n.innerText = dance;
         if(fromAI) n.classList.add('ai-verified'); else n.classList.remove('ai-verified');
         
-        // Video Check (Beispiel Walzer)
         const vcont = document.getElementById('video-container');
         const v = document.getElementById('dance-video');
         if (dance.toLowerCase().includes('walzer')) {
@@ -226,7 +227,7 @@
             isRunning = true;
             document.getElementById('mic-btn').innerText = "STOP";
             document.getElementById('mic-btn').style.background = "var(--red)";
-        } catch(e) { alert("Mic Error"); }
+        } catch(e) { alert("Mic-Fehler."); }
     }
 
     function handleBeat(now) {
@@ -254,7 +255,7 @@
         ).join('');
     }
     function addPref() {
-        const v = document.getElementById('new-pref').value;
+        const v = document.getElementById('new-pref').value.trim();
         if(v) { preferredDances.push(v); document.getElementById('new-pref').value=""; renderPrefs(); }
     }
 </script>
