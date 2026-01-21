@@ -8,59 +8,48 @@
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: rgba(255,255,255,0.08); }
         body { background: var(--bg); color: #e8e8e8; font-family: system-ui, -apple-system, sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* Header & Kompakte Buttons */
         #top-bar { display: grid; grid-template-columns: 100px 1fr 140px; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); z-index: 3000; }
-        
-        .header-btn { border: none; padding: 10px 0; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px; width: 80px; text-align: center; }
+        .header-btn { border: none; padding: 10px 0; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; width: 80px; text-align: center; }
         .btn-off { background: rgba(255,255,255,0.05); color: #444; }
-        .btn-on-local { background: var(--green); color: white; box-shadow: 0 0 15px rgba(52, 199, 89, 0.4); }
-        .btn-on-ki { background: var(--blue); color: white; box-shadow: 0 0 15px rgba(43, 124, 255, 0.4); }
-        
+        .btn-on-local { background: var(--green); color: white; }
+        .btn-on-ki { background: var(--blue); color: white; }
         #mic-btn { background: #222; border: 2px solid #333; color: white; padding: 12px 30px; border-radius: 16px; font-weight: 900; font-size: 1rem; cursor: pointer; justify-self: center; }
-        #mic-btn.active { border-color: var(--green); color: var(--green); }
+        .gear-btn { background: none; border: none; font-size: 2.2rem; cursor: pointer; padding: 5px; }
 
-        .gear-btn { background: none; border: none; font-size: 2.2rem; cursor: pointer; padding: 5px; margin-left: 10px; }
-
-        /* Monitor & Inhalte */
-        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 10px; overflow: hidden; }
-        
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 10px; }
         #takt-label { font-size: 1.4rem; color: var(--blue); font-weight: 800; letter-spacing: 4px; }
-        #song-display { font-size: 1.1rem; color: var(--yellow); height: 1.5rem; opacity: 0; transition: opacity 20s linear; font-weight: bold; }
+        #song-display { font-size: 1.8rem; color: var(--yellow); font-weight: 900; min-height: 2.2rem; filter: drop-shadow(0 0 10px rgba(255,204,0,0.3)); }
         
-        .dance-wrap { display: flex; align-items: center; justify-content: center; gap: 15px; }
-        #dance-name { font-size: clamp(2rem, 9vw, 6rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1; }
-        .ai-badge { font-size: 3rem; display: none; filter: drop-shadow(0 0 10px var(--yellow)); }
+        .dance-wrap { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        #dance-name { font-size: clamp(2.5rem, 10vw, 7rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1; }
+        .ai-badge { font-size: 4rem; display: none; }
         .is-verified #dance-name { color: var(--yellow); }
         .is-verified .ai-badge { display: inline; }
 
-        #bpm-val { font-size: 7rem; font-weight: 900; font-family: monospace; color: var(--green); line-height: 0.9; }
+        #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; color: var(--green); line-height: 0.8; }
         .bpm-label { font-size: 1.2rem; letter-spacing: 8px; opacity: 0.4; font-weight: bold; }
 
-        #video-container { display: none; width: min(800px, 95%); max-height: 35vh; background: var(--card); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 1; }
-        video { width: 100%; max-height: 30vh; border-radius: 12px; object-fit: contain; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .disco-pulse { animation: pulse 0.5s infinite ease-in-out; }
-
-        /* Settings - iPad optimiert */
-        #settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 4000; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .settings-card { background: #15161a; padding: 35px; border-radius: 35px; width: 90vw; max-width: 800px; margin: auto; border: 1px solid #333; box-sizing: border-box; }
+        /* Settings & History */
+        #settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 4000; padding: 20px; overflow-y: auto; }
+        .settings-card { background: #15161a; padding: 30px; border-radius: 35px; width: 95%; max-width: 900px; margin: auto; border: 1px solid #333; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        input[type="text"], input[type="password"] { background: #000; border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; font-size: 1rem; }
         
-        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .row label { font-size: 1.2rem; font-weight: bold; }
-        
-        .input-group { display: flex; align-items: center; gap: 15px; width: 60%; }
-        input[type="text"], input[type="password"] { background: #000; border: 1px solid #444; color: white; padding: 15px; border-radius: 10px; flex: 1; font-size: 1.1rem; }
-        
-        /* History / Camouflage */
-        #history-box { display: none; background: #000; border-radius: 20px; padding: 20px; margin-top: 20px; max-height: 40vh; overflow-y: auto; border: 1px solid #222; }
-        .hist-header { display: grid; grid-template-columns: 100px 1.5fr 1fr 1fr 80px; gap: 10px; font-size: 0.7rem; opacity: 0.5; margin-bottom: 10px; padding: 0 5px; }
-        .hist-item { display: grid; grid-template-columns: 100px 1.5fr 1fr 1fr 80px; gap: 10px; padding: 12px 5px; border-bottom: 1px solid #111; font-size: 0.9rem; align-items: center; }
-        .hist-item input, .hist-item select { background: transparent; border: none; border-bottom: 1px solid #333; color: var(--yellow); padding: 5px; font-size: 0.9rem; width: 100%; }
+        #history-box { background: #000; border-radius: 20px; padding: 20px; margin-top: 20px; border: 1px solid #222; }
+        .hist-table-header { display: grid; grid-template-columns: 100px 1.5fr 1.2fr 1fr 140px 40px; gap: 10px; font-size: 0.7rem; font-weight: bold; color: var(--blue); cursor: pointer; padding: 10px 5px; }
+        .hist-item { display: grid; grid-template-columns: 100px 1.5fr 1.2fr 1fr 140px 40px; gap: 10px; padding: 12px 5px; border-bottom: 1px solid #111; align-items: center; font-size: 0.85rem; }
+        .hist-item input { background: transparent; border: none; border-bottom: 1px solid #222; color: #fff; width: 100%; font-size: 0.85rem; }
 
-        .btn-act { padding: 20px; border-radius: 15px; font-weight: 800; font-size: 1.2rem; cursor: pointer; border: none; }
-        .btn-save { background: var(--green); color: white; flex: 2; }
-        .btn-cancel { background: #222; color: #777; flex: 1; }
+        /* Sterne Rating */
+        .stars { color: #333; font-size: 1.2rem; cursor: pointer; white-space: nowrap; }
+        .stars span.active { color: var(--yellow); text-shadow: 0 0 5px var(--yellow); }
+
+        .filter-field { width: 100%; padding: 12px; border-radius: 12px; background: #222; border: 1px solid #444; color: white; margin-bottom: 15px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .tag { background: var(--blue); padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; }
+        
+        #video-container { display: none; width: min(800px, 95%); max-height: 30vh; background: var(--card); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        video { width: 100%; max-height: 28vh; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -96,44 +85,45 @@
 
 <div id="settings">
     <div class="settings-card">
-        <h1 style="margin-top:0; color:var(--blue); font-size: 2rem;">Tanz das! Settings</h1>
+        <h1 style="margin-top:0; color:var(--blue); font-size: 1.8rem;">Tanz das! Pro-Konfiguration</h1>
         
         <div class="row">
-            <label>KI Schlüssel <span id="ok-key" style="color:var(--green); display:none;">✔</span></label>
-            <div class="input-group">
-                <button onclick="testAI()" class="header-btn" style="width: auto; padding: 5px 10px;">TEST</button>
-                <input type="password" id="api-key" placeholder="OpenAI Key...">
-            </div>
+            <label>API Key</label>
+            <input type="password" id="api-key" style="width:60%">
         </div>
         
         <div class="row">
-            <label>Funk-Topic <span id="ok-topic" style="color:var(--green); display:none;">✔</span></label>
-            <div class="input-group">
-                <button onclick="testFunk()" class="header-btn" style="width: auto; padding: 5px 10px;">TEST</button>
-                <input type="text" id="topic-id" placeholder="ntfy Name...">
-            </div>
+            <label>Funk-Kanal</label>
+            <input type="text" id="topic-id" style="width:60%">
         </div>
 
-        <div class="row">
-            <label>Disco-Modus (Pulsieren)</label>
-            <input type="checkbox" id="disco-mode">
+        <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+            <label style="font-size:0.8rem; opacity:0.5;">BEVORZUGTE TÄNZE</label>
+            <div id="pref-list" class="tag-list"></div>
+            <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; padding:0 15px; border-radius:10px;">+</button></div>
         </div>
 
-        <div style="margin-top:30px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-            <button onclick="toggleHistory()" class="header-btn" style="width:100%; background:#333; color:white;">🕒 VERLAUF</button>
-            <button onclick="exportDB()" class="header-btn" style="width:100%; background:#333; color:white;">💾 BACKUP</button>
-            <button onclick="document.getElementById('impFile').click()" class="header-btn" style="width:100%; background:#333; color:white;">📂 LADEN</button>
-            <input type="file" id="impFile" style="display:none" onchange="importDB(event)">
-        </div>
-
+        <input type="text" id="hist-filter" class="filter-field" placeholder="🔍 Verlauf durchsuchen (Partner, Tanz, Lied)..." oninput="renderHistory()">
+        
         <div id="history-box">
-            <div class="hist-header">
-                <span>DATUM</span><span>TITEL</span><span>TANZ</span><span>PARTNER</span><span>⭐</span>
+            <div class="hist-table-header">
+                <span onclick="sortHist('date')">DATUM ⇅</span>
+                <span onclick="sortHist('title')">TITEL ⇅</span>
+                <span onclick="sortHist('dance')">TANZ ⇅</span>
+                <span onclick="sortHist('partner')">PARTNER ⇅</span>
+                <span onclick="sortHist('stars')">BEWERTUNG ⇅</span>
+                <span></span>
             </div>
             <div id="history-list"></div>
         </div>
 
-        <div class="action-btns" style="display:flex; gap:15px; margin-top:30px;">
+        <div style="display:flex; gap:15px; margin-top:30px;">
+            <button class="header-btn" style="flex:1; background:#444; color:white;" onclick="exportDB()">💾 BACKUP</button>
+            <button class="header-btn" style="flex:1; background:#444; color:white;" onclick="document.getElementById('impFile').click()">📂 LADEN</button>
+            <input type="file" id="impFile" style="display:none" onchange="importDB(event)">
+        </div>
+
+        <div style="display:flex; gap:15px; margin-top:30px;">
             <button class="btn-act btn-cancel" onclick="toggleSettings()">ABBRECHEN</button>
             <button class="btn-act btn-save" onclick="saveSettings()">SPEICHERN</button>
         </div>
@@ -143,43 +133,36 @@
 <script>
     let audioCtx, analyser, processor, isRunning = false;
     let lastBeat = 0, bpmBuf = [], aiOverride = false, timerOverride = null;
-    let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Jive"];
+    let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa"];
     let danceHistory = [];
-    let eventSource = null;
+    let sortKey = 'date', sortDir = -1;
 
     window.onload = () => {
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
         if(localStorage.getItem('dm_history')) danceHistory = JSON.parse(localStorage.getItem('dm_history'));
-        updateBadges();
+        renderPrefs();
         const topic = localStorage.getItem('dm_topic');
-        if(topic) connectFunk(topic);
+        if(topic) {
+            document.getElementById('topic-id').value = topic;
+            connectFunk(topic);
+        }
+        document.getElementById('api-key').value = localStorage.getItem('dm_key') || "";
     };
-
-    function updateBadges() {
-        document.getElementById('ok-key').style.display = localStorage.getItem('dm_key') ? 'inline' : 'none';
-        document.getElementById('ok-topic').style.display = localStorage.getItem('dm_topic') ? 'inline' : 'none';
-        document.getElementById('api-key').placeholder = localStorage.getItem('dm_key') ? "••••••••••••••••" : "sk-...";
-    }
 
     function toggleSettings() {
         const s = document.getElementById('settings');
         s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
+        if(s.style.display === 'flex') renderHistory();
     }
 
-    function handleMainAction() { toggleMic(); }
-
-    // --- SENSIBLER LOKAL MODUS ---
+    // --- LOKALE ERKENNUNG (PARAMETER) ---
     async function toggleMic() {
-        const btnL = document.getElementById('btn-local');
-        const main = document.getElementById('mic-btn');
         if(isRunning) { location.reload(); return; }
-        
         try {
             audioCtx = new AudioContext();
             const s = await navigator.mediaDevices.getUserMedia({audio: true});
             const src = audioCtx.createMediaStreamSource(s);
             analyser = audioCtx.createAnalyser();
-            // Höhere Auflösung für mehr Sensibilität
             analyser.fftSize = 1024;
             processor = audioCtx.createScriptProcessor(2048, 1, 1);
             src.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
@@ -189,32 +172,32 @@
                 let sum = 0; for(let i=0; i<d.length; i++) sum += d[i]*d[i];
                 const rms = Math.sqrt(sum/d.length);
                 
-                // SENSIBLERER SCHWELLENWERT (0.3 statt 0.8)
+                // PARAMETER: Sensibilität (0.3 = Reagiert auf leise Musik)
                 if(rms * 100 > 0.3) {
                     const now = Date.now();
                     if(now - lastBeat > 240) { handleBeat(now); lastBeat = now; }
                 }
             };
             isRunning = true;
-            btnL.className = "header-btn btn-on-local";
-            main.innerText = "STOP";
-            main.classList.add('active');
-        } catch(e) { alert("Mikrofon-Zugriff verweigert."); }
+            document.getElementById('btn-local').className = "header-btn btn-on-local";
+            document.getElementById('mic-btn').innerText = "STOP";
+        } catch(e) { alert("Mikro-Zugriff!"); }
     }
 
     function handleBeat(now) {
         if(lastBeat > 0) {
-            const bpm = Math.round(60000 / (now - lastBeat));
+            const interval = now - lastBeat;
+            const bpm = Math.round(60000 / interval);
             bpmBuf.push(bpm); if(bpmBuf.length > 15) bpmBuf.shift();
             const avg = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
             document.getElementById('bpm-val').innerText = avg;
             
-            const interval = now - lastBeat;
-            const is34 = (interval > 480 && interval < 890); // Etwas toleranter
+            // PARAMETER: Takt-Erkennung (Hysterese für 3/4 Walzer)
+            const is34 = (interval > 480 && interval < 890);
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             
             if(!aiOverride) {
-                // TOLERANTERE TANZWAHL
+                // PARAMETER: Tanz-Logik
                 if(is34) updateDisplay(avg > 148 ? "Wiener Walzer" : "Langsamer Walzer");
                 else {
                     if(avg < 95) updateDisplay("Rumba / Blues");
@@ -226,44 +209,39 @@
         }
     }
 
-    // --- KI & DB LOGIK ---
+    // --- KI & FUNK ---
     function connectFunk(topic) {
-        if(eventSource) eventSource.close();
-        eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
-        eventSource.onmessage = (e) => {
+        const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        ev.onmessage = (e) => {
             const d = JSON.parse(e.data);
             if(d.message && !d.message.includes("💃") && !d.message.includes("Test")) handleShortcut(d.message);
         };
     }
 
     function manualKiTrigger() {
-        const song = prompt("Liedname für KI-Suche:");
-        if(song) handleShortcut(song);
+        const s = prompt("Liedtitel:"); if(s) handleShortcut(s);
     }
 
-    function handleShortcut(songTitle) {
+    function handleShortcut(title) {
         aiOverride = true;
-        const kiBtn = document.getElementById('btn-ki');
-        kiBtn.className = "header-btn btn-on-ki";
-        
-        const disp = document.getElementById('song-display');
-        disp.innerText = songTitle;
-        disp.style.transition = "none"; disp.style.opacity = "1";
+        document.getElementById('btn-ki').className = "header-btn btn-on-ki";
+        document.getElementById('song-display').innerText = title;
+        document.getElementById('song-display').style.opacity = "1";
 
         // DB Check
-        const cache = danceHistory.find(item => item.title.toLowerCase() === songTitle.toLowerCase());
+        const cache = danceHistory.find(h => h.title.toLowerCase() === title.toLowerCase());
         if(cache) {
             updateDisplay(cache.dance, true);
         } else {
-            askAI(songTitle);
+            askAI(title);
         }
 
         if(timerOverride) clearTimeout(timerOverride);
         timerOverride = setTimeout(() => {
-            disp.style.transition = "opacity 20s linear"; disp.style.opacity = "0";
+            document.getElementById('song-display').style.opacity = "0";
             setTimeout(() => { 
                 aiOverride = false; 
-                kiBtn.className = "header-btn btn-off"; 
+                document.getElementById('btn-ki').className = "header-btn btn-off";
             }, 20000);
         }, 1000);
     }
@@ -274,112 +252,99 @@
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({
-                    model: "gpt-4o-mini", 
-                    messages: [{role: "user", content: `Lied: '${song}'. Wähle aus: ${preferredDances.join(", ")}. Antworte nur mit dem Tanznamen.`}], 
-                    max_tokens: 15
-                })
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Wähle aus: ${preferredDances.join(",")}. Nur Name.`}], max_tokens: 15})
             });
             const d = await resp.json();
-            const result = d.choices[0].message.content.trim();
-            
-            // Neuer History-Eintrag mit allen Feldern
-            const entry = {
-                title: song, 
-                dance: result, 
-                date: new Date().toLocaleDateString('de-DE'),
-                partner: "-",
-                stars: "5"
-            };
-            danceHistory.push(entry);
+            const res = d.choices[0].message.content.trim();
+            danceHistory.push({title: song, dance: res, date: new Date().toLocaleDateString('de-DE'), partner: "", stars: 0});
             localStorage.setItem('dm_history', JSON.stringify(danceHistory));
-            
-            updateDisplay(result, true);
-            const topic = localStorage.getItem('dm_topic');
-            if(topic) fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${result}` });
+            updateDisplay(res, true);
         } catch(e) { aiOverride = false; }
     }
 
-    function updateDisplay(dance, fromAIOrDB = false) {
-        const n = document.getElementById('dance-name');
-        const monitor = document.getElementById('monitor');
-        const disco = document.getElementById('disco-mode').checked;
-        n.innerText = dance;
-        
-        if(fromAIOrDB) monitor.classList.add('is-verified'); 
-        else monitor.classList.remove('is-verified');
-        
-        if(disco) {
-            n.classList.add('disco-pulse');
-            document.getElementById('bpm-val').classList.add('disco-pulse');
-        } else {
-            n.classList.remove('disco-pulse');
-            document.getElementById('bpm-val').classList.remove('disco-pulse');
-        }
+    function updateDisplay(dance, fromAI = false) {
+        document.getElementById('dance-name').innerText = dance;
+        if(fromAI) document.getElementById('monitor').classList.add('is-verified');
+        else document.getElementById('monitor').classList.remove('is-verified');
 
         const vcont = document.getElementById('video-container');
         const v = document.getElementById('dance-video');
         if (dance.toLowerCase().includes('walzer')) {
-            vcont.style.display = 'block';
-            v.src = './Walzer_Grundschritt_1200.mp4'; 
+            vcont.style.display = 'block'; v.src = './Walzer_Grundschritt_1200.mp4';
         } else {
             vcont.style.display = 'none'; v.pause();
         }
     }
 
-    // --- SETTINGS & HISTORY ---
-    function saveSettings() {
-        const k = document.getElementById('api-key').value.trim();
-        const t = document.getElementById('topic-id').value.trim();
-        if(k) localStorage.setItem('dm_key', k);
-        if(t) localStorage.setItem('dm_topic', t);
-        localStorage.setItem('dm_history', JSON.stringify(danceHistory));
-        location.reload();
-    }
-
-    function toggleHistory() {
-        const box = document.getElementById('history-box');
-        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    // --- VERLAUF & RATING ---
+    function renderHistory() {
+        const filter = document.getElementById('hist-filter').value.toLowerCase();
         const list = document.getElementById('history-list');
-        list.innerHTML = danceHistory.slice().reverse().map((item, idx) => {
-            const realIdx = danceHistory.length - 1 - idx;
+        
+        let filtered = danceHistory.filter(h => 
+            h.title.toLowerCase().includes(filter) || 
+            h.dance.toLowerCase().includes(filter) || 
+            h.partner.toLowerCase().includes(filter)
+        );
+
+        filtered.sort((a, b) => {
+            let va = a[sortKey], vb = b[sortKey];
+            if(sortKey === 'date') { va = va.split('.').reverse().join(''); vb = vb.split('.').reverse().join(''); }
+            return va > vb ? (1 * sortDir) : (-1 * sortDir);
+        });
+
+        list.innerHTML = filtered.map((h, i) => {
+            const realIdx = danceHistory.indexOf(h);
             return `
             <div class="hist-item">
-                <span style="font-size:0.6rem; opacity:0.6">${item.date || '?'}</span>
-                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.title}</span>
-                <input type="text" value="${item.dance}" onchange="updateEntry(${realIdx}, 'dance', this.value)">
-                <input type="text" value="${item.partner || ''}" placeholder="Partner" onchange="updateEntry(${realIdx}, 'partner', this.value)">
-                <select onchange="updateEntry(${realIdx}, 'stars', this.value)">
-                    <option value="5" ${item.stars=="5"?'selected':''}>⭐⭐⭐⭐⭐</option>
-                    <option value="4" ${item.stars=="4"?'selected':''}>⭐⭐⭐⭐</option>
-                    <option value="3" ${item.stars=="3"?'selected':''}>⭐⭐⭐</option>
-                    <option value="2" ${item.stars=="2"?'selected':''}>⭐⭐</option>
-                    <option value="1" ${item.stars=="1"?'selected':''}>⭐</option>
-                </select>
-                <span style="color:var(--red); text-align:center;" onclick="danceHistory.splice(${realIdx},1);toggleHistory();toggleHistory()">✕</span>
+                <span style="font-size:0.7rem">${h.date}</span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.title}</span>
+                <input type="text" value="${h.dance}" onchange="updateH(${realIdx},'dance',this.value)">
+                <input type="text" value="${h.partner}" placeholder="Partner..." onchange="updateH(${realIdx},'partner',this.value)">
+                <div class="stars">${renderStars(realIdx, h.stars)}</div>
+                <span style="color:var(--red);text-align:right;cursor:pointer" onclick="delH(${realIdx})">✕</span>
             </div>`;
         }).join('');
     }
 
-    function updateEntry(idx, field, val) {
-        danceHistory[idx][field] = val;
-        localStorage.setItem('dm_history', JSON.stringify(danceHistory));
+    function renderStars(idx, count) {
+        let html = '';
+        for(let i=1; i<=5; i++) {
+            html += `<span class="${i <= count ? 'active' : ''}" onclick="setStars(${idx},${i})">★</span>`;
+        }
+        return html;
     }
 
-    function testFunk() { fetch(`https://ntfy.sh/${document.getElementById('topic-id').value || localStorage.getItem('dm_topic')}`, { method: 'POST', body: 'Test-Signal' }); }
-    async function testAI() {
-        const key = document.getElementById('api-key').value || localStorage.getItem('dm_key');
-        const resp = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`}, body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: "OK"}], max_tokens: 5})});
-        alert(resp.ok ? "KI OK" : "KI Fehler");
+    function setStars(idx, val) { danceHistory[idx].stars = val; saveH(); renderHistory(); }
+    function updateH(idx, key, val) { danceHistory[idx][key] = val; saveH(); }
+    function delH(idx) { danceHistory.splice(idx, 1); saveH(); renderHistory(); }
+    function saveH() { localStorage.setItem('dm_history', JSON.stringify(danceHistory)); }
+    function sortHist(key) { if(sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; } renderHistory(); }
+
+    // --- SETTINGS ---
+    function saveSettings() {
+        localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
+        localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
+        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+        location.reload();
     }
-    function exportDB() { 
-        const a = document.createElement('a'); 
-        a.href = URL.createObjectURL(new Blob([JSON.stringify(danceHistory)], {type: 'application/json'})); 
-        a.download = 'Tanz_DB.json'; a.click(); 
+    function renderPrefs() {
+        document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
+            `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></div>`
+        ).join('');
+    }
+    function addPref() {
+        const v = document.getElementById('new-pref').value.trim();
+        if(v) { preferredDances.push(v); document.getElementById('new-pref').value=""; renderPrefs(); }
+    }
+    function exportDB() {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(danceHistory)], {type: 'application/json'}));
+        a.download = 'Tanz_History.json'; a.click();
     }
     function importDB(e) {
         const reader = new FileReader();
-        reader.onload = (ev) => { danceHistory = JSON.parse(ev.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); alert("Geladen!"); };
+        reader.onload = (ev) => { danceHistory = JSON.parse(ev.target.result); saveH(); renderHistory(); };
         reader.readAsText(e.target.files[0]);
     }
 </script>
