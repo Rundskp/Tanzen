@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dance Master Pro 22.0</title>
+    <title>Dance Master Pro 24.0</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #0b0c10; --card: rgba(255,255,255,0.06); }
         body { background: var(--bg); color: #e8e8e8; font-family: system-ui, -apple-system, sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         #top-bar { position: relative; z-index: 3000; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
         #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; z-index: 10; gap: 10px; }
-        #takt-label { font-size: 1rem; color: var(--blue); font-weight: bold; letter-spacing: 4px; text-transform: uppercase; }
         #song-display { font-size: 1.2rem; color: var(--yellow); font-weight: bold; height: 1.5rem; opacity: 0; transition: opacity 20s linear; }
-        #dance-name { font-size: clamp(2rem, 8vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; transition: 0.5s; line-height: 1; }
+        #dance-name { font-size: clamp(2.5rem, 10vw, 6rem); font-weight: 900; text-transform: uppercase; margin: 0; transition: 0.5s; }
         .ai-verified { color: var(--yellow) !important; text-shadow: 0 0 20px rgba(255, 204, 0, 0.4); }
         .ai-badge { display: none; margin-left: 10px; }
         .ai-verified .ai-badge { display: inline; }
         #bpm-val { font-size: 5rem; font-weight: 900; font-family: monospace; color: var(--green); margin: 0; }
-        #video-container { display: none; width: min(700px, 95%); background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; margin-top: 15px; }
-        video { width: 100%; height: auto; border-radius: 12px; }
         #settings { display: none; position: fixed; inset: 0; background: rgba(11,12,16,0.98); z-index: 4000; flex-direction: column; padding: 30px; overflow-y: auto; }
         .settings-card { background: #1a1b20; padding: 30px; border-radius: 25px; width: 100%; max-width: 550px; margin: auto; border: 1px solid rgba(255,255,255,0.1); }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .input-box { width: 50%; display: flex; align-items: center; gap: 10px; }
         input[type="text"], input[type="password"] { background: #0b0c10; border: 1px solid #333; color: white; padding: 12px; border-radius: 10px; flex: 1; }
-        .check-badge { color: var(--green); font-weight: bold; font-size: 1.2rem; display: none; margin-left: 5px; }
-        .btn-test { background: rgba(255,255,255,0.1); border: 0; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+        .check-badge { color: var(--green); font-weight: bold; display: none; }
         .btn-main { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
-        .pref-tag { display: inline-flex; align-items: center; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; margin: 4px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -34,39 +29,34 @@
 <div id="top-bar">
     <div id="conn-info" style="font-size: 0.7rem; opacity: 0.6;">FUNK: BEREIT</div>
     <button onclick="toggleMic()" id="mic-btn" style="background:var(--green); border:none; color:white; padding:10px 18px; border-radius:10px; font-weight:bold;">START MONITOR</button>
-    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2rem; color:white; cursor:pointer;">⚙️</button>
+    <button onclick="toggleSettings()" style="background:none; border:none; font-size:2rem; color:white;">⚙️</button>
 </div>
 
 <div id="monitor">
-    <div id="takt-label">ANALYSE...</div>
     <div id="song-display">---</div>
     <div id="main-display">
         <h1 id="dance-name">BEREIT <span class="ai-badge">✨</span></h1>
         <div id="bpm-val">0</div>
     </div>
-    <div id="video-container"><video id="dance-video" playsinline muted loop autoplay></video></div>
 </div>
 
 <div id="settings">
     <div class="settings-card">
-        <h2 style="color:var(--blue); margin-top:0;">KONFIGURATION</h2>
-        <div class="row"><span>OpenAI Key <span id="key-check" class="check-badge">✔</span></span><div class="input-box"><button class="btn-test" onclick="testAI()">TEST KI</button><input type="password" id="api-key" placeholder="Key..."></div></div>
-        <div class="row"><span>Funk-Kanal <span id="topic-check" class="check-badge">✔</span></span><div class="input-box"><button class="btn-test" onclick="testFunk()">TEST FUNK</button><input type="text" id="topic-id" placeholder="Name..."></div></div>
-        <div class="row"><span>Schritte anzeigen</span><input type="checkbox" id="show-steps" checked></div>
-        <div id="pref-list" style="margin:15px 0;"></div>
-        <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; width:40px; border-radius:10px;">+</button></div>
-        <button class="btn-main" onclick="saveSettings()" style="margin-top:20px;">SPEICHERN & ZURÜCK</button>
+        <h2>EINSTELLUNGEN</h2>
+        <div class="row"><span>OpenAI Key <span id="key-check" class="check-badge">✔</span></span><div class="input-box"><input type="password" id="api-key" placeholder="Key..."></div></div>
+        <div class="row"><span>Funk-Kanal <span id="topic-check" class="check-badge">✔</span></span><div class="input-box"><input type="text" id="topic-id" placeholder="Name..."></div></div>
+        <div id="pref-list"></div>
+        <button class="btn-main" onclick="saveSettings()">SPEICHERN</button>
     </div>
 </div>
 
 <script>
     let audioCtx, analyser, processor, isRunning = false, lastBeat = 0, bpmBuf = [], aiOverride = false, timerOverride = null;
     let preferredDances = ["Langsamer Walzer", "Wiener Walzer", "Rumba", "Cha Cha Cha", "Discofox"];
-    
+
     window.onload = () => {
         updateBadges();
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
-        renderPrefs();
         const topic = localStorage.getItem('dm_topic');
         if(topic) connectFunk(topic);
     };
@@ -76,30 +66,9 @@
         document.getElementById('topic-check').style.display = localStorage.getItem('dm_topic') ? 'inline' : 'none';
     }
 
-    function testFunk() {
-        const topic = document.getElementById('topic-id').value.trim() || localStorage.getItem('dm_topic');
-        if(!topic) return alert("Name fehlt!");
-        fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: 'Test-Erfolg!' });
-    }
-
-    async function testAI() {
-        const key = document.getElementById('api-key').value.trim() || localStorage.getItem('dm_key');
-        if(!key) return alert("Key fehlt!");
-        try {
-            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: "Antworte 'OK'"}], max_tokens: 5})
-            });
-            const d = await resp.json();
-            alert("KI sagt: " + d.choices[0].message.content);
-        } catch(e) { alert("KI Fehler."); }
-    }
-
     function toggleSettings() {
         const s = document.getElementById('settings');
         s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
-        if(s.style.display === 'flex') updateBadges();
     }
 
     function saveSettings() {
@@ -107,16 +76,14 @@
         const t = document.getElementById('topic-id').value.trim();
         if(k) localStorage.setItem('dm_key', k);
         if(t) localStorage.setItem('dm_topic', t);
-        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+        toggleSettings();
         location.reload();
     }
 
     function connectFunk(topic) {
         const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
-        ev.onopen = () => document.getElementById('conn-info').innerText = "FUNK: AKTIV ✅";
         ev.onmessage = (e) => {
             const d = JSON.parse(e.data);
-            // Verhindert, dass das iPad auf seine eigenen Echos (💃) reagiert
             if(d.message && !d.message.includes("💃")) handleShortcut(d.message);
         };
     }
@@ -143,14 +110,22 @@
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
                 body: JSON.stringify({
                     model: "gpt-4o-mini", 
-                    messages: [{role: "user", content: `Lied: '${song}'. Wähle den passenden Tanz aus dieser Liste: ${preferredDances.join(", ")}. Antworte STRIKT nur mit dem Namen aus der Liste. Keine Beschreibungen, keine Adjektive.`}], 
-                    max_tokens: 15
+                    messages: [{role: "user", content: `Wähle aus: ${preferredDances.join(", ")}. Welcher Tanz passt zu '${song}'? Nur 1-2 Worte Antwort.`}], 
+                    max_tokens: 10
                 })
             });
             const d = await resp.json();
-            const danceResult = d.choices[0].message.content.trim();
-            updateDisplay(danceResult, true);
-            if(topic) fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${danceResult}` });
+            const result = d.choices[0].message.content.trim();
+            updateDisplay(result, true);
+            
+            // DIESER TEIL SCHICKT DIE MITTEILUNG AN DIE UHR
+            if(topic) {
+                fetch(`https://ntfy.sh/${topic}`, { 
+                    method: 'POST', 
+                    body: `💃 ${result}`,
+                    headers: { 'Title': 'Tanz erkannt', 'Priority': 'high' } 
+                });
+            }
         } catch(e) { aiOverride = false; }
     }
 
@@ -158,10 +133,6 @@
         const n = document.getElementById('dance-name');
         n.innerText = dance;
         if(fromAI) n.classList.add('ai-verified'); else n.classList.remove('ai-verified');
-        const vcont = document.getElementById('video-container');
-        const v = document.getElementById('dance-video');
-        if (dance.toLowerCase().includes('walzer')) { vcont.style.display = 'block'; v.src = './Walzer_Grundschritt_1200.mp4'; } 
-        else { vcont.style.display = 'none'; v.pause(); }
     }
 
     async function toggleMic() {
@@ -185,7 +156,7 @@
             isRunning = true;
             document.getElementById('mic-btn').innerText = "STOP";
             document.getElementById('mic-btn').style.background = "var(--red)";
-        } catch(e) { alert("Mic-Fehler."); }
+        } catch(e) { alert("Mikro-Fehler."); }
     }
 
     function handleBeat(now) {
@@ -195,10 +166,8 @@
             bpmBuf.push(bpm); if(bpmBuf.length > 15) bpmBuf.shift();
             const avg = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
             document.getElementById('bpm-val').innerText = avg;
-            const is34 = (interval > 510 && interval < 860);
-            document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             if(!aiOverride) {
-                if(is34) updateDisplay(avg > 152 ? "Wiener Walzer" : "Langsamer Walzer");
+                if(interval > 510 && interval < 860) updateDisplay(avg > 152 ? "Wiener Walzer" : "Langsamer Walzer");
                 else {
                     if(avg < 92) updateDisplay("Rumba");
                     else if(avg < 118) updateDisplay("Cha Cha Cha");
@@ -206,16 +175,6 @@
                 }
             }
         }
-    }
-
-    function renderPrefs() {
-        document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
-            `<span class="pref-tag">${d}<span style="margin-left:8px;color:var(--red);cursor:pointer" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></span>`
-        ).join('');
-    }
-    function addPref() {
-        const v = document.getElementById('new-pref').value.trim();
-        if(v) { preferredDances.push(v); document.getElementById('new-pref').value=""; renderPrefs(); }
     }
 </script>
 </body>
