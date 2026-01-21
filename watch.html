@@ -6,21 +6,19 @@
     <style>
         body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
         #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; }
-        #song { font-size: 0.8rem; color: #FFCC00; margin-top: 10px; font-weight: bold; }
-        #vib-btn { position: fixed; inset: 0; background: rgba(52, 199, 89, 0.8); color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 1000; text-align: center; padding: 15px; }
+        #song { font-size: 0.85rem; color: #FFCC00; margin-top: 10px; font-weight: bold; min-height: 1em; }
+        #vib-btn { position: fixed; inset: 0; background: rgba(52, 199, 89, 0.8); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 1000; padding: 20px; }
     </style>
 </head>
 <body>
-    <div id="vib-btn" onclick="enableVib()">RHYTHMUS-VIBRATION<br>AKTIVIEREN (HIER TIPPEN)</div>
+    <div id="vib-btn" onclick="enableVib()">VIBRATION STARTEN<br>(HIER TIPPEN)</div>
     <div id="dance">BEREIT</div>
-    <div id="song">Warte auf Signal...</div>
+    <div id="song">Warte auf Scan...</div>
 
     <script>
-        // Liest den Kanal aus der URL (z.B. watch.html?t=MEIN_KANAL) oder nutzt Standard
         const urlParams = new URLSearchParams(window.location.search);
         const topic = urlParams.get('t') || "Tanz_8392_Haxen_2026_XyZ";
-        let lastVibTime = 0;
-
+        
         function enableVib() {
             navigator.vibrate(200);
             document.getElementById('vib-btn').style.display = 'none';
@@ -34,24 +32,21 @@
                     const name = d.message.replace("💃", "").trim();
                     document.getElementById('dance').innerText = name;
                     document.getElementById('dance').style.color = "#34C759";
-                    document.getElementById('song').innerText = "Empfangen!";
-
-                    const now = Date.now();
-                    if(now - lastVibTime > 4000) {
-                        if (d.tags && d.tags.includes("W")) {
-                            navigator.vibrate([500, 100, 200, 100, 200]);
-                        } else {
-                            navigator.vibrate([200, 100, 200, 100, 200, 100, 200]);
-                        }
-                        lastVibTime = now;
+                    
+                    // Rhythmus-Vibration
+                    if (d.tags && d.tags.includes("W")) {
+                        navigator.vibrate([500, 150, 200, 150, 200]);
+                    } else {
+                        navigator.vibrate([200, 150, 200, 150, 200, 150, 200]);
                     }
                 } else if(d.message) {
+                    // Titel wird hier festgesetzt und bleibt stehen!
                     document.getElementById('song').innerText = "🎵 " + d.message;
-                    document.getElementById('dance').innerText = "SCAN...";
+                    document.getElementById('dance').innerText = "KI PRÜFT...";
                     document.getElementById('dance').style.color = "#2b7cff";
                 }
             };
-            ev.onerror = () => setTimeout(connect, 3000);
+            ev.onerror = () => setTimeout(connect, 2000);
         }
         connect();
     </script>
