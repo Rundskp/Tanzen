@@ -8,20 +8,22 @@
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: rgba(255,255,255,0.08); }
         body { background: var(--bg); color: #e8e8e8; font-family: system-ui, -apple-system, sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
+        /* Header */
         #top-bar { display: grid; grid-template-columns: 100px 1fr 140px; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); z-index: 3000; }
-        .header-btn { border: none; padding: 10px 0; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; width: 80px; text-align: center; }
+        .header-btn { border: none; padding: 10px 0; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; width: 85px; text-align: center; }
         .btn-off { background: rgba(255,255,255,0.05); color: #444; }
         .btn-on-local { background: var(--green); color: white; }
         .btn-on-ki { background: var(--blue); color: white; }
         #mic-btn { background: #222; border: 2px solid #333; color: white; padding: 12px 30px; border-radius: 16px; font-weight: 900; font-size: 1rem; cursor: pointer; justify-self: center; }
         .gear-btn { background: none; border: none; font-size: 2.2rem; cursor: pointer; padding: 5px; }
 
-        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 10px; }
+        /* Monitor */
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 10px; overflow: hidden; }
         #takt-label { font-size: 1.4rem; color: var(--blue); font-weight: 800; letter-spacing: 4px; }
         #song-display { font-size: 1.8rem; color: var(--yellow); font-weight: 900; min-height: 2.2rem; filter: drop-shadow(0 0 10px rgba(255,204,0,0.3)); }
         
         .dance-wrap { display: flex; align-items: center; justify-content: center; gap: 20px; }
-        #dance-name { font-size: clamp(2.5rem, 10vw, 7rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1; }
+        #dance-name { font-size: clamp(2.5rem, 9vw, 7rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 1; }
         .ai-badge { font-size: 4rem; display: none; }
         .is-verified #dance-name { color: var(--yellow); }
         .is-verified .ai-badge { display: inline; }
@@ -29,27 +31,34 @@
         #bpm-val { font-size: 8rem; font-weight: 900; font-family: monospace; color: var(--green); line-height: 0.8; }
         .bpm-label { font-size: 1.2rem; letter-spacing: 8px; opacity: 0.4; font-weight: bold; }
 
-        /* Settings & History */
+        /* Video Area - Fixed height */
+        #video-container { display: none; width: min(800px, 95%); max-height: 30vh; background: var(--card); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        video { width: 100%; max-height: 28vh; border-radius: 12px; }
+
+        /* Settings - iPad 90vw max */
         #settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 4000; padding: 20px; overflow-y: auto; }
-        .settings-card { background: #15161a; padding: 30px; border-radius: 35px; width: 95%; max-width: 900px; margin: auto; border: 1px solid #333; }
+        .settings-card { background: #15161a; padding: 30px; border-radius: 35px; width: 90vw; max-width: 850px; margin: auto; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
         input[type="text"], input[type="password"] { background: #000; border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; font-size: 1rem; }
         
-        #history-box { background: #000; border-radius: 20px; padding: 20px; margin-top: 20px; border: 1px solid #222; }
-        .hist-table-header { display: grid; grid-template-columns: 100px 1.5fr 1.2fr 1fr 140px 40px; gap: 10px; font-size: 0.7rem; font-weight: bold; color: var(--blue); cursor: pointer; padding: 10px 5px; }
-        .hist-item { display: grid; grid-template-columns: 100px 1.5fr 1.2fr 1fr 140px 40px; gap: 10px; padding: 12px 5px; border-bottom: 1px solid #111; align-items: center; font-size: 0.85rem; }
-        .hist-item input { background: transparent; border: none; border-bottom: 1px solid #222; color: #fff; width: 100%; font-size: 0.85rem; }
-
-        /* Sterne Rating */
-        .stars { color: #333; font-size: 1.2rem; cursor: pointer; white-space: nowrap; }
-        .stars span.active { color: var(--yellow); text-shadow: 0 0 5px var(--yellow); }
-
-        .filter-field { width: 100%; padding: 12px; border-radius: 12px; background: #222; border: 1px solid #444; color: white; margin-bottom: 15px; }
         .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .tag { background: var(--blue); padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; }
+        .tag { background: var(--blue); padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; display: flex; align-items: center; }
+
+        /* History Table */
+        #history-box { background: #000; border-radius: 20px; padding: 20px; margin-top: 10px; border: 1px solid #222; }
+        .filter-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .filter-field { flex: 1; padding: 12px; border-radius: 10px; background: #222; border: 1px solid #444; color: white; }
         
-        #video-container { display: none; width: min(800px, 95%); max-height: 30vh; background: var(--card); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
-        video { width: 100%; max-height: 28vh; border-radius: 12px; }
+        .hist-table-header { display: grid; grid-template-columns: 100px 1.5fr 1fr 1fr 160px 40px; gap: 10px; font-size: 0.7rem; font-weight: bold; color: var(--blue); cursor: pointer; padding: 10px 5px; text-transform: uppercase; }
+        .hist-item { display: grid; grid-template-columns: 100px 1.5fr 1fr 1fr 160px 40px; gap: 10px; padding: 12px 5px; border-bottom: 1px solid #111; align-items: center; font-size: 0.85rem; }
+        .hist-item input { background: transparent; border: none; border-bottom: 1px solid #222; color: #fff; width: 100%; font-size: 0.85rem; padding: 4px; }
+
+        .stars { color: #333; font-size: 1.4rem; cursor: pointer; white-space: nowrap; letter-spacing: 2px; }
+        .stars span.active { color: var(--yellow); text-shadow: 0 0 8px var(--yellow); }
+
+        .btn-act { padding: 18px; border-radius: 15px; font-weight: 800; font-size: 1.2rem; cursor: pointer; border: none; flex: 1; }
+        .btn-save { background: var(--green); color: white; }
+        .btn-cancel { background: #222; color: #777; }
     </style>
 </head>
 <body>
@@ -85,7 +94,7 @@
 
 <div id="settings">
     <div class="settings-card">
-        <h1 style="margin-top:0; color:var(--blue); font-size: 1.8rem;">Tanz das! Pro-Konfiguration</h1>
+        <h1 style="margin-top:0; color:var(--blue); font-size: 1.8rem;">Tanz das! Pro-Setup</h1>
         
         <div class="row">
             <label>API Key</label>
@@ -100,10 +109,13 @@
         <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
             <label style="font-size:0.8rem; opacity:0.5;">BEVORZUGTE TÄNZE</label>
             <div id="pref-list" class="tag-list"></div>
-            <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; padding:0 15px; border-radius:10px;">+</button></div>
+            <div style="display:flex; gap:10px;"><input type="text" id="new-pref" style="flex:1;" placeholder="Tanz hinzufügen..."><button onclick="addPref()" style="background:var(--green); border:none; color:white; padding:0 20px; border-radius:10px; font-weight:bold;">+</button></div>
         </div>
 
-        <input type="text" id="hist-filter" class="filter-field" placeholder="🔍 Verlauf durchsuchen (Partner, Tanz, Lied)..." oninput="renderHistory()">
+        <div class="filter-row" style="margin-top:30px;">
+            <label style="font-weight:bold; color:var(--blue);">Filter:</label>
+            <input type="text" id="hist-filter" class="filter-field" placeholder="Suche in Datenbank..." oninput="renderHistory()">
+        </div>
         
         <div id="history-box">
             <div class="hist-table-header">
@@ -111,15 +123,15 @@
                 <span onclick="sortHist('title')">TITEL ⇅</span>
                 <span onclick="sortHist('dance')">TANZ ⇅</span>
                 <span onclick="sortHist('partner')">PARTNER ⇅</span>
-                <span onclick="sortHist('stars')">BEWERTUNG ⇅</span>
+                <span onclick="sortHist('stars')">RATING ⇅</span>
                 <span></span>
             </div>
             <div id="history-list"></div>
         </div>
 
-        <div style="display:flex; gap:15px; margin-top:30px;">
-            <button class="header-btn" style="flex:1; background:#444; color:white;" onclick="exportDB()">💾 BACKUP</button>
-            <button class="header-btn" style="flex:1; background:#444; color:white;" onclick="document.getElementById('impFile').click()">📂 LADEN</button>
+        <div style="display:flex; gap:15px; margin-top:20px;">
+            <button class="header-btn" style="flex:1; background:#333; color:white;" onclick="exportDB()">💾 BACKUP</button>
+            <button class="header-btn" style="flex:1; background:#333; color:white;" onclick="document.getElementById('impFile').click()">📂 LADEN</button>
             <input type="file" id="impFile" style="display:none" onchange="importDB(event)">
         </div>
 
@@ -136,6 +148,10 @@
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa"];
     let danceHistory = [];
     let sortKey = 'date', sortDir = -1;
+    
+    // Stabilisator Variablen
+    let stableDance = "BEREIT";
+    let danceVotes = {};
 
     window.onload = () => {
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
@@ -155,7 +171,9 @@
         if(s.style.display === 'flex') renderHistory();
     }
 
-    // --- LOKALE ERKENNUNG (PARAMETER) ---
+    function handleMainAction() { toggleMic(); }
+
+    // --- SENSIBLER LOKAL MODUS ---
     async function toggleMic() {
         if(isRunning) { location.reload(); return; }
         try {
@@ -171,8 +189,6 @@
                 const d = e.inputBuffer.getChannelData(0);
                 let sum = 0; for(let i=0; i<d.length; i++) sum += d[i]*d[i];
                 const rms = Math.sqrt(sum/d.length);
-                
-                // PARAMETER: Sensibilität (0.3 = Reagiert auf leise Musik)
                 if(rms * 100 > 0.3) {
                     const now = Date.now();
                     if(now - lastBeat > 240) { handleBeat(now); lastBeat = now; }
@@ -181,41 +197,61 @@
             isRunning = true;
             document.getElementById('btn-local').className = "header-btn btn-on-local";
             document.getElementById('mic-btn').innerText = "STOP";
-        } catch(e) { alert("Mikro-Zugriff!"); }
+            document.getElementById('mic-btn').style.background = "var(--red)";
+        } catch(e) { alert("Mic Error!"); }
     }
 
     function handleBeat(now) {
         if(lastBeat > 0) {
             const interval = now - lastBeat;
             const bpm = Math.round(60000 / interval);
-            bpmBuf.push(bpm); if(bpmBuf.length > 15) bpmBuf.shift();
+            bpmBuf.push(bpm); if(bpmBuf.length > 20) bpmBuf.shift();
             const avg = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
             document.getElementById('bpm-val').innerText = avg;
             
-            // PARAMETER: Takt-Erkennung (Hysterese für 3/4 Walzer)
             const is34 = (interval > 480 && interval < 890);
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             
             if(!aiOverride) {
-                // PARAMETER: Tanz-Logik
-                if(is34) updateDisplay(avg > 148 ? "Wiener Walzer" : "Langsamer Walzer");
+                let candidate = "";
+                if(is34) candidate = (avg > 148 ? "Wiener Walzer" : "Langsamer Walzer");
                 else {
-                    if(avg < 95) updateDisplay("Rumba / Blues");
-                    else if(avg < 115) updateDisplay("Cha Cha Cha / Rumba");
-                    else if(avg < 135) updateDisplay("Discofox / Samba");
-                    else updateDisplay("Jive / Quickstep");
+                    if(avg < 95) candidate = "Rumba / Blues";
+                    else if(avg < 115) candidate = "Cha Cha Cha / Rumba";
+                    else if(avg < 135) candidate = "Discofox / Samba";
+                    else candidate = "Jive / Quickstep";
                 }
+                updateStableDance(candidate);
             }
+        }
+    }
+
+    // --- ANTI-ZAPPEL LOGIK ---
+    function updateStableDance(candidate) {
+        if(!danceVotes[candidate]) danceVotes[candidate] = 0;
+        danceVotes[candidate]++;
+
+        // Alle 5 Beats prüfen wir, welcher Tanz "gewonnen" hat
+        const totalVotes = Object.values(danceVotes).reduce((a, b) => a + b, 0);
+        if(totalVotes >= 5) {
+            const winner = Object.keys(danceVotes).reduce((a, b) => danceVotes[a] > danceVotes[b] ? a : b);
+            if(winner !== stableDance) {
+                stableDance = winner;
+                updateDisplay(stableDance, false);
+            }
+            danceVotes = {}; // Reset für nächste Runde
         }
     }
 
     // --- KI & FUNK ---
     function connectFunk(topic) {
         const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        ev.onopen = () => console.log("Verbunden mit " + topic);
         ev.onmessage = (e) => {
             const d = JSON.parse(e.data);
             if(d.message && !d.message.includes("💃") && !d.message.includes("Test")) handleShortcut(d.message);
         };
+        ev.onerror = () => { ev.close(); setTimeout(() => connectFunk(topic), 2000); };
     }
 
     function manualKiTrigger() {
@@ -228,7 +264,6 @@
         document.getElementById('song-display').innerText = title;
         document.getElementById('song-display').style.opacity = "1";
 
-        // DB Check
         const cache = danceHistory.find(h => h.title.toLowerCase() === title.toLowerCase());
         if(cache) {
             updateDisplay(cache.dance, true);
@@ -252,13 +287,16 @@
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
-                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Wähle aus: ${preferredDances.join(",")}. Nur Name.`}], max_tokens: 15})
+                body: JSON.stringify({model: "gpt-4o-mini", messages: [{role: "user", content: `Lied: '${song}'. Liste: ${preferredDances.join(",")}. Welcher Tanz? Nur 1 Name.`}], max_tokens: 15})
             });
             const d = await resp.json();
             const res = d.choices[0].message.content.trim();
             danceHistory.push({title: song, dance: res, date: new Date().toLocaleDateString('de-DE'), partner: "", stars: 0});
             localStorage.setItem('dm_history', JSON.stringify(danceHistory));
             updateDisplay(res, true);
+            
+            const topic = localStorage.getItem('dm_topic');
+            if(topic) fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${res}`, headers: {'Priority': '5'} });
         } catch(e) { aiOverride = false; }
     }
 
@@ -276,7 +314,7 @@
         }
     }
 
-    // --- VERLAUF & RATING ---
+    // --- VERLAUF & UI ---
     function renderHistory() {
         const filter = document.getElementById('hist-filter').value.toLowerCase();
         const list = document.getElementById('history-list');
@@ -288,21 +326,21 @@
         );
 
         filtered.sort((a, b) => {
-            let va = a[sortKey], vb = b[sortKey];
+            let va = a[sortKey] || '', vb = b[sortKey] || '';
             if(sortKey === 'date') { va = va.split('.').reverse().join(''); vb = vb.split('.').reverse().join(''); }
             return va > vb ? (1 * sortDir) : (-1 * sortDir);
         });
 
-        list.innerHTML = filtered.map((h, i) => {
+        list.innerHTML = filtered.map((h) => {
             const realIdx = danceHistory.indexOf(h);
             return `
             <div class="hist-item">
-                <span style="font-size:0.7rem">${h.date}</span>
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.title}</span>
+                <span style="font-size:0.65rem; opacity:0.5;">${h.date}</span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;">${h.title}</span>
                 <input type="text" value="${h.dance}" onchange="updateH(${realIdx},'dance',this.value)">
-                <input type="text" value="${h.partner}" placeholder="Partner..." onchange="updateH(${realIdx},'partner',this.value)">
+                <input type="text" value="${h.partner || ''}" placeholder="Partner..." onchange="updateH(${realIdx},'partner',this.value)">
                 <div class="stars">${renderStars(realIdx, h.stars)}</div>
-                <span style="color:var(--red);text-align:right;cursor:pointer" onclick="delH(${realIdx})">✕</span>
+                <span style="color:var(--red);text-align:right;cursor:pointer;padding:5px;" onclick="delH(${realIdx})">✕</span>
             </div>`;
         }).join('');
     }
@@ -310,18 +348,17 @@
     function renderStars(idx, count) {
         let html = '';
         for(let i=1; i<=5; i++) {
-            html += `<span class="${i <= count ? 'active' : ''}" onclick="setStars(${idx},${i})">★</span>`;
+            html += `<span class="${i <= count ? 'active' : ''}" onclick="setStars(${idx},${i})">${i <= count ? '★' : '☆'}</span>`;
         }
         return html;
     }
 
     function setStars(idx, val) { danceHistory[idx].stars = val; saveH(); renderHistory(); }
     function updateH(idx, key, val) { danceHistory[idx][key] = val; saveH(); }
-    function delH(idx) { danceHistory.splice(idx, 1); saveH(); renderHistory(); }
+    function delH(idx) { if(confirm("Löschen?")) { danceHistory.splice(idx, 1); saveH(); renderHistory(); } }
     function saveH() { localStorage.setItem('dm_history', JSON.stringify(danceHistory)); }
     function sortHist(key) { if(sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; } renderHistory(); }
 
-    // --- SETTINGS ---
     function saveSettings() {
         localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
         localStorage.setItem('dm_topic', document.getElementById('topic-id').value.trim());
@@ -330,7 +367,7 @@
     }
     function renderPrefs() {
         document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
-            `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></div>`
+            `<div class="tag">${d}<span style="margin-left:10px; cursor:pointer;" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></div>`
         ).join('');
     }
     function addPref() {
@@ -344,7 +381,7 @@
     }
     function importDB(e) {
         const reader = new FileReader();
-        reader.onload = (ev) => { danceHistory = JSON.parse(ev.target.result); saveH(); renderHistory(); };
+        reader.onload = (ev) => { danceHistory = JSON.parse(ev.target.result); saveH(); renderHistory(); alert("Datenbank geladen!"); };
         reader.readAsText(e.target.files[0]);
     }
 </script>
