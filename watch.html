@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
+        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; overflow: hidden; }
         #dance { font-size: 1.8rem; font-weight: 900; color: #2b7cff; text-transform: uppercase; }
         #song { font-size: 0.8rem; color: #FFCC00; margin-top: 10px; font-weight: bold; }
-        #btn { position: fixed; inset: 0; background: #34C759; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 1000; }
+        #vib-btn { position: fixed; inset: 0; background: #34C759; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; z-index: 9999; font-size: 1.2rem; border: none; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
-    <div id="btn" onclick="start()">START VIB</div>
+    <button id="vib-btn" onclick="activateVibration()">RHYTHMUS AN</button>
     <div id="dance">BEREIT</div>
-    <div id="song">Warte...</div>
+    <div id="song">Warte auf Scan...</div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
+        // Nutzt den Kanal aus der URL (?t=...) oder den Standard-Kanal
         const topic = urlParams.get('t') || "Tanz_8392_Haxen_2026_XyZ";
         
-        function start() {
-            navigator.vibrate(100);
-            document.getElementById('btn').style.display = 'none';
+        function activateVibration() {
+            if ("vibrate" in navigator) navigator.vibrate(200);
+            document.getElementById('vib-btn').style.display = 'none';
         }
 
         const ev = new EventSource(`https://ntfy.sh/${topic}/sse`);
@@ -31,10 +32,11 @@
                 const name = d.message.replace("💃", "").trim();
                 document.getElementById('dance').innerText = name;
                 document.getElementById('dance').style.color = "#34C759";
-                navigator.vibrate([300, 100, 300]);
+                if (name.toLowerCase().includes("walzer")) navigator.vibrate([400, 200, 150, 200, 150]);
+                else navigator.vibrate([200, 150, 200, 150, 200, 150, 200]);
             } else {
                 document.getElementById('song').innerText = "📡 " + d.message;
-                document.getElementById('dance').innerText = "PRÜFE...";
+                document.getElementById('dance').innerText = "KI PRÜFT...";
             }
         };
     </script>
