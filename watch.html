@@ -16,7 +16,9 @@
     <div id="song">Warte auf Signal...</div>
 
     <script>
-        const topic = "Tanz_8392_Haxen_2026_XyZ";
+        // Liest den Kanal aus der URL (z.B. watch.html?t=MEIN_KANAL) oder nutzt Standard
+        const urlParams = new URLSearchParams(window.location.search);
+        const topic = urlParams.get('t') || "Tanz_8392_Haxen_2026_XyZ";
         let lastVibTime = 0;
 
         function enableVib() {
@@ -32,16 +34,13 @@
                     const name = d.message.replace("💃", "").trim();
                     document.getElementById('dance').innerText = name;
                     document.getElementById('dance').style.color = "#34C759";
-                    document.getElementById('song').innerText = "Vom Handy empfangen";
+                    document.getElementById('song').innerText = "Empfangen!";
 
-                    // Vibration nur alle 5 Sekunden triggern, um nicht zu nerven
                     const now = Date.now();
-                    if(now - lastVibTime > 5000) {
+                    if(now - lastVibTime > 4000) {
                         if (d.tags && d.tags.includes("W")) {
-                            // Walzer: Lang (500), Pause (100), Kurz (200), Pause (100), Kurz (200)
                             navigator.vibrate([500, 100, 200, 100, 200]);
                         } else {
-                            // 4/4 Takt: 4x gleichmäßig
                             navigator.vibrate([200, 100, 200, 100, 200, 100, 200]);
                         }
                         lastVibTime = now;
