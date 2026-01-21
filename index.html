@@ -3,37 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dance Master Pro 26.0</title>
+    <title>Tanz das!</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: rgba(255,255,255,0.08); }
         body { background: var(--bg); color: #e8e8e8; font-family: system-ui, -apple-system, sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* Neue Top Bar mit Buttons */
+        /* Header & Buttons */
         #top-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); z-index: 3000; }
         
-        .header-btn { border: none; padding: 10px 15px; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
-        .btn-off { background: rgba(255,255,255,0.05); color: #444; }
-        .btn-on { background: var(--green); color: white; text-shadow: 0 0 10px rgba(255,255,255,0.5); box-shadow: 0 0 15px rgba(52, 199, 89, 0.3); }
+        .header-btn { border: none; padding: 10px 15px; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px; min-width: 80px; }
+        .btn-off { background: rgba(255,255,255,0.05); color: #555; }
+        .btn-on-local { background: var(--green); color: white; box-shadow: 0 0 15px rgba(52, 199, 89, 0.3); }
+        .btn-on-ki { background: var(--blue); color: white; box-shadow: 0 0 15px rgba(43, 124, 255, 0.3); }
         
         #mic-btn { background: #222; border: 2px solid #333; color: white; padding: 12px 25px; border-radius: 14px; font-weight: 900; font-size: 0.9rem; cursor: pointer; }
         #mic-btn.active { border-color: var(--green); color: var(--green); }
 
         .gear-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; padding: 5px; margin-left: 10px; }
 
+        /* Monitor */
         #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; z-index: 10; gap: 5px; }
-        
         #takt-label { font-size: 1.2rem; color: var(--blue); font-weight: 800; letter-spacing: 3px; }
         #song-display { font-size: 1.1rem; color: var(--yellow); height: 1.3rem; opacity: 0; transition: opacity 20s linear; font-weight: bold; }
         #dance-name { font-size: clamp(2rem, 10vw, 5.5rem); font-weight: 900; text-transform: uppercase; margin: 5px 0; line-height: 1; }
         
-        /* KI Stern / Badge */
+        /* ✨ Stern Badge */
         .ai-badge { display: none; margin-left: 10px; filter: drop-shadow(0 0 5px var(--yellow)); }
         .is-verified .ai-badge { display: inline; }
         .is-verified { color: var(--yellow) !important; }
 
-        #bpm-display { margin-top: 5px; }
         #bpm-val { font-size: 6rem; font-weight: 900; font-family: monospace; color: var(--green); line-height: 1; }
-        .bpm-label { font-size: 1rem; letter-spacing: 5px; opacity: 0.4; font-weight: bold; display: block; }
+        .bpm-label { font-size: 1rem; letter-spacing: 5px; opacity: 0.4; font-weight: bold; }
 
         /* Disco Animation */
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); } }
@@ -42,21 +42,12 @@
         #video-container { display: none; width: min(600px, 90%); background: var(--card); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); margin-top: 15px; }
         video { width: 100%; border-radius: 12px; }
 
-        /* Settings Card - Schmal (450px) */
+        /* Settings */
         #settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 4000; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .settings-card { background: #15161a; padding: 25px; border-radius: 25px; width: 100%; max-width: 450px; margin: auto; border: 1px solid #333; }
+        .settings-card { background: #15161a; padding: 25px; border-radius: 25px; width: 95%; max-width: 450px; margin: auto; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
         .input-group { display: flex; align-items: center; gap: 8px; width: 60%; }
         input[type="text"], input[type="password"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; flex: 1; font-size: 0.9rem; }
-        
-        .btn-test { background: #333; border: none; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.6rem; font-weight: bold; cursor: pointer; }
-        .check-icon { color: var(--green); display: none; }
-
-        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
-        .tag { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 12px; font-size: 0.8rem; display: flex; align-items: center; }
-        .tag span { margin-left: 8px; color: var(--red); cursor: pointer; font-weight: bold; }
-
         .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
         .btn-act { padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; }
         .btn-save { background: var(--blue); color: white; }
@@ -65,6 +56,8 @@
         #history-box { display: none; background: #000; border-radius: 15px; padding: 15px; margin-top: 15px; max-height: 250px; overflow-y: auto; }
         .hist-item { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid #111; font-size: 0.75rem; align-items: center; }
         .hist-item input { background: transparent; border: none; border-bottom: 1px solid #333; color: var(--yellow); padding: 2px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 12px; font-size: 0.8rem; display: flex; align-items: center; }
     </style>
 </head>
 <body>
@@ -73,7 +66,7 @@
     <button id="btn-local" onclick="toggleMic()" class="header-btn btn-off">LOKAL</button>
     <button onclick="handleMainAction()" id="mic-btn">START</button>
     <div style="display: flex; align-items: center; justify-content: flex-end;">
-        <button id="btn-ai" onclick="toggleAI()" class="header-btn btn-off">KI</button>
+        <button id="btn-ki" onclick="manualKiTrigger()" class="header-btn btn-off">KI</button>
         <button onclick="toggleSettings()" class="gear-btn">⚙️</button>
     </div>
 </div>
@@ -97,20 +90,20 @@
 
 <div id="settings">
     <div class="settings-card">
-        <h2 style="margin-top:0; color:var(--blue);">EINSTELLUNGEN</h2>
+        <h2 style="margin-top:0; color:var(--blue); font-size: 1.2rem;">Tanz das! Settings</h2>
         
         <div class="row">
-            <label>OpenAI API <span id="ok-key" class="check-icon">✔</span></label>
+            <label>OpenAI Key <span id="ok-key" style="color:var(--green); display:none;">✔</span></label>
             <div class="input-group">
-                <button class="btn-test" onclick="testAI()">TEST</button>
+                <button onclick="testAI()" style="font-size:0.6rem; padding:5px;">TEST</button>
                 <input type="password" id="api-key" placeholder="sk-...">
             </div>
         </div>
         
         <div class="row">
-            <label>Funk-Kanal <span id="ok-topic" class="check-icon">✔</span></label>
+            <label>Funk-Kanal <span id="ok-topic" style="color:var(--green); display:none;">✔</span></label>
             <div class="input-group">
-                <button class="btn-test" onclick="testFunk()">TEST</button>
+                <button onclick="testFunk()" style="font-size:0.6rem; padding:5px;">TEST</button>
                 <input type="text" id="topic-id" placeholder="Name...">
             </div>
         </div>
@@ -121,15 +114,15 @@
         </div>
 
         <div style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">
-            <label style="font-size:0.7rem; opacity:0.5; letter-spacing:1px;">BEVORZUGTE TÄNZE</label>
+            <label style="font-size:0.7rem; opacity:0.5;">BEVORZUGTE TÄNZE</label>
             <div id="pref-list" class="tag-list"></div>
-            <div style="display:flex; gap:5px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; padding:0 15px; border-radius:8px; font-weight:bold;">+</button></div>
+            <div style="display:flex; gap:5px;"><input type="text" id="new-pref" style="flex:1;"><button onclick="addPref()" style="background:var(--green); border:none; color:white; padding:0 10px; border-radius:8px;">+</button></div>
         </div>
 
         <div style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
-            <button class="btn-test" onclick="toggleHistory()">🕒 VERLAUF</button>
-            <button class="btn-test" onclick="exportDB()">💾 BACKUP</button>
-            <button class="btn-test" onclick="document.getElementById('impFile').click()">📂 LADEN</button>
+            <button onclick="toggleHistory()" style="font-size:0.6rem; padding:8px;">🕒 VERLAUF</button>
+            <button onclick="exportDB()" style="font-size:0.6rem; padding:8px;">💾 BACKUP</button>
+            <button onclick="document.getElementById('impFile').click()" style="font-size:0.6rem; padding:8px;">📂 LADEN</button>
             <input type="file" id="impFile" style="display:none" onchange="importDB(event)">
         </div>
 
@@ -145,7 +138,7 @@
 </div>
 
 <script>
-    let audioCtx, analyser, processor, isRunning = false, isAiActive = false;
+    let audioCtx, analyser, processor, isRunning = false;
     let lastBeat = 0, bpmBuf = [], aiOverride = false, timerOverride = null;
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa"];
     let danceHistory = [];
@@ -157,9 +150,8 @@
         renderPrefs();
         updateBadges();
         
-        // Automatischer KI Start falls Kanal vorhanden
         const topic = localStorage.getItem('dm_topic');
-        if(topic) toggleAI(true);
+        if(topic) connectFunk(topic);
     };
 
     function updateBadges() {
@@ -175,7 +167,7 @@
     }
 
     function handleMainAction() {
-        if(!isRunning) toggleMic(); else toggleMic();
+        toggleMic();
     }
 
     // --- LOKAL MODUS ---
@@ -203,44 +195,38 @@
                 }
             };
             isRunning = true;
-            btn.className = "header-btn btn-on";
+            btn.className = "header-btn btn-on-local";
             main.innerText = "STOP";
             main.classList.add('active');
-        } catch(e) { alert("Mikrofon Zugriff verweigert."); }
+        } catch(e) { alert("Mikrofon-Zugriff fehlt."); }
     }
 
-    // --- KI MODUS ---
-    function toggleAI(forceStart = false) {
-        const topic = localStorage.getItem('dm_topic');
-        const btn = document.getElementById('btn-ai');
-        
-        if(!topic && !forceStart) return alert("Zuerst Funk-Kanal in Settings speichern!");
+    // --- KI LOGIK ---
+    function connectFunk(topic) {
+        if(eventSource) eventSource.close();
+        eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        eventSource.onmessage = (e) => {
+            const d = JSON.parse(e.data);
+            if(d.message && !d.message.includes("💃") && !d.message.includes("Test")) handleShortcut(d.message);
+        };
+    }
 
-        if(isAiActive && !forceStart) {
-            if(eventSource) eventSource.close();
-            isAiActive = false;
-            btn.className = "header-btn btn-off";
-        } else {
-            if(eventSource) eventSource.close();
-            eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
-            eventSource.onopen = () => {
-                isAiActive = true;
-                btn.className = "header-btn btn-on";
-            };
-            eventSource.onmessage = (e) => {
-                const d = JSON.parse(e.data);
-                if(d.message && !d.message.includes("💃") && !d.message.includes("Test")) handleShortcut(d.message);
-            };
-        }
+    function manualKiTrigger() {
+        const song = prompt("Liedname für KI-Suche eingeben:");
+        if(song) handleShortcut(song);
     }
 
     function handleShortcut(songTitle) {
         aiOverride = true;
+        // KI Button auf aktiv setzen
+        const kiBtn = document.getElementById('btn-ai');
+        kiBtn.className = "header-btn btn-on-ki";
+        
         const disp = document.getElementById('song-display');
         disp.innerText = songTitle;
         disp.style.transition = "none"; disp.style.opacity = "1";
 
-        // Datenbank-Check (TOKEN SAVER)
+        // 1. Datenbank-Check (Token-Saver)
         const cache = danceHistory.find(item => item.title.toLowerCase() === songTitle.toLowerCase());
         if(cache) {
             updateDisplay(cache.dance, true);
@@ -251,7 +237,10 @@
         if(timerOverride) clearTimeout(timerOverride);
         timerOverride = setTimeout(() => {
             disp.style.transition = "opacity 20s linear"; disp.style.opacity = "0";
-            setTimeout(() => { aiOverride = false; }, 20000);
+            setTimeout(() => { 
+                aiOverride = false; 
+                kiBtn.className = "header-btn btn-off"; // KI Button wieder blass
+            }, 20000);
         }, 1000);
     }
 
@@ -263,20 +252,19 @@
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
                 body: JSON.stringify({
                     model: "gpt-4o-mini", 
-                    messages: [{role: "user", content: `Lied: '${song}'. Wähle den besten Tanz aus dieser Liste: ${preferredDances.join(", ")}. Antworte STRIKT nur mit dem Namen.`}], 
+                    messages: [{role: "user", content: `Lied: '${song}'. Wähle aus: ${preferredDances.join(", ")}. Nur Tanznamen nennen.`}], 
                     max_tokens: 15
                 })
             });
             const d = await resp.json();
             const result = d.choices[0].message.content.trim();
             
-            // In DB speichern
             danceHistory.push({title: song, dance: result});
             localStorage.setItem('dm_history', JSON.stringify(danceHistory));
             
             updateDisplay(result, true);
             const topic = localStorage.getItem('dm_topic');
-            if(topic) fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${result}`, headers: {'Title': 'Tanz erkannt', 'Priority': '5'} });
+            if(topic) fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${result}` });
         } catch(e) { aiOverride = false; }
     }
 
@@ -285,7 +273,9 @@
         const disco = document.getElementById('disco-mode').checked;
         n.innerText = dance;
         
-        if(fromAIOrDB) n.classList.add('is-verified'); else n.classList.remove('is-verified');
+        // ✨ Stern hinzufügen wenn KI/DB Treffer
+        if(fromAIOrDB) n.parentElement.classList.add('is-verified'); 
+        else n.parentElement.classList.remove('is-verified');
         
         if(disco) {
             n.classList.add('disco-pulse');
@@ -326,7 +316,6 @@
         }
     }
 
-    // --- SETTINGS HELPER ---
     function saveSettings() {
         const k = document.getElementById('api-key').value.trim();
         const t = document.getElementById('topic-id').value.trim();
@@ -338,7 +327,7 @@
 
     function renderPrefs() {
         document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => 
-            `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></div>`
+            `<div class="tag">${d}<span style="margin-left:8px; cursor:pointer" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></div>`
         ).join('');
     }
     function addPref() {
@@ -351,7 +340,7 @@
         const list = document.getElementById('history-list');
         list.innerHTML = danceHistory.slice().reverse().map((item, idx) => {
             const realIdx = danceHistory.length - 1 - idx;
-            return `<div class="hist-item"><span>${item.title}</span><input type="text" value="${item.dance}" onchange="danceHistory[${realIdx}].dance=this.value; localStorage.setItem('dm_history', JSON.stringify(danceHistory))"><span style="color:var(--red)" onclick="danceHistory.splice(${realIdx},1);toggleHistory();toggleHistory()">✕</span></div>`;
+            return `<div class="hist-item"><span>${item.title}</span><input type="text" value="${item.dance}" onchange="danceHistory[${realIdx}].dance=this.value; localStorage.setItem('dm_history', JSON.stringify(danceHistory))"><span style="color:var(--red); cursor:pointer" onclick="danceHistory.splice(${realIdx},1);toggleHistory();toggleHistory()">✕</span></div>`;
         }).join('');
     }
     function testFunk() { fetch(`https://ntfy.sh/${document.getElementById('topic-id').value || localStorage.getItem('dm_topic')}`, { method: 'POST', body: 'Test-Signal' }); }
@@ -367,7 +356,7 @@
     }
     function importDB(e) {
         const reader = new FileReader();
-        reader.onload = (ev) => { danceHistory = JSON.parse(ev.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); alert("Geladen!"); };
+        reader.onload = (ev) => { danceHistory = JSON.parse(ev.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); alert("Datenbank geladen!"); };
         reader.readAsText(e.target.files[0]);
     }
 </script>
