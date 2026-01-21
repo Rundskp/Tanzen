@@ -15,8 +15,8 @@
         #dance-name { font-size: clamp(2.5rem, 12vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; }
         #bpm-val { font-size: 6rem; color: var(--green); font-family: monospace; font-weight: 900; line-height: 1; }
         #song-title { font-size: 1.2rem; color: var(--yellow); font-weight: bold; min-height: 1.5em; }
-        #log { font-size: 0.7rem; color: #666; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; width: 80%; }
-        #settings { display: none; position: fixed; inset: 0; background: #000; z-index: 4000; padding: 40px 20px; flex-direction: column; align-items: center; }
+        #status-log { font-size: 0.75rem; color: #666; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; width: 80%; }
+        #settings { display: none; position: fixed; inset: 0; background: #000; z-index: 4000; padding: 40px 20px; flex-direction: column; align-items: center; overflow-y: auto; }
         input { background: #1a1b20; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; width: 85%; margin-bottom: 10px; }
     </style>
 </head>
@@ -34,7 +34,7 @@
     <div id="takt-label" style="color:var(--blue); font-weight:bold;">---</div>
     <h1 id="dance-name">STOP</h1>
     <div id="bpm-val">0</div>
-    <div id="log">Status: Bereit</div>
+    <div id="status-log">Warte auf Signal...</div>
 </div>
 
 <div id="settings">
@@ -48,7 +48,6 @@
 
 <script>
     let audioCtx, analyser, processor, lastBeat = 0, bpmBuf = [], currentMode = 'aus';
-    let preferredDances = ["Langsamer Walzer", "Wiener Walzer", "Rumba", "Cha Cha Cha", "Discofox"];
 
     window.onload = () => {
         const topic = localStorage.getItem('dm_topic');
@@ -60,17 +59,10 @@
         document.getElementById('btn-lokal').classList.toggle('active-lokal', mode === 'lokal');
         document.getElementById('btn-ki').classList.toggle('active-ki', mode === 'ki');
         document.getElementById('bpm-val').innerText = "0";
+        document.getElementById('status-log').innerText = mode === 'ki' ? "KI bereit. Warte auf Signal..." : "Modus gewechselt.";
         
-        if (mode === 'lokal') {
-            document.getElementById('song-title').innerText = "Lokale Analyse...";
-            startMic();
-        } else if (mode === 'ki') {
-            document.getElementById('song-title').innerText = "Warte auf Uhr-Scan...";
-            if(audioCtx) audioCtx.suspend();
-        } else {
-            document.getElementById('song-title').innerText = "Pause";
-            if(audioCtx) audioCtx.suspend();
-        }
+        if (mode === 'lokal') startMic();
+        else if (audioCtx) audioCtx.suspend();
     }
 
     async function startMic() {
@@ -104,7 +96,6 @@
             const is34 = (now - lastBeat > 500 && now - lastBeat < 880);
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             document.getElementById('dance-name').innerText = is34 ? "WALZER" : "4/4 TANZ";
-            document.getElementById('dance-name').style.color = "#fff";
         }
     }
 
@@ -113,11 +104,15 @@
         ev.onmessage = (e) => {
             const d = JSON.parse(e.data);
             if (d.message && !d.message.includes("💃")) {
-                document.getElementById('log').innerText = "Signal empfangen: " + d.message;
+                document.getElementById('status-log').innerText = "📡 Signal empfangen: " + d.message;
                 if (currentMode === 'ki') {
-                    document.getElementById('song-title').innerText = "📡 " + d.message;
+                    document.getElementById('song-title').innerText = d.message;
                     askAI(d.message);
                 }
+            }
+            if (d.message && d.message.includes("💃")) {
+                document.getElementById('dance-name').innerText = d.message.replace("💃", "").trim();
+                document.getElementById('dance-name').style.color = "var(--yellow)";
             }
         };
     }
@@ -129,14 +124,12 @@
             const resp = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: `Welcher Tanz zu '${song}'? Aus: ${preferredDances.join(",")}. Nur 1 Wort.` }], max_tokens: 20 })
+                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: `Tanz zu '${song}'? Nur der Name.` }], max_tokens: 15 })
             });
             const data = await resp.json();
             const result = data.choices[0].message.content.trim();
-            document.getElementById('dance-name').innerText = result;
-            document.getElementById('dance-name').style.color = "var(--yellow)";
             fetch(`https://ntfy.sh/${localStorage.getItem('dm_topic')}`, { method: 'POST', body: `💃 ${result}` });
-        } catch (e) { document.getElementById('log').innerText = "KI Fehler!"; }
+        } catch (e) { document.getElementById('status-log').innerText = "KI Fehler!"; }
     }
 
     function toggleSettings() {
