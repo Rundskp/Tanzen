@@ -32,7 +32,6 @@
         .is-verified #dance-name { color: var(--yellow); }
         .is-verified .ai-badge { display: inline-block; }
 
-        /* Disco Pulse Animation */
         @keyframes disco-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
         .disco-active { animation: disco-pulse 0.4s infinite ease-in-out; }
 
@@ -43,7 +42,7 @@
         #video-container { width: min(700px, 95%); max-height: 20vh; background: var(--card); border-radius: 20px; padding: 8px; border: 1px solid rgba(255,255,255,0.1); display: none; overflow: hidden; }
         video { width: 100%; max-height: 18vh; border-radius: 12px; object-fit: contain; }
 
-        /* Settings - iPad Optimiert (max 720px) */
+        /* Settings */
         #settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 4000; padding: 20px; overflow-y: auto; }
         .settings-card { background: #15161a; padding: 30px; border-radius: 35px; width: 95%; max-width: 720px; margin: auto; border: 1px solid #333; }
         
@@ -67,6 +66,21 @@
         .btn-act { padding: 20px; border-radius: 15px; font-weight: 800; font-size: 1.2rem; cursor: pointer; border: none; }
         .btn-save { background: var(--green); color: white; }
         .btn-cancel { background: #222; color: #777; }
+
+        /* --- NUR HANDY PORTRAIT OPTIMIERUNGEN --- */
+        @media (max-width: 600px) and (orientation: portrait) {
+            /* Settings Zeilen umbrechen */
+            .row { flex-direction: column; align-items: stretch; gap: 10px; }
+            .row label { margin-bottom: 5px; }
+            .input-group { width: 100%; flex-wrap: wrap; justify-content: space-between; }
+            /* API/Funk Key kriegt eigene Zeile */
+            input[type="text"], input[type="password"] { width: 100%; flex: none; margin-top: 5px; }
+            
+            /* Datenbank Tabelle: Datum weg */
+            .hist-table-header { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
+            .hist-item { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
+            .hist-table-header span:first-child, .hist-item span:first-child { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -305,7 +319,6 @@
         if(verified) document.getElementById('monitor').classList.add('is-verified');
         else document.getElementById('monitor').classList.remove('is-verified');
 
-        // Disco Modus anwenden
         if(disco) {
             nameEl.classList.add('disco-active');
             bpmEl.classList.add('disco-active');
