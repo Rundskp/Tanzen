@@ -69,42 +69,42 @@
 
         /* --- HANDY PORTRAIT OPTIMIERUNGEN --- */
         @media (max-width: 600px) and (orientation: portrait) {
-            /* Zeilenumbruch NUR für API und Funk Zeilen */
+            /* API & Funk: Grid zwingt Label+Button nach oben, Input nach unten */
             .row:has(input[type="password"]), 
             .row:has(input[id="topic-id"]) { 
-                flex-wrap: wrap;
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 8px;
             }
             
-            /* Label und Button nebeneinander lassen */
             .row:has(input[type="password"]) label,
-            .row:has(input[id="topic-id"]) label {
-                flex: 1;
-            }
+            .row:has(input[id="topic-id"]) label { grid-column: 1; align-self: center; }
+            
+            /* Der Button rutscht in Zeile 1 ganz nach rechts */
+            .row:has(input[type="password"]) .btn-test,
+            .row:has(input[id="topic-id"]) .btn-test { grid-column: 2; grid-row: 1; }
 
+            /* Das Input-Feld bekommt eine eigene Zeile (spannt über beide Spalten) */
             .row:has(input[type="password"]) .input-group,
-            .row:has(input[id="topic-id"]) .input-group {
-                width: 100%;
-                flex-wrap: wrap;
-                justify-content: flex-start;
+            .row:has(input[id="topic-id"]) .input-group { 
+                grid-column: span 2; 
+                width: 100%; 
                 margin-top: 5px;
             }
+            
+            /* Eingabefelder volle Breite ohne Buttons daneben */
+            input[type="text"], input[type="password"] { width: 100%; }
 
-            /* Test-Button bleibt oben beim Label (per CSS Verschiebung im flex-wrap) */
-            .btn-test { margin-left: auto; order: -1; }
-
-            /* Text-Inputs volle Breite in neuer Zeile */
-            input[type="text"], input[type="password"] { 
-                width: 100%; 
-                flex: none; 
-                margin-top: 8px; 
-            }
-
-            /* Disco-Modus und Video-Tempo bleiben in einer Zeile */
+            /* Disco & Tempo: Flexbox nebeneinander lassen */
             .row:has(input[type="checkbox"]),
             .row:has(.speed-btn) {
+                display: flex;
                 flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
                 flex-wrap: nowrap;
             }
+            .row:has(.speed-btn) .input-group { width: auto; }
             
             /* Datenbank-Tabelle: Datum-Spalte ausblenden */
             .hist-table-header { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
@@ -146,22 +146,22 @@
 
 <div id="settings">
     <div class="settings-card">
-        <h1 style="margin:0 0 25px 0; color:var(--blue); font-size: 1.8rem;">Tanz das! Setup</h1>
+        <h1 style="margin:0 0 25px 0; color:var(--blue); font-size: 1.8rem;">Tanz das! Einstellungen</h1>
         
         <div class="row">
             <label>API Key</label>
             <div class="input-group">
-                <button onclick="testAI()" class="btn-test">TEST</button>
                 <input type="password" id="api-key" placeholder="sk-...">
             </div>
+            <button onclick="testAI()" class="btn-test">TEST</button>
         </div>
         
         <div class="row">
             <label>Funk-Topic</label>
             <div class="input-group">
-                <button onclick="testFunk()" class="btn-test">TEST</button>
                 <input type="text" id="topic-id" placeholder="Kanalname...">
             </div>
+            <button onclick="testFunk()" class="btn-test">TEST</button>
         </div>
 
         <div class="row">
