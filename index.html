@@ -11,7 +11,7 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: #e8e8e8; font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* Header & Buttons */
+        /* Header */
         #top-bar { display: grid; grid-template-columns: 100px 1fr 140px; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); flex-shrink: 0; }
         .header-btn { border: none; padding: 10px 0; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s; width: 85px; text-align: center; }
         .btn-off { background: rgba(255,255,255,0.05); color: #444; }
@@ -69,48 +69,22 @@
 
         /* --- HANDY PORTRAIT OPTIMIERUNGEN --- */
         @media (max-width: 600px) and (orientation: portrait) {
-            /* API & Funk: Grid zwingt Label+Button nach oben, Input nach unten */
-            .row:has(input[type="password"]), 
-            .row:has(input[id="topic-id"]) { 
-                display: grid;
-                grid-template-columns: 1fr auto;
-                gap: 8px;
+            /* API & Funk: Label + Button oben, Input darunter */
+            .row.stackable { 
+                display: grid; 
+                grid-template-columns: 1fr auto; 
+                gap: 10px; 
             }
-            
-            .row:has(input[type="password"]) label,
-            .row:has(input[id="topic-id"]) label { grid-column: 1; align-self: center; }
-            
-            /* Der Button rutscht in Zeile 1 ganz nach rechts */
-            .row:has(input[type="password"]) .btn-test,
-            .row:has(input[id="topic-id"]) .btn-test { grid-column: 2; grid-row: 1; }
-
-            /* Das Input-Feld bekommt eine eigene Zeile (spannt über beide Spalten) */
-            .row:has(input[type="password"]) .input-group,
-            .row:has(input[id="topic-id"]) .input-group { 
+            .row.stackable .input-group { 
                 grid-column: span 2; 
                 width: 100%; 
-                margin-top: 5px;
             }
-            
-            /* Eingabefelder volle Breite ohne Buttons daneben */
-            input[type="text"], input[type="password"] { width: 100%; }
+            .row.stackable input { width: 100%; }
 
-            /* Disco & Tempo: Flexbox nebeneinander lassen */
-            .row:has(input[type="checkbox"]),
-            .row:has(.speed-btn) {
-                display: flex;
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: nowrap;
-            }
-            .row:has(.speed-btn) .input-group { width: auto; }
-            
-            /* Datenbank-Tabelle: Datum-Spalte ausblenden */
+            /* Datenbank Tabelle: Datum weg */
             .hist-table-header { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
             .hist-item { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
-            .hist-table-header span:first-child, 
-            .hist-item span:first-child { display: none; }
+            .hist-table-header span:first-child, .hist-item span:first-child { display: none; }
         }
     </style>
 </head>
@@ -128,40 +102,31 @@
 <div id="monitor">
     <div id="song-display">---</div>
     <div id="takt-label">ANALYSE...</div>
-    
     <div class="dance-wrap">
         <h1 id="dance-name">BEREIT</h1>
         <div class="ai-badge">✨</div>
     </div>
-
     <div id="bpm-display">
         <div id="bpm-val">0</div>
         <div class="bpm-label">BPM LIVE</div>
     </div>
-
-    <div id="video-container">
-        <video id="dance-video" playsinline muted loop autoplay></video>
-    </div>
+    <div id="video-container"><video id="dance-video" playsinline muted loop autoplay></video></div>
 </div>
 
 <div id="settings">
     <div class="settings-card">
         <h1 style="margin:0 0 25px 0; color:var(--blue); font-size: 1.8rem;">Tanz das! Einstellungen</h1>
         
-        <div class="row">
+        <div class="row stackable">
             <label>API Key</label>
-            <div class="input-group">
-                <input type="password" id="api-key" placeholder="sk-...">
-            </div>
             <button onclick="testAI()" class="btn-test">TEST</button>
+            <div class="input-group"><input type="password" id="api-key" placeholder="sk-..."></div>
         </div>
         
-        <div class="row">
+        <div class="row stackable">
             <label>Funk-Topic</label>
-            <div class="input-group">
-                <input type="text" id="topic-id" placeholder="Kanalname...">
-            </div>
             <button onclick="testFunk()" class="btn-test">TEST</button>
+            <div class="input-group"><input type="text" id="topic-id" placeholder="Kanalname..."></div>
         </div>
 
         <div class="row">
@@ -191,11 +156,11 @@
         
         <div id="history-box">
             <div class="hist-table-header">
-                <span onclick="sortHist('date')">DATUM ⇅</span>
-                <span onclick="sortHist('title')">TITEL ⇅</span>
-                <span onclick="sortHist('dance')">TANZ ⇅</span>
-                <span onclick="sortHist('partner')">PARTNER ⇅</span>
-                <span onclick="sortHist('stars')">⭐ ⇅</span>
+                <span>DATUM ⇅</span>
+                <span>TITEL ⇅</span>
+                <span>TANZ ⇅</span>
+                <span>PARTNER ⇅</span>
+                <span>⭐ ⇅</span>
                 <span></span>
             </div>
             <div id="history-list"></div>
@@ -228,14 +193,12 @@
     };
 
     function setGlobalSpeed(val) {
-        globalSpeed = val;
-        localStorage.setItem('dm_speed', val);
+        globalSpeed = val; localStorage.setItem('dm_speed', val);
         document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-        if(val === 0.25) document.getElementById('spd-025').classList.add('active');
-        if(val === 0.5) document.getElementById('spd-05').classList.add('active');
-        if(val === 1.0) document.getElementById('spd-1').classList.add('active');
-        const v = document.getElementById('dance-video');
-        if(v) v.playbackRate = val;
+        if(document.getElementById('spd-025') && val === 0.25) document.getElementById('spd-025').classList.add('active');
+        if(document.getElementById('spd-05') && val === 0.5) document.getElementById('spd-05').classList.add('active');
+        if(document.getElementById('spd-1') && val === 1.0) document.getElementById('spd-1').classList.add('active');
+        const v = document.getElementById('dance-video'); if(v) v.playbackRate = val;
     }
 
     function toggleSettings() {
@@ -252,7 +215,6 @@
             const s = await navigator.mediaDevices.getUserMedia({audio: true});
             const src = audioCtx.createMediaStreamSource(s);
             analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 1024;
             processor = audioCtx.createScriptProcessor(2048, 1, 1);
             src.connect(analyser); analyser.connect(processor); processor.connect(audioCtx.destination);
             processor.onaudioprocess = (e) => {
@@ -267,7 +229,6 @@
             isRunning = true;
             document.getElementById('btn-local').className = "header-btn btn-on-local";
             document.getElementById('mic-btn').innerText = "STOP";
-            document.getElementById('btn-ki').className = "header-btn btn-off";
         } catch(e) { alert("Mikro-Zugriff!"); }
     }
 
@@ -277,12 +238,21 @@
             bpmBuf.push(bpm); if(bpmBuf.length > 20) bpmBuf.shift();
             const avg = Math.round(bpmBuf.reduce((a,b)=>a+b)/bpmBuf.length);
             document.getElementById('bpm-val').innerText = avg;
-            const interval = now - lastBeat;
-            const is34 = (interval > 480 && interval < 890);
+            const is34 = (now - lastBeat > 480 && now - lastBeat < 890);
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
+            
             if(!aiOverride) {
-                let cand = is34 ? (avg > 148 ? "Wiener Walzer" : "Langsamer Walzer") :
-                           (avg < 95 ? "Rumba" : avg < 115 ? "Cha Cha Cha" : "Discofox");
+                // Lokale Logik nutzt preferredDances
+                let cand = "BEREIT";
+                if(is34) {
+                    cand = (avg > 148) ? 
+                        (preferredDances.includes("Wiener Walzer") ? "Wiener Walzer" : "Walzer") : 
+                        (preferredDances.includes("Langsamer Walzer") ? "Langsamer Walzer" : "Walzer");
+                } else {
+                    if(avg < 95) cand = preferredDances.includes("Rumba") ? "Rumba" : "Langsamer Tanz";
+                    else if(avg < 118) cand = preferredDances.includes("Cha Cha Cha") ? "Cha Cha Cha" : "Rumba";
+                    else cand = preferredDances.includes("Discofox") ? "Discofox" : "Jive / Quickstep";
+                }
                 updateStableDance(cand);
             }
         }
@@ -314,10 +284,15 @@
         sd.innerText = title; sd.style.opacity = "1";
         const cache = danceHistory.find(h => h.title.toLowerCase() === title.toLowerCase());
         if(cache) updateDisplay(cache.dance, true); else askAI(title);
+        
         if(timerOverride) clearTimeout(timerOverride);
         timerOverride = setTimeout(() => {
             sd.style.opacity = "0";
-            setTimeout(() => { aiOverride = false; document.getElementById('btn-ki').className = "header-btn btn-off"; }, 1000);
+            // RESET NACH KI: Puffer leeren damit lokale Analyse sofort frisch startet
+            bpmBuf = []; 
+            danceVotes = {};
+            aiOverride = false; 
+            document.getElementById('btn-ki').className = "header-btn btn-off";
         }, 20000);
     }
 
@@ -341,25 +316,17 @@
 
     function updateDisplay(dance, verified) {
         const nameEl = document.getElementById('dance-name');
-        const bpmEl = document.getElementById('bpm-val');
-        const taktEl = document.getElementById('takt-label');
         const disco = document.getElementById('disco-toggle').checked;
-
         nameEl.innerText = dance.replace(/[.!?;:]+$/, "");
-        
         if(verified) document.getElementById('monitor').classList.add('is-verified');
         else document.getElementById('monitor').classList.remove('is-verified');
-
         if(disco) {
             nameEl.classList.add('disco-active');
-            bpmEl.classList.add('disco-active');
-            taktEl.classList.add('disco-active');
+            document.getElementById('bpm-val').classList.add('disco-active');
         } else {
             nameEl.classList.remove('disco-active');
-            bpmEl.classList.remove('disco-active');
-            taktEl.classList.remove('disco-active');
+            document.getElementById('bpm-val').classList.remove('disco-active');
         }
-
         const v = document.getElementById('dance-video');
         if (dance.toLowerCase().includes('walzer')) {
             document.getElementById('video-container').style.display = 'block';
@@ -381,7 +348,7 @@
         });
         list.innerHTML = filtered.map(h => {
             const idx = danceHistory.indexOf(h);
-            return `<div class="hist-item"><span style="font-size:0.7rem">${h.date}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.title}</span><input type="text" value="${h.dance}" onchange="danceHistory[${idx}].dance=this.value;saveH()"> <input type="text" value="${h.partner||''}" placeholder="..." onchange="danceHistory[${idx}].partner=this.value;saveH()"> <div class="stars">${renderStars(idx, h.stars)}</div><span onclick="delH(${idx})" style="color:var(--red);cursor:pointer;text-align:center">✕</span></div>`;
+            return `<div class="hist-item"><span>${h.date}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.title}</span><input type="text" value="${h.dance}" onchange="danceHistory[${idx}].dance=this.value;saveH()"> <input type="text" value="${h.partner||''}" placeholder="..." onchange="danceHistory[${idx}].partner=this.value;saveH()"> <div class="stars">${renderStars(idx, h.stars)}</div><span onclick="delH(${idx})" style="color:var(--red);cursor:pointer;text-align:center">✕</span></div>`;
         }).join('');
     }
     function renderStars(idx, count) {
@@ -404,11 +371,24 @@
         document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => `<div class="tag" style="background:var(--blue);color:white;padding:8px 15px;border-radius:12px;font-size:0.9rem;display:flex;align-items:center;">${d}<span style="margin-left:10px;cursor:pointer" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></div>`).join('');
     }
     function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v) { preferredDances.push(v); document.getElementById('new-pref').value=""; renderPrefs(); } }
-    function testFunk() { fetch(`https://ntfy.sh/${document.getElementById('topic-id').value || localStorage.getItem('dm_topic')}`, {method:'POST', body:'Test-Signal'}); alert("Signal gesendet!"); }
+    function testFunk() { 
+        const t = document.getElementById('topic-id').value || localStorage.getItem('dm_topic');
+        fetch(`https://ntfy.sh/${t}`, {method:'POST', body:'Test-Signal'}); alert("Signal gesendet!"); 
+    }
     async function testAI() {
-        const k = document.getElementById('api-key').value || localStorage.getItem('dm_key');
-        const r = await fetch('https://api.openai.com/v1/chat/completions', {method:'POST', headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "OK"}], max_tokens:5})});
-        alert(r.ok ? "KI Verbindung steht!" : "KI Fehler!");
+        // Fix: Liest den Key direkt aus dem Feld ODER Speicher
+        const k = document.getElementById('api-key').value.trim() || localStorage.getItem('dm_key');
+        if(!k) return alert("Bitte API Key eingeben!");
+        try {
+            const r = await fetch('https://api.openai.com/v1/chat/completions', {
+                method:'POST', 
+                headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
+                body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Antworte OK"}], max_tokens:5})
+            });
+            const data = await r.json();
+            if(data.choices) alert("KI Verbindung steht: " + data.choices[0].message.content);
+            else alert("API Fehler: " + (data.error ? data.error.message : "Unbekannt"));
+        } catch(e) { alert("Verbindung fehlgeschlagen!"); }
     }
 </script>
 </body>
