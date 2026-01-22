@@ -69,22 +69,29 @@
 
         /* --- HANDY PORTRAIT OPTIMIERUNGEN --- */
         @media (max-width: 600px) and (orientation: portrait) {
-            /* API & Funk: Label + Button oben, Input darunter */
+            /* API & Funk: Grid zwingt Label+Button nach oben, Input nach unten */
             .row.stackable { 
                 display: grid; 
                 grid-template-columns: 1fr auto; 
-                gap: 10px; 
+                gap: 8px; 
             }
+            .row.stackable label { grid-column: 1; align-self: center; }
+            .row.stackable .btn-test { grid-column: 2; grid-row: 1; }
             .row.stackable .input-group { 
                 grid-column: span 2; 
                 width: 100%; 
+                margin-top: 5px;
             }
-            .row.stackable input { width: 100%; }
+            input[type="text"], input[type="password"] { width: 100%; }
 
-            /* Datenbank Tabelle: Datum weg */
+            /* Disco & Tempo: Einzeilig lassen */
+            .row:not(.stackable) { flex-direction: row; flex-wrap: nowrap; }
+            
+            /* Datenbank-Tabelle: Datum-Spalte ausblenden */
             .hist-table-header { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
             .hist-item { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
-            .hist-table-header span:first-child, .hist-item span:first-child { display: none; }
+            .hist-table-header span:first-child, 
+            .hist-item span:first-child { display: none; }
         }
     </style>
 </head>
@@ -102,15 +109,20 @@
 <div id="monitor">
     <div id="song-display">---</div>
     <div id="takt-label">ANALYSE...</div>
+    
     <div class="dance-wrap">
         <h1 id="dance-name">BEREIT</h1>
         <div class="ai-badge">✨</div>
     </div>
+
     <div id="bpm-display">
         <div id="bpm-val">0</div>
         <div class="bpm-label">BPM LIVE</div>
     </div>
-    <div id="video-container"><video id="dance-video" playsinline muted loop autoplay></video></div>
+
+    <div id="video-container">
+        <video id="dance-video" playsinline muted loop autoplay></video>
+    </div>
 </div>
 
 <div id="settings">
@@ -120,13 +132,17 @@
         <div class="row stackable">
             <label>API Key</label>
             <button onclick="testAI()" class="btn-test">TEST</button>
-            <div class="input-group"><input type="password" id="api-key" placeholder="sk-..."></div>
+            <div class="input-group">
+                <input type="password" id="api-key" placeholder="sk-...">
+            </div>
         </div>
         
         <div class="row stackable">
             <label>Funk-Topic</label>
             <button onclick="testFunk()" class="btn-test">TEST</button>
-            <div class="input-group"><input type="text" id="topic-id" placeholder="Kanalname..."></div>
+            <div class="input-group">
+                <input type="text" id="topic-id" placeholder="Kanalname...">
+            </div>
         </div>
 
         <div class="row">
@@ -136,7 +152,7 @@
 
         <div class="row">
             <label>Video-Tempo</label>
-            <div class="input-group">
+            <div class="input-group" style="width:auto;">
                 <button onclick="setGlobalSpeed(0.25)" class="btn-test speed-btn" id="spd-025">1/4</button>
                 <button onclick="setGlobalSpeed(0.5)" class="btn-test speed-btn" id="spd-05">1/2</button>
                 <button onclick="setGlobalSpeed(1.0)" class="btn-test speed-btn" id="spd-1">1x</button>
@@ -176,7 +192,7 @@
 <script>
     let audioCtx, analyser, processor, isRunning = false;
     let lastBeat = 0, bpmBuf = [], aiOverride = false, timerOverride = null;
-    let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa"];
+    let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [], danceVotes = {}, stableDance = "BEREIT";
     let sortKey = 'date', sortDir = -1, globalSpeed = 1.0;
 
@@ -221,15 +237,16 @@
                 const d = e.inputBuffer.getChannelData(0);
                 let sum = 0; for(let i=0; i<d.length; i++) sum += d[i]*d[i];
                 const rms = Math.sqrt(sum/d.length);
-                if(rms * 100 > 0.35) {
+                if(rms * 100 > 0.45) { // Empfindlichkeit leicht gesenkt
                     const now = Date.now();
-                    if(now - lastBeat > 240) { handleBeat(now); lastBeat = now; }
+                    // Walking in Memphis Fix: Mindestabstand 330ms (~180 BPM Max)
+                    if(now - lastBeat > 330) { handleBeat(now); lastBeat = now; }
                 }
             };
             isRunning = true;
             document.getElementById('btn-local').className = "header-btn btn-on-local";
             document.getElementById('mic-btn').innerText = "STOP";
-        } catch(e) { alert("Mikro-Zugriff!"); }
+        } catch(e) { alert("Mikro-Fehler!"); }
     }
 
     function handleBeat(now) {
@@ -242,7 +259,6 @@
             document.getElementById('takt-label').innerText = is34 ? "3/4 TAKT" : "4/4 TAKT";
             
             if(!aiOverride) {
-                // Lokale Logik nutzt preferredDances
                 let cand = "BEREIT";
                 if(is34) {
                     cand = (avg > 148) ? 
@@ -275,23 +291,21 @@
         };
     }
 
-    function manualKiTrigger() { const s = prompt("Titel:"); if(s) handleShortcut(s); }
+    function manualKiTrigger() { const s = prompt("Lied:"); if(s) handleShortcut(s); }
 
     function handleShortcut(title) {
         aiOverride = true;
         document.getElementById('btn-ki').className = "header-btn btn-on-ki";
         const sd = document.getElementById('song-display');
         sd.innerText = title; sd.style.opacity = "1";
+        
         const cache = danceHistory.find(h => h.title.toLowerCase() === title.toLowerCase());
         if(cache) updateDisplay(cache.dance, true); else askAI(title);
         
         if(timerOverride) clearTimeout(timerOverride);
         timerOverride = setTimeout(() => {
             sd.style.opacity = "0";
-            // RESET NACH KI: Puffer leeren damit lokale Analyse sofort frisch startet
-            bpmBuf = []; 
-            danceVotes = {};
-            aiOverride = false; 
+            bpmBuf = []; danceVotes = {}; aiOverride = false; 
             document.getElementById('btn-ki').className = "header-btn btn-off";
         }, 20000);
     }
@@ -306,8 +320,17 @@
             });
             const d = await resp.json();
             let res = d.choices[0].message.content.trim().replace(/[.!?;:]+$/, "");
-            danceHistory.push({title: song, dance: res, date: new Date().toLocaleDateString('de-DE'), partner: "", stars: 0});
+            
+            // DATENBANK SPEICHERN FIX: Songtitel und Tanz korrekt zuordnen
+            danceHistory.push({
+                title: song, 
+                dance: res, 
+                date: new Date().toLocaleDateString('de-DE'), 
+                partner: "", 
+                stars: 0
+            });
             localStorage.setItem('dm_history', JSON.stringify(danceHistory));
+            
             updateDisplay(res, true);
             const topic = localStorage.getItem('dm_topic');
             if(topic) fetch(`https://ntfy.sh/${topic}`, { method: 'POST', body: `💃 ${res}` });
@@ -317,7 +340,7 @@
     function updateDisplay(dance, verified) {
         const nameEl = document.getElementById('dance-name');
         const disco = document.getElementById('disco-toggle').checked;
-        nameEl.innerText = dance.replace(/[.!?;:]+$/, "");
+        nameEl.innerText = dance;
         if(verified) document.getElementById('monitor').classList.add('is-verified');
         else document.getElementById('monitor').classList.remove('is-verified');
         if(disco) {
@@ -348,7 +371,7 @@
         });
         list.innerHTML = filtered.map(h => {
             const idx = danceHistory.indexOf(h);
-            return `<div class="hist-item"><span>${h.date}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.title}</span><input type="text" value="${h.dance}" onchange="danceHistory[${idx}].dance=this.value;saveH()"> <input type="text" value="${h.partner||''}" placeholder="..." onchange="danceHistory[${idx}].partner=this.value;saveH()"> <div class="stars">${renderStars(idx, h.stars)}</div><span onclick="delH(${idx})" style="color:var(--red);cursor:pointer;text-align:center">✕</span></div>`;
+            return `<div class="hist-item"><span>${h.date}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${h.title}">${h.title}</span><input type="text" value="${h.dance}" onchange="danceHistory[${idx}].dance=this.value;saveH()"> <input type="text" value="${h.partner||''}" placeholder="..." onchange="danceHistory[${idx}].partner=this.value;saveH()"> <div class="stars">${renderStars(idx, h.stars)}</div><span onclick="delH(${idx})" style="color:var(--red);cursor:pointer;text-align:center">✕</span></div>`;
         }).join('');
     }
     function renderStars(idx, count) {
@@ -371,12 +394,13 @@
         document.getElementById('pref-list').innerHTML = preferredDances.map((d, i) => `<div class="tag" style="background:var(--blue);color:white;padding:8px 15px;border-radius:12px;font-size:0.9rem;display:flex;align-items:center;">${d}<span style="margin-left:10px;cursor:pointer" onclick="preferredDances.splice(${i},1);renderPrefs()">×</span></div>`).join('');
     }
     function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v) { preferredDances.push(v); document.getElementById('new-pref').value=""; renderPrefs(); } }
+    
     function testFunk() { 
         const t = document.getElementById('topic-id').value || localStorage.getItem('dm_topic');
-        fetch(`https://ntfy.sh/${t}`, {method:'POST', body:'Test-Signal'}); alert("Signal gesendet!"); 
+        fetch(`https://ntfy.sh/${t}`, {method:'POST', body:'Test-Signal'}).then(() => alert("Signal gesendet!")); 
     }
+    
     async function testAI() {
-        // Fix: Liest den Key direkt aus dem Feld ODER Speicher
         const k = document.getElementById('api-key').value.trim() || localStorage.getItem('dm_key');
         if(!k) return alert("Bitte API Key eingeben!");
         try {
@@ -387,7 +411,7 @@
             });
             const data = await r.json();
             if(data.choices) alert("KI Verbindung steht: " + data.choices[0].message.content);
-            else alert("API Fehler: " + (data.error ? data.error.message : "Unbekannt"));
+            else alert("Fehler: " + (data.error?.message || "Checke Key!"));
         } catch(e) { alert("Verbindung fehlgeschlagen!"); }
     }
 </script>
