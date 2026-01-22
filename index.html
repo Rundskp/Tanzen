@@ -67,19 +67,50 @@
         .btn-save { background: var(--green); color: white; }
         .btn-cancel { background: #222; color: #777; }
 
-        /* --- NUR HANDY PORTRAIT OPTIMIERUNGEN --- */
+        /* --- HANDY PORTRAIT OPTIMIERUNGEN --- */
         @media (max-width: 600px) and (orientation: portrait) {
-            /* Settings Zeilen umbrechen */
-            .row { flex-direction: column; align-items: stretch; gap: 10px; }
-            .row label { margin-bottom: 5px; }
-            .input-group { width: 100%; flex-wrap: wrap; justify-content: space-between; }
-            /* API/Funk Key kriegt eigene Zeile */
-            input[type="text"], input[type="password"] { width: 100%; flex: none; margin-top: 5px; }
+            /* Zeilenumbruch NUR für API und Funk Zeilen */
+            .row:has(input[type="password"]), 
+            .row:has(input[id="topic-id"]) { 
+                flex-wrap: wrap;
+            }
             
-            /* Datenbank Tabelle: Datum weg */
+            /* Label und Button nebeneinander lassen */
+            .row:has(input[type="password"]) label,
+            .row:has(input[id="topic-id"]) label {
+                flex: 1;
+            }
+
+            .row:has(input[type="password"]) .input-group,
+            .row:has(input[id="topic-id"]) .input-group {
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                margin-top: 5px;
+            }
+
+            /* Test-Button bleibt oben beim Label (per CSS Verschiebung im flex-wrap) */
+            .btn-test { margin-left: auto; order: -1; }
+
+            /* Text-Inputs volle Breite in neuer Zeile */
+            input[type="text"], input[type="password"] { 
+                width: 100%; 
+                flex: none; 
+                margin-top: 8px; 
+            }
+
+            /* Disco-Modus und Video-Tempo bleiben in einer Zeile */
+            .row:has(input[type="checkbox"]),
+            .row:has(.speed-btn) {
+                flex-direction: row;
+                flex-wrap: nowrap;
+            }
+            
+            /* Datenbank-Tabelle: Datum-Spalte ausblenden */
             .hist-table-header { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
             .hist-item { grid-template-columns: 1.4fr 1fr 1fr 150px 30px; }
-            .hist-table-header span:first-child, .hist-item span:first-child { display: none; }
+            .hist-table-header span:first-child, 
+            .hist-item span:first-child { display: none; }
         }
     </style>
 </head>
