@@ -396,7 +396,6 @@ window.onload = () => {
   }
   UI.apiKey().value = localStorage.getItem('api_key') || '';
   // NTFY topic (from URL ?t= or localStorage)
-  const params = new URLSearchParams(window.location.search);
   const t = params.get('t') || localStorage.getItem('ntfy_topic') || '';
   const topicInput = document.getElementById('ntfy-topic');
   if (topicInput) topicInput.value = t;
