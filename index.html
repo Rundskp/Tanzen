@@ -22,7 +22,7 @@
         #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; }
         
         /* Linker Hauptbereich */
-        #main-display { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 10px; z-index: 2; }
+        #main-display { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 10px; z-index: 2; width: 100%; }
 
         #song-info { width: 100%; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; }
         #song-title { font-size: 1.3rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
@@ -50,7 +50,7 @@
         .stat-label { font-size: 0.7rem; letter-spacing: 2px; font-weight: bold; color: #555; margin-top: 5px; }
 
         /* Rechter Regler Bereich */
-        #slider-sidebar { width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); padding: 10px 0; z-index: 10; }
+        #slider-sidebar { width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); padding: 10px 0; z-index: 10; flex-shrink: 0; }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
         
         /* Vertikaler Slider Hack */
@@ -62,6 +62,7 @@
             outline: none;
             background: #333;
             border-radius: 4px;
+            cursor: pointer;
         }
         /* Level Meter Hintergrund */
         #level-meter {
@@ -91,6 +92,8 @@
         /* Slider Horizontal */
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
+        
+        input[type="checkbox"] { transform: scale(1.5); accent-color: var(--blue); }
 
         /* Preferred Dances Tags */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
@@ -326,7 +329,7 @@
     let danceHistory = [];
     let sortKey = 'date', sortDir = -1;
     
-    // Default Ranges from Infographic
+    // Default Ranges
     const defaultRanges = {
         "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "-" },
         "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "1 2 3" },
@@ -342,7 +345,6 @@
     };
     let expertRanges = JSON.parse(JSON.stringify(defaultRanges));
 
-    // Video Library
     const videoLibrary = {
         "Cha Cha Cha": {
             file: "media/chacha.mp4",
@@ -365,7 +367,6 @@
     window.onload = () => {
         loadData();
         
-        // Setup Inputs
         document.getElementById('api-key').value = localStorage.getItem('dm_key') || "";
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
@@ -394,7 +395,7 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-    /* --- UI & OVERLAYS --- */
+    /* --- UI --- */
     function openOverlay(id) {
         document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -405,12 +406,10 @@
         const v = document.getElementById('main-video');
         if(!v.paused) v.pause();
     }
-    
     function updateSpeedLabel(val) {
         playbackSpeed = parseFloat(val);
         document.getElementById('speed-val').innerText = playbackSpeed + "x";
     }
-
     function saveSettings() {
         localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
         localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
@@ -419,7 +418,6 @@
         localStorage.setItem('dm_speed', playbackSpeed);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
         
-        // Save Expert Ranges
         const inputs = document.querySelectorAll('.expert-input');
         inputs.forEach(inp => {
             const dance = inp.dataset.dance;
@@ -427,14 +425,11 @@
             if(expertRanges[dance]) expertRanges[dance][type] = parseInt(inp.value);
         });
         localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
-        
         location.reload();
     }
-
     function updateSens(val) {
         document.getElementById('main-sens').value = val;
         document.getElementById('sens-val-display').innerText = val;
-        // Simple mapping: 1-100 to appropriate rms threshold (approx 0.001 to 0.1)
         micSens = val / 1000; 
         localStorage.setItem('dm_sens', val);
     }
@@ -449,6 +444,7 @@
             btn.innerText = "START";
             btn.classList.remove('active');
             document.getElementById('level-meter').style.height = "0%";
+            bpmBuffer = []; lastBeat = 0; // Reset
         }
     }
 
@@ -456,6 +452,10 @@
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Resume Context (wichtig für iOS)
+            if(audioCtx.state === 'suspended') await audioCtx.resume();
+            
             const source = audioCtx.createMediaStreamSource(stream);
             analyser = audioCtx.createAnalyser();
             processor = audioCtx.createScriptProcessor(2048, 1, 1);
@@ -475,8 +475,6 @@
                 for(let i=0; i<data.length; i++) sum += data[i]*data[i];
                 const rms = Math.sqrt(sum/data.length);
                 
-                // Visual Level Meter (Green Bar)
-                // Normalize visualization: if rms is 0.1 -> 100%
                 const level = Math.min(100, rms * 1000); 
                 document.getElementById('level-meter').style.height = level + "%";
 
@@ -485,14 +483,12 @@
                     if(now - lastBeat > 300) { 
                         processBeat(now);
                         lastBeat = now;
-                        
-                        // Flash background on beat
                         document.getElementById('level-meter').style.background = "rgba(52, 199, 89, 0.8)";
                         setTimeout(()=>document.getElementById('level-meter').style.background = "rgba(52, 199, 89, 0.2)", 100);
                     }
                 }
             };
-        } catch(e) { alert("Mikrofon Fehler: " + e); }
+        } catch(e) { alert("Mikrofon Fehler (bitte erlauben): " + e); }
     }
 
     function processBeat(now) {
@@ -522,25 +518,16 @@
                 matches.push({ name: dance, tact: range.tact, rhythm: range.rhythm });
             }
         }
-
         if(matches.length === 0) {
             updateDisplay("---", "--", "", false);
             return;
         }
-
-        // Logic: Filter by Preferred
-        const preferredMatches = matches.filter(m => 
-            preferredDances.some(p => m.name.toLowerCase().includes(p.toLowerCase()))
-        );
-
+        const preferredMatches = matches.filter(m => preferredDances.some(p => m.name.toLowerCase().includes(p.toLowerCase())));
         let winner = preferredMatches.length > 0 ? preferredMatches[0] : matches[0];
-        
-        // Anti-Discofox Bias: If we have multiple preferred matches, pick non-disco if possible
         if(preferredMatches.length > 1) {
             const nonDisco = preferredMatches.find(m => !m.name.toLowerCase().includes("disco"));
             if(nonDisco) winner = nonDisco;
         }
-
         updateDisplay(winner.name, winner.tact, winner.rhythm, false);
     }
 
@@ -548,14 +535,12 @@
         document.getElementById('dance-name').innerText = dance;
         document.getElementById('takt-display').innerText = tact;
         document.getElementById('badge-rhythm').innerText = rhythm;
-        
         const m = document.getElementById('dance-name');
         if(verified) m.classList.add('verified'); else m.classList.remove('verified');
-        
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- CLOUD / AI LOGIC --- */
+    /* --- CLOUD / AI --- */
     function connectNtfy(topic) {
         const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
         es.onmessage = (e) => {
@@ -564,28 +549,33 @@
         };
     }
     
-    // Parse JSON helper (robust)
+    // Robuster Parser für das "Doppelt-JSON" Problem
     function cleanTitle(input) {
         if(!input) return "";
         try {
+            // Falls Input ein String ist, der wie JSON aussieht (z.B. "{\"message\":...}")
+            if(typeof input === 'string' && (input.startsWith('{') || input.startsWith('"'))) {
+                 const parsed = JSON.parse(input);
+                 return cleanTitle(parsed); // Rekursion
+            }
+            // Falls Input ein Objekt ist
             if(typeof input === 'object') {
                 if(input.body) return cleanTitle(input.body);
                 if(input.message) return cleanTitle(input.message);
                 if(input.title) return input.title;
             }
-            if(typeof input === 'string' && input.startsWith('{')) return cleanTitle(JSON.parse(input));
         } catch(e) {}
+        // Wenn kein JSON mehr, ist es wohl der String
         return input;
     }
 
     function handleExternalInput(rawStr) {
         let clean = cleanTitle(rawStr);
-        if(!clean || clean.includes("Test")) return;
+        if(!clean || typeof clean !== 'string' || clean.includes("Test")) return;
         
-        // Format assumption: "Artist - Title" (Shazam default)
         let artist = "Unbekannt";
         let title = clean;
-        if(typeof clean === 'string' && clean.includes("-")) {
+        if(clean.includes("-")) {
             const parts = clean.split("-");
             artist = parts[0].trim();
             title = parts.slice(1).join("-").trim();
@@ -595,13 +585,10 @@
         document.getElementById('song-artist').innerText = artist;
         document.getElementById('song-info').style.opacity = 1;
 
-        // 1. COST CHECK: Check Database
-        const cached = danceHistory.find(x => 
-            x.title.toLowerCase().trim() === title.toLowerCase().trim()
-        );
+        const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
 
         aiLocked = true;
-        if(isListening) mainAction(); // Stop local
+        if(isListening) mainAction(); 
         
         if(cached) {
             updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
@@ -638,7 +625,6 @@
             const content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
             const result = JSON.parse(content);
 
-            // Save to DB
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
                 title: title,
@@ -663,10 +649,10 @@
         setTimeout(() => {
             document.getElementById('mic-btn').classList.remove('ai-mode');
             aiLocked = false;
-        }, 30000); // Lock for 30s so user can see result
+        }, 30000); 
     }
 
-    /* --- HISTORY & PREFS --- */
+    /* --- HELPERS --- */
     function renderPrefs() {
         const list = document.getElementById('pref-list');
         list.innerHTML = preferredDances.map((d,i) => 
@@ -681,26 +667,15 @@
             renderPrefs();
         }
     }
-
     function renderHistory() {
-        const f = document.getElementById('hist-filter').value.toLowerCase();
+        const f = document.getElementById('search-hist').value.toLowerCase();
         const list = document.getElementById('history-list');
-        
-        let filtered = danceHistory.filter(h => 
-            h.title.toLowerCase().includes(f) || 
-            (h.artist && h.artist.toLowerCase().includes(f)) || 
-            h.dance.toLowerCase().includes(f)
-        );
+        let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f) || (h.artist && h.artist.toLowerCase().includes(f)) || h.dance.toLowerCase().includes(f));
 
         filtered.sort((a,b) => {
             let va = a[sortKey] || '', vb = b[sortKey] || '';
-            if(sortKey === 'date') { 
-                va = va.split('.').reverse().join('');
-                vb = vb.split('.').reverse().join('');
-            }
-            if(va < vb) return -1 * sortDir;
-            if(va > vb) return 1 * sortDir;
-            return 0;
+            if(sortKey === 'date') { va = va.split('.').reverse().join(''); vb = vb.split('.').reverse().join(''); }
+            if(va < vb) return -1 * sortDir; if(va > vb) return 1 * sortDir; return 0;
         });
 
         list.innerHTML = filtered.map(h => {
@@ -716,16 +691,10 @@
             </div>`;
         }).join('');
     }
-
-    function renderStars(idx, n) {
-        let s = "";
-        for(let i=1; i<=5; i++) s += `<span class="${i<=n?'active':''}" onclick="setStar(${idx},${i})">★</span>`;
-        return s;
-    }
+    function renderStars(idx, n) { let s = ""; for(let i=1; i<=5; i++) s += `<span class="${i<=n?'active':''}" onclick="setStar(${idx},${i})">★</span>`; return s; }
     function setStar(idx, n) { danceHistory[idx].stars = n; localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); }
     function delHist(idx) { if(confirm("Löschen?")) { danceHistory.splice(idx,1); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); } }
     function sortHist(k) { if(sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = 1; } renderHistory(); }
-    
     function exportData() {
         const a = document.createElement('a');
         a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(danceHistory));
@@ -737,8 +706,6 @@
         r.onload = (e) => { try { danceHistory=JSON.parse(e.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); alert("Import OK!"); } catch(x){ alert("Fehler!"); } };
         r.readAsText(input.files[0]);
     }
-
-    /* --- EXPERT --- */
     function renderExpert() {
         const el = document.getElementById('expert-list');
         el.innerHTML = Object.keys(expertRanges).map(d => `
@@ -749,11 +716,8 @@
             </div>
         `).join('');
     }
-    function resetExpert() {
-        if(confirm("Zurücksetzen?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); }
-    }
+    function resetExpert() { if(confirm("Zurücksetzen?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
     
-    /* --- VIDEO & TAP --- */
     function renderLibrary() {
         const c = document.getElementById('library-content');
         c.innerHTML = '<div class="dance-grid"></div>';
@@ -796,40 +760,20 @@
         const now = Date.now();
         const el = e.target;
         el.style.transform = "scale(0.9)"; setTimeout(() => el.style.transform = "scale(1)", 100);
-
         if(tapTimes.length > 0 && (now - tapTimes[tapTimes.length-1]) > 2000) tapTimes = [];
         tapTimes.push(now);
         if(tapTimes.length > 8) tapTimes.shift();
-
         if(tapTimes.length >= 2) {
             let intervals = [];
             for(let i=1; i<tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i-1]);
             const avgMs = intervals.reduce((a,b)=>a+b)/intervals.length;
             const bpm = Math.round(60000/avgMs);
             document.getElementById('tap-bpm').innerText = bpm + " BPM";
-            detectDance(bpm); // Use expert logic for Tap too
+            detectDance(bpm);
             document.getElementById('tap-result').innerText = document.getElementById('dance-name').innerText;
         }
     }
     function resetTap() { tapTimes = []; document.getElementById('tap-bpm').innerText = "0 BPM"; document.getElementById('tap-result').innerText = "---"; }
-
-    function testFunk() { 
-        const t = document.getElementById('ntfy-topic').value;
-        fetch(`https://ntfy.sh/${t}`, {method:'POST', body:'Test Artist - Test Title'});
-    }
-    
-    async function testAI() {
-        const k = document.getElementById('api-key').value;
-        if(!k) return alert("Key fehlt!");
-        try {
-            const r = await fetch('https://api.openai.com/v1/chat/completions', {
-                method:'POST', 
-                headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
-                body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
-            });
-            if(r.ok) alert("Verbindung OK!"); else alert("Fehler!");
-        } catch(e) { alert("Verbindung fehlgeschlagen"); }
-    }
 </script>
 </body>
 </html>
