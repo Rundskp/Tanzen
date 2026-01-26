@@ -92,6 +92,7 @@
         
         input[type="checkbox"] { transform: scale(1.5); accent-color: var(--blue); }
 
+        /* Preferred Dances Tags */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
@@ -99,7 +100,9 @@
         .btn-action { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; margin-top: 10px; cursor: pointer; font-size: 1rem; }
         .btn-save { background: var(--green); color: white; }
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
+        .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.8rem; margin-left: 10px; }
 
+        /* Expert Table */
         .expert-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center; font-size: 0.9rem; }
         .expert-row input { text-align: center; padding: 8px; }
 
@@ -195,11 +198,21 @@
     </div>
     
     <div class="settings-group">
-        <div class="row"><label>OpenAI API Key</label></div>
-        <input type="password" id="api-key" placeholder="sk-...">
+        <div class="row">
+            <label>OpenAI API Key</label>
+            <div style="display:flex; gap:10px; align-items:center; width:65%;">
+                <input type="password" id="api-key" placeholder="sk-..." style="flex:1;">
+                <button class="btn-test-small" onclick="testAI()">TEST</button>
+            </div>
+        </div>
         
-        <div class="row" style="margin-top:10px;"><label>NTFY Topic (Shazam)</label></div>
-        <input type="text" id="ntfy-topic" placeholder="Tanz_Das_DeinName">
+        <div class="row">
+            <label>Funk-Topic (Shazam)</label>
+            <div style="display:flex; gap:10px; align-items:center; width:65%;">
+                <input type="text" id="ntfy-topic" placeholder="Tanz_Das_DeinName" style="flex:1;">
+                <button class="btn-test-small" onclick="testFunk()">TEST</button>
+            </div>
+        </div>
         
         <div class="row" style="margin-top:15px;">
             <label>Disco-Modus (Pulsieren)</label>
@@ -774,6 +787,29 @@
         }
     }
     function resetTap() { tapTimes = []; document.getElementById('tap-bpm').innerText = "0 BPM"; document.getElementById('tap-result').innerText = "---"; }
+
+    function testFunk() { 
+        const t = document.getElementById('ntfy-topic').value;
+        if(!t) return alert("Topic fehlt!");
+        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})})
+        .then(() => alert("Signal gesendet! Prüfe App."))
+        .catch(e => alert("Funk Fehler: " + e));
+    }
+    
+    async function testAI() {
+        const k = document.getElementById('api-key').value;
+        if(!k) return alert("Key fehlt!");
+        try {
+            const r = await fetch('https://api.openai.com/v1/chat/completions', {
+                method:'POST', 
+                headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
+                body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
+            });
+            const data = await r.json();
+            if(r.ok) alert("Verbindung OK! ✅");
+            else alert("Fehler: " + (data.error?.message || "Unbekannt"));
+        } catch(e) { alert("Netzwerkfehler! (Offline?)"); }
+    }
 </script>
 </body>
 </html>
