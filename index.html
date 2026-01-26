@@ -611,8 +611,16 @@
             if(!res.ok) throw new Error("Error " + res.status);
             
             const data = await res.json();
-            const content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
-            const result = JSON.parse(content);
+            
+            // ROBUSTER PARSER
+            const rawContent = data.choices[0].message.content;
+            const jsonStart = rawContent.indexOf('{');
+            const jsonEnd = rawContent.lastIndexOf('}');
+            
+            if (jsonStart === -1 || jsonEnd === -1) throw new Error("JSON Format");
+            
+            const jsonStr = rawContent.substring(jsonStart, jsonEnd + 1);
+            const result = JSON.parse(jsonStr);
 
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
@@ -662,7 +670,6 @@
         let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f) || (h.artist && h.artist.toLowerCase().includes(f)) || h.dance.toLowerCase().includes(f));
 
         filtered.sort((a,b) => {
-            // Sortierung für DB (Neu oben)
             return new Date(b.date.split('.').reverse().join('-')) - new Date(a.date.split('.').reverse().join('-'));
         });
 
