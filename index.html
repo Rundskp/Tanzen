@@ -7,34 +7,45 @@
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #15161a; --text: #e8e8e8; }
         
-        * { box-sizing: border-box; touch-action: manipulation; }
+        * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
         /* --- HEADER --- */
-        #top-bar { display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); z-index: 100; flex-shrink: 0; }
-        .header-icon-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text); padding: 5px; }
-        #mic-btn { background: #222; border: 2px solid #333; color: white; padding: 10px 20px; border-radius: 16px; font-weight: 900; font-size: 1rem; cursor: pointer; justify-self: center; width: 120px; transition: 0.3s; }
+        #top-bar { display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); z-index: 100; flex-shrink: 0; }
+        .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
+        #mic-btn { background: #222; border: 2px solid #333; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 100px; transition: 0.3s; }
         #mic-btn.active { background: var(--red); box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); border-color: var(--red); }
         #mic-btn.calibrated { background: var(--green); border-color: var(--green); box-shadow: 0 0 15px rgba(52, 199, 89, 0.4); }
 
         /* --- MONITOR BEREICH --- */
-        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 10px; overflow-y: auto; position: relative; }
+        #monitor { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; text-align: center; padding: 10px; overflow-y: auto; position: relative; width: 100%; }
         
-        #song-info { width: 100%; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 10px; }
-        #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); opacity: 0; transition: opacity 0.5s; max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        #song-info { width: 100%; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; }
+        #song-title { font-size: 1.3rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); opacity: 0; transition: opacity 0.5s; max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
         #ai-details { font-size: 0.8rem; color: #aaa; opacity: 0; transition: opacity 0.5s; display: flex; gap: 10px; margin-top: 5px; }
         .detail-badge { background: #333; padding: 2px 6px; border-radius: 4px; border: 1px solid #444; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
-        #dance-name { font-size: clamp(2.5rem, 12vw, 6rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; transition: color 0.3s; }
+        #dance-name { font-size: clamp(2.5rem, 12vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; transition: color 0.3s, transform 0.1s; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 20px rgba(52, 199, 89, 0.5); }
         
-        .status-indicators { display: flex; gap: 15px; margin-top: 20px; align-items: flex-end; }
+        /* Disco Effekt */
+        .pulse-effect { transform: scale(1.15); text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+
+        /* Calibration Success Message */
+        #calib-toast { position: absolute; top: 40%; background: rgba(0,0,0,0.9); border: 2px solid var(--green); color: var(--green); padding: 15px 20px; border-radius: 15px; font-weight: 900; font-size: 1.2rem; transform: scale(0); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; z-index: 50; text-align: center; }
+        #calib-toast.show { transform: scale(1); }
+
+        .status-indicators { display: flex; gap: 20px; margin-top: 10px; align-items: flex-end; margin-bottom: 20px; }
         .stat-box { display: flex; flex-direction: column; align-items: center; }
-        .stat-val { font-size: 3rem; font-weight: 900; font-family: monospace; color: #666; line-height: 1; transition: color 0.2s; }
+        .stat-val { font-size: 2.5rem; font-weight: 900; font-family: monospace; color: #666; line-height: 1; transition: transform 0.1s; }
         .stat-label { font-size: 0.7rem; letter-spacing: 2px; font-weight: bold; color: #555; margin-top: 5px; }
-        .active-stat { color: var(--blue); }
+
+        /* Mic Visualizer */
+        #mic-vis-container { width: 80%; height: 6px; background: #222; border-radius: 3px; margin-top: 10px; overflow: hidden; position: relative; }
+        #mic-bar { height: 100%; width: 0%; background: #444; transition: width 0.05s linear, background-color 0.2s; }
+        .mic-label { font-size: 0.6rem; color: #555; margin-top: 3px; letter-spacing: 1px; }
 
         /* --- OVERLAYS --- */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
@@ -47,8 +58,14 @@
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
         .row:last-child { border-bottom: none; margin-bottom: 0; }
-        input[type="text"], input[type="password"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
+        input[type="text"], input[type="password"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; user-select: text; -webkit-user-select: text; }
         input[type="checkbox"] { transform: scale(1.5); accent-color: var(--blue); }
+        
+        /* Slider */
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 10px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
+        .range-vals { display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; margin-top: 5px; }
+
         .btn-action { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; margin-top: 10px; cursor: pointer; font-size: 1rem; }
         .btn-save { background: var(--green); color: white; }
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
@@ -71,8 +88,8 @@
 
         /* Tap Detector */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
-        .tap-area { width: 200px; height: 200px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; user-select: none; transition: 0.1s; cursor: pointer; }
-        .tap-area:active { transform: scale(0.95); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
+        .tap-area { width: 220px; height: 220px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; color: #666; }
+        .tap-area:active { transform: scale(0.92); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
         #tap-result { font-size: 2rem; color: var(--yellow); font-weight: 800; min-height: 3rem; }
 
         /* History Table */
@@ -85,10 +102,6 @@
         .hist-stars { grid-column: 2; grid-row: 2 / span 2; display: flex; flex-direction: row; gap: 3px; align-items: center; justify-content: flex-end; font-size: 1.2rem; color: #444; }
         .hist-stars .active { color: var(--yellow); }
         .hist-del { grid-column: 2; grid-row: 1; color: var(--red); justify-self: end; cursor: pointer; }
-
-        /* Disco Animation */
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .disco-beat { animation: pulse 0.15s ease-out; }
     </style>
 </head>
 <body>
@@ -112,6 +125,11 @@
         </div>
     </div>
 
+    <div id="calib-toast">
+        <div>✓ KALIBRIERUNG</div>
+        <div style="font-size:0.8rem; margin-top:5px;">ERFOLGREICH</div>
+    </div>
+
     <div class="dance-wrap">
         <h1 id="dance-name">BEREIT</h1>
     </div>
@@ -122,10 +140,15 @@
             <div class="stat-label">BPM LIVE</div>
         </div>
         <div class="stat-box">
-             <div id="conf-display" class="stat-val" style="font-size: 1.5rem; margin-bottom: 10px;">RAW</div>
-            <div class="stat-label">KALIBRIERUNG</div>
+            <div id="conf-display" class="stat-val" style="font-size: 1.5rem; margin-bottom: 10px;">RAW</div>
+            <div class="stat-label">STATUS</div>
         </div>
     </div>
+    
+    <div id="mic-vis-container">
+        <div id="mic-bar"></div>
+    </div>
+    <div class="mic-label">MIKROFON EMPFINDLICHKEIT</div>
 </div>
 
 <div id="settings-overlay" class="overlay">
@@ -141,8 +164,18 @@
         <input type="text" id="ntfy-topic" placeholder="Tanz_Das_DeinName">
         
         <div class="row" style="margin-top:15px;">
-            <label>Disco-Pulsieren</label>
+            <label>Disco-Modus (Pulsieren)</label>
             <input type="checkbox" id="disco-mode">
+        </div>
+
+        <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
+            <label>Video Geschwindigkeit</label>
+            <input type="range" id="video-speed" min="0.5" max="1.5" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)">
+            <div class="range-vals">
+                <span>0.5x</span>
+                <span id="speed-val" style="color:var(--blue); font-weight:bold;">1.0x</span>
+                <span>1.5x</span>
+            </div>
         </div>
 
         <button class="btn-action btn-save" onclick="saveSettings()">Speichern</button>
@@ -192,10 +225,10 @@
         <button class="close-btn" onclick="closeOverlays()">✕</button>
     </div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Tippe den Takt (1-2-3-4) auf den Button.<br>Versuche den Rhythmus (Lang-Schnell) zu betonen.
+        Tippe im Takt auf den Kreis.
     </div>
     <div id="tap-pad">
-        <div class="tap-area" onpointerdown="handleTap(event)">TAP</div>
+        <div class="tap-area" onpointerdown="handleTap(event)">🖐️</div>
         <div id="tap-result">---</div>
         <div id="tap-bpm" style="font-family:monospace; font-size:1.5rem; color:#666;">0 BPM</div>
     </div>
@@ -206,10 +239,17 @@
     // --- VARIABLES ---
     let audioCtx, analyser, micStream, isListening = false;
     let lastBeatTime = 0, bpmBuffer = [], localBpm = 0;
+    // Stabilisator: Muss 3x das gleiche Ergebnis sein bevor Wechsel
+    let predictionBuffer = []; 
+    let currentStableDance = "BEREIT";
+    
     let danceHistory = JSON.parse(localStorage.getItem('dm_history') || "[]");
     let currentAIResult = null;
-    let calibrationFactor = 1.0; // Kalibrierungsfaktor für die Engine
+    let calibrationFactor = 1.0; 
     let discoEnabled = true;
+    let playbackSpeed = 1.0;
+
+    const micThreshold = 175; // Schwellwert für Beat
 
     // --- VIDEO DATEN ---
     const videoLibrary = {
@@ -236,9 +276,21 @@
         document.getElementById('ntfy-topic').value = localStorage.getItem('dm_topic') || "";
         discoEnabled = localStorage.getItem('dm_disco') !== 'false';
         document.getElementById('disco-mode').checked = discoEnabled;
+        
+        playbackSpeed = parseFloat(localStorage.getItem('dm_speed')) || 1.0;
+        document.getElementById('video-speed').value = playbackSpeed;
+        updateSpeedLabel(playbackSpeed);
+
         renderHistory();
         connectNtfy();
     };
+
+    function updateSpeedLabel(val) {
+        playbackSpeed = parseFloat(val);
+        document.getElementById('speed-val').innerText = playbackSpeed + "x";
+        const v = document.getElementById('main-video');
+        if(v) v.playbackRate = playbackSpeed;
+    }
 
     function openOverlay(id) {
         document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
@@ -262,7 +314,7 @@
                 const filter = audioCtx.createBiquadFilter();
                 filter.type = "lowpass"; filter.frequency.value = 150; 
                 analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 2048;
+                analyser.fftSize = 2048; // Hohe Auflösung
                 source.connect(filter); filter.connect(analyser);
                 const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
@@ -275,10 +327,15 @@
                     if (!isListening) return;
                     requestAnimationFrame(processAudio);
                     analyser.getByteFrequencyData(dataArray);
+                    
                     let maxVol = 0;
                     for(let i = 0; i < dataArray.length; i++) if(dataArray[i] > maxVol) maxVol = dataArray[i];
                     
-                    if (maxVol > 175) { // Threshold
+                    // --- VISUALIZER ---
+                    updateMicVisualizer(maxVol);
+
+                    // --- BEAT DETEKTION ---
+                    if (maxVol > micThreshold) { 
                         const now = Date.now();
                         if (now - lastBeatTime > 300) handleBeat(now);
                     }
@@ -288,12 +345,33 @@
         }
     }
 
+    function updateMicVisualizer(vol) {
+        const bar = document.getElementById('mic-bar');
+        // Normalisieren (0-255) auf Prozent (0-100)
+        let pct = Math.min(100, (vol / 255) * 100);
+        bar.style.width = pct + "%";
+        
+        if(vol > 250) bar.style.backgroundColor = "var(--red)"; // Clipping
+        else if(vol > micThreshold) bar.style.backgroundColor = "var(--green)"; // Good
+        else bar.style.backgroundColor = "#555"; // Too low
+    }
+
     function handleBeat(now) {
+        // DISCO PULSE
         if(discoEnabled) {
-            const disp = document.getElementById('bpm-display');
-            disp.classList.remove('disco-beat');
-            void disp.offsetWidth;
-            disp.classList.add('disco-beat');
+            const danceEl = document.getElementById('dance-name');
+            const bpmEl = document.getElementById('bpm-display');
+            
+            // CSS Klasse entfernen und neu hinzufügen für Restart der Animation
+            danceEl.classList.remove('pulse-effect');
+            bpmEl.classList.remove('stat-val-pulse'); // Custom pulse needed?
+            
+            // Force Reflow
+            void danceEl.offsetWidth;
+            
+            danceEl.classList.add('pulse-effect');
+            // Timeout um Klasse wieder zu entfernen (cleaner look)
+            setTimeout(() => danceEl.classList.remove('pulse-effect'), 150);
         }
 
         if (lastBeatTime > 0) {
@@ -304,23 +382,31 @@
             if(rawBpm < 50) rawBpm *= 2; 
             if(rawBpm > 210) rawBpm /= 2;
 
-            // Rolling Average (Kleiner Buffer für schnellere Reaktion: 5)
+            // Rolling Average
             bpmBuffer.push(rawBpm);
             if (bpmBuffer.length > 5) bpmBuffer.shift();
             
-            // KALIBRIERUNG ANWENDEN
             const avgRaw = bpmBuffer.reduce((a, b) => a + b, 0) / bpmBuffer.length;
             localBpm = Math.round(avgRaw * calibrationFactor);
             
             document.getElementById('bpm-display').innerText = localBpm;
 
             if(!currentAIResult) {
-                // FALLBACK LOKAL
-                const guess = predictLocalDance(localBpm);
-                document.getElementById('dance-name').innerText = guess;
-                document.getElementById('dance-name').classList.remove('verified');
+                // FALLBACK LOKAL MIT HYSTERESE (Anti-Flicker)
+                const instantGuess = predictLocalDance(localBpm);
+                predictionBuffer.push(instantGuess);
+                if(predictionBuffer.length > 3) predictionBuffer.shift();
+
+                // Nur wechseln, wenn alle 3 im Buffer gleich sind
+                if(predictionBuffer.length === 3 && predictionBuffer.every(v => v === predictionBuffer[0])) {
+                    if(currentStableDance !== predictionBuffer[0]) {
+                        currentStableDance = predictionBuffer[0];
+                        document.getElementById('dance-name').innerText = currentStableDance;
+                        document.getElementById('dance-name').classList.remove('verified');
+                    }
+                }
             } else {
-                // KI (Wahrheit)
+                // KI hat Vorrang
                 document.getElementById('dance-name').innerText = currentAIResult.dance;
                 document.getElementById('dance-name').classList.add('verified');
             }
@@ -329,13 +415,12 @@
     }
 
     function predictLocalDance(bpm) {
-        // DATEN AUS INFOGRAFIK
         if (bpm < 70) return "TANGO ARGENTINO";
         if (bpm >= 80 && bpm < 98) return "LANGSAMER WALZER";
-        if (bpm >= 100 && bpm < 110) return "RUMBA / SAMBA / DISCO";
+        if (bpm >= 100 && bpm < 110) return "RUMBA / SAMBA";
         if (bpm >= 110 && bpm < 130) return "CHA CHA / DISCOFOX";
-        if (bpm >= 130 && bpm < 160) return "JIVE / WW / DISCO";
-        if (bpm >= 160) return "FOXTROTT / SALSA / BOOGIE";
+        if (bpm >= 130 && bpm < 160) return "JIVE / WW";
+        if (bpm >= 160) return "FOXTROTT / SALSA";
         return "HÖRE ZU...";
     }
 
@@ -344,12 +429,24 @@
         const topic = localStorage.getItem('dm_topic');
         if(!topic) return;
         const eventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        
         eventSource.onmessage = (e) => {
-            const data = JSON.parse(e.data);
-            if(data.message) {
-                // Titel Update erzwingen
-                handleNewSong(data.message);
-            }
+            try {
+                const data = JSON.parse(e.data);
+                // Robustes Parsen: Ntfy sendet manchmal reinen Text im 'message' Feld
+                // oder ein JSON String im 'message' Feld.
+                let title = data.message || "";
+                
+                // Falls message selbst JSON ist (z.B. {"title": "xyz"})
+                if(title.startsWith('{')) {
+                    try {
+                        const inner = JSON.parse(title);
+                        if(inner.title) title = inner.title;
+                    } catch(e) { /* ignore, just use text */ }
+                }
+                
+                if(title && title !== "Test") handleNewSong(title);
+            } catch(x) { console.log("SSE Error", x); }
         };
     }
 
@@ -357,24 +454,20 @@
         const apiKey = document.getElementById('api-key').value;
         if(!apiKey) return;
 
+        // UI Reset
         const titleEl = document.getElementById('song-title');
         titleEl.innerText = title;
         titleEl.style.opacity = 1;
-
         document.getElementById('dance-name').innerText = "ANALYSE...";
         document.getElementById('ai-details').style.opacity = 0;
 
-        // SYSTEM PROMPT: Strenge Rhythmus-Vorgabe
         const systemPrompt = `
-Du bist ein Tanzexperte. Analysiere den Songtitel.
-Nutze EXAKT diese Daten aus der Doodance-Infografik.
-
+Du bist ein Tanzexperte. Nutze EXAKT diese Daten:
 1. TAKTART:
-- 2/4: Tango Argentino (55-65 BPM), Samba (100-120 BPM).
-- 3/4: Langsamer Walzer (85-95 BPM), Wiener Walzer (135-180 BPM).
-- 4/4: Alle anderen.
-
-2. BPM & RHYTHMUS (Priorität). Antworte beim Rhythmus GENAU mit dem String in Klammern:
+- 2/4: Tango (55-65), Samba (100-120).
+- 3/4: L.Walzer (85-95), W.Walzer (135-180).
+- 4/4: Rest.
+2. BPM & RHYTHMUS (String in Klammern):
 - 55-65: Tango Argentino.
 - 85-95: Langsamer Walzer (1-2-3).
 - 100-120: Rumba (L S S) ODER Samba (L e L) ODER Discofox (1 2 3).
@@ -384,9 +477,7 @@ Nutze EXAKT diese Daten aus der Doodance-Infografik.
 - 135-180: Wiener Walzer (1 2 3).
 - 140-200: Boogie Woogie (S S L L).
 - 160-200: Foxtrott (L L S S) ODER Salsa (S S L S S L).
-
-Falls unklar, nimm Standard-Werte (z.B. Discofox).
-Antworte NUR als JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm": "String"}
+Antworte NUR JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm": "String"}
 `;
 
         try {
@@ -405,17 +496,18 @@ Antworte NUR als JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm":
 
             currentAIResult = result;
             
-            // --- AUTO-KALIBRIERUNG DER ENGINE ---
-            // Wenn wir gerade etwas hören, passen wir die Empfindlichkeit an
+            // --- AUTO-KALIBRIERUNG ---
             if(localBpm > 0) {
-                // Wenn KI sagt 120, aber wir messen 110: Factor = 1.09
                 calibrationFactor = result.bpm / (localBpm / calibrationFactor);
                 document.getElementById('conf-display').innerText = "AUTO-TUNED";
                 document.getElementById('conf-display').style.color = "var(--green)";
                 if(isListening) document.getElementById('mic-btn').classList.add('calibrated');
+                
+                // Show Success Message
+                const toast = document.getElementById('calib-toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
             } else {
-                // Wenn Mikro aus ist, setzen wir Factor nur visuell zurück, 
-                // warten aber auf den ersten echten Beat für Feinjustierung
                 document.getElementById('conf-display').innerText = "KI ZIEL";
             }
 
@@ -436,25 +528,16 @@ Antworte NUR als JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm":
     async function checkAIConnection() {
         const apiKey = document.getElementById('api-key').value;
         const btn = document.getElementById('btn-test-ai');
-        
-        if(!apiKey) return alert("Bitte erst API Key eingeben.");
-        
+        if(!apiKey) return alert("Bitte API Key eingeben.");
         btn.innerText = "Prüfe...";
         try {
             const response = await fetch('https://api.openai.com/v1/models', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${apiKey}` }
             });
-            
-            if (response.ok) {
-                alert("Verbindung Erfolgreich! ✅");
-            } else {
-                const err = await response.json();
-                alert("Fehler: " + (err.error?.message || "Unbekannt"));
-            }
-        } catch (e) {
-            alert("Netzwerkfehler: " + e.message);
-        }
+            if (response.ok) alert("Verbindung Erfolgreich! ✅");
+            else alert("Fehler: " + (await response.json()).error?.message);
+        } catch (e) { alert("Netzwerkfehler: " + e.message); }
         btn.innerText = "KI Verbindung testen";
     }
 
@@ -502,6 +585,7 @@ Antworte NUR als JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm":
         localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
         localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
         localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
+        localStorage.setItem('dm_speed', playbackSpeed);
         location.reload();
     }
 
@@ -535,16 +619,16 @@ Antworte NUR als JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm":
         const v = document.getElementById('main-video');
         o.classList.add('active');
         v.src = src; v.currentTime = s; curStart=s; curEnd=e;
+        v.playbackRate = playbackSpeed;
         document.getElementById('vid-info').innerText = t;
         v.play();
         v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime=curEnd; } };
     }
-    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.play(); }
+    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
 
     // --- TAP DETECTOR ---
     let tapTimes = [];
     function handleTap(e) {
-        e.preventDefault();
         const now = Date.now();
         const el = e.target;
         el.style.transform = "scale(0.9)"; setTimeout(() => el.style.transform = "scale(1)", 100);
@@ -564,11 +648,11 @@ Antworte NUR als JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm":
             let res = "Unklar";
             if(bpm >= 160) res = "Foxtrott / Salsa / Boogie";
             else if(bpm >= 140) res = "Boogie Woogie";
-            else if(bpm >= 135) res = "Wiener Walzer (wenn 3/4)";
+            else if(bpm >= 135) res = "Wiener Walzer";
             else if(bpm >= 130) res = "Jive";
             else if(bpm >= 110) res = "Cha Cha / Discofox";
             else if(bpm >= 100) res = "Rumba / Samba / Discofox";
-            else if(bpm >= 85) res = "Langsamer Walzer (wenn 3/4)";
+            else if(bpm >= 85) res = "Langsamer Walzer";
             else if(bpm >= 55) res = "Tango";
 
             document.getElementById('tap-result').innerText = res;
