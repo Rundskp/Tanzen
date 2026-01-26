@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tanz das! Ultimate Science</title>
+    <title>Tanz das! Ultimate Fix</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
         
@@ -11,7 +11,7 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* --- HEADER --- */
+        /* HEADER */
         #top-bar { display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
@@ -21,16 +21,15 @@
         #mic-btn.loading { opacity: 0.7; animation: pulse-load 1s infinite; }
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
-        /* --- MONITOR --- */
+        /* MONITOR */
         #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
         
-        /* VISUALIZER CANVAS */
-        #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; }
+        #vis-wrap { width: 100%; height: 100px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
         #main-display { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 10px; z-index: 2; width: 100%; }
 
-        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
+        #song-info { width: 100%; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
@@ -38,23 +37,10 @@
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
-        #dance-name { 
-            font-size: clamp(2.5rem, 11vw, 5rem); 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            margin: 0; 
-            line-height: 0.9; 
-            color: #fff; 
-            text-align: center;
-        }
+        #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; transition: transform 0.1s; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
-        /* NEW PULSE ANIMATION */
-        @keyframes pump {
-            0% { transform: scale(1); text-shadow: 0 0 0 rgba(255,255,255,0); }
-            30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); }
-            100% { transform: scale(1); text-shadow: 0 0 0 rgba(255,255,255,0); }
-        }
+        @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
         .pulse-effect { animation: pump 0.15s ease-out; }
 
         .status-indicators { display: flex; gap: 15px; margin-top: 10px; align-items: flex-end; margin-bottom: 10px; width: 100%; justify-content: center; }
@@ -63,28 +49,23 @@
         .stat-val.active { color: #fff; }
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
 
-        /* Slider Sidebar (Overlay Style on Right) */
-        #slider-overlay { position: absolute; right: 0; top: 80px; bottom: 0; width: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; padding-bottom: 20px; }
-        input[type=range].vertical {
-            writing-mode: bt-lr; -webkit-appearance: slider-vertical;
-            width: 4px; height: 60%; outline: none; background: rgba(255,255,255,0.1); border-radius: 4px; cursor: pointer;
-        }
-        #level-indicator { width: 4px; height: 4px; background: #333; border-radius: 50%; margin-bottom: 5px; transition: 0.1s; }
-        #level-indicator.hit { background: var(--green); box-shadow: 0 0 10px var(--green); transform: scale(2); }
+        /* Slider Sidebar */
+        #slider-overlay { position: absolute; right: 0; top: 100px; bottom: 0; width: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; padding-bottom: 20px; }
+        input[type=range].vertical { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 4px; height: 60%; outline: none; background: rgba(255,255,255,0.1); border-radius: 4px; cursor: pointer; }
+        #level-indicator { width: 6px; height: 6px; background: #333; border-radius: 50%; margin-bottom: 5px; transition: 0.05s; }
+        #level-indicator.hit { background: var(--green); box-shadow: 0 0 10px var(--green); transform: scale(1.5); }
 
-        /* --- OVERLAYS --- */
+        /* OVERLAYS */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
-        /* Settings Styles */
+        /* Settings */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-        .row:last-child { border-bottom: none; margin-bottom: 0; }
         input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; user-select: text; -webkit-user-select: text; }
-        
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
         input[type="checkbox"] { transform: scale(1.5); accent-color: var(--blue); }
@@ -94,7 +75,7 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; white-space: nowrap; }
 
-        /* Expert Table */
+        /* Expert */
         .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
         .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
         .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
@@ -104,7 +85,7 @@
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
 
-        /* History Cards */
+        /* History */
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
         .hist-del { position: absolute; top: 10px; right: 10px; color: #555; font-weight: bold; padding: 10px; cursor: pointer; }
@@ -115,7 +96,7 @@
         .star-btn { font-size: 1.6rem; color: #333; cursor: pointer; transition: 0.1s; }
         .star-btn.active { color: var(--yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
 
-        /* Video / Tap Overlay */
+        /* Video/Tap */
         #fs-video-overlay { background: black; display: none; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
         #fs-video-overlay.active { display: flex; }
         #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 30px; }
@@ -195,7 +176,6 @@
                 <button class="btn-test-small" onclick="testAI()">TEST</button>
             </div>
         </div>
-        
         <div class="row">
             <label>Funk-Topic (Shazam)</label>
             <div style="display:flex; gap:10px; align-items:center; width:65%;">
@@ -203,17 +183,14 @@
                 <button class="btn-test-small" onclick="testFunk()">TEST</button>
             </div>
         </div>
-        
         <div class="row" style="margin-top:15px;">
             <label>Disco-Modus (Pulsieren)</label>
             <input type="checkbox" id="disco-mode">
         </div>
-
         <div class="row">
             <label>Video Ton aktivieren</label>
             <input type="checkbox" id="video-audio">
         </div>
-
         <div class="row">
             <label>Video Geschwindigkeit</label>
             <div style="width: 50%;">
@@ -221,7 +198,6 @@
                 <div id="speed-val" style="text-align:right; font-size:0.8rem; color:var(--blue);">1.0x</div>
             </div>
         </div>
-        
         <button class="btn-action btn-secondary" style="margin-top:20px;" onclick="openOverlay('expert-overlay')">Experten-Einstellungen & BPM</button>
         <button class="btn-action btn-save" onclick="saveSettings()">Speichern</button>
     </div>
@@ -241,9 +217,7 @@
             <label>Datenbank (Lokal)</label>
             <input type="text" id="search-hist" placeholder="Suche..." style="width:40%;" oninput="renderHistory()">
         </div>
-        
         <div id="history-list"></div>
-        
         <div style="display:flex; gap:10px; margin-top:20px;">
             <button class="btn-action btn-secondary" onclick="exportData()">Export JSON</button>
             <button class="btn-action btn-secondary" onclick="document.getElementById('file-imp').click()">Import</button>
@@ -259,7 +233,7 @@
     </div>
     <div class="settings-group">
         <div style="margin-bottom:15px; text-align:right;">
-             <button class="btn-action btn-secondary" onclick="resetExpert()" style="font-size:0.8rem;">Auf Standard (Infografik) zurücksetzen</button>
+             <button class="btn-action btn-secondary" onclick="resetExpert()" style="font-size:0.8rem;">Auf Standard zurücksetzen</button>
         </div>
         <div class="expert-row expert-header">
             <span>Tanz</span><span>Min</span><span>Max</span><span>Rhythmus</span>
@@ -316,7 +290,6 @@
     // Rhythm Logic
     let lowHits = 0, highHits = 0, rhythmRatio = 0.0;
     
-    // Default Ranges
     const defaultRanges = {
         "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "-" },
         "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "1 2 3" },
@@ -372,6 +345,11 @@
         updateSens(savedSens);
         
         renderPrefs(); renderHistory(); renderExpert();
+        
+        // Touch Wakeup für iOS AudioContext
+        document.body.addEventListener('touchstart', function() {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }, {once:true});
     };
 
     function loadData() {
@@ -380,13 +358,14 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-    /* --- AUDIO ENGINE (MULTI-BAND) --- */
+    /* --- AUDIO ENGINE --- */
     function mainAction() {
         const btn = document.getElementById('mic-btn');
         if(btn.innerText === "START") toggleMic();
         else {
             isListening = false;
-            if(audioCtx) audioCtx.close();
+            // Nicht schließen, nur stoppen damit wir wieder starten können ohne user gesture probleme
+            if(audioCtx) audioCtx.suspend();
             btn.innerText = "START";
             btn.classList.remove('active', 'loading');
             bpmBuffer = []; lastBeat = 0; 
@@ -398,25 +377,33 @@
         btn.classList.add('loading');
         
         try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') await audioCtx.resume();
+
+            // RAW AUDIO REQUEST (Kein Filter/EchoCancel)
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { 
+                    echoCancellation: false, 
+                    noiseSuppression: false, 
+                    autoGainControl: false 
+                } 
+            });
             
             const source = audioCtx.createMediaStreamSource(stream);
             
-            // 1. Low Band (Kick/Bass) < 150Hz
+            // 1. Low Band (Kick)
             const lowFilter = audioCtx.createBiquadFilter();
-            lowFilter.type = "lowpass"; lowFilter.frequency.value = 150;
+            lowFilter.type = "lowpass"; lowFilter.frequency.value = 120; 
             analyserLow = audioCtx.createAnalyser();
-            analyserLow.fftSize = 512;
+            analyserLow.fftSize = 256;
             source.connect(lowFilter);
             lowFilter.connect(analyserLow);
 
-            // 2. High Band (Snare/Hat) > 2000Hz
+            // 2. High Band (Snare)
             const highFilter = audioCtx.createBiquadFilter();
-            highFilter.type = "highpass"; highFilter.frequency.value = 2000;
+            highFilter.type = "highpass"; highFilter.frequency.value = 2500;
             analyserHigh = audioCtx.createAnalyser();
-            analyserHigh.fftSize = 512;
+            analyserHigh.fftSize = 256;
             source.connect(highFilter);
             highFilter.connect(analyserHigh);
 
@@ -429,7 +416,7 @@
             analyzeRhythm();
 
         } catch(e) { 
-            alert("Mic Error: " + e); 
+            alert("Mikrofon Fehler: " + e.message); 
             btn.classList.remove('loading');
         }
     }
@@ -441,75 +428,56 @@
         const bufferLen = analyserLow.frequencyBinCount;
         const lowData = new Uint8Array(bufferLen);
         const highData = new Uint8Array(bufferLen);
-        
         analyserLow.getByteFrequencyData(lowData);
         analyserHigh.getByteFrequencyData(highData);
         
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        const barWidth = (canvas.width / bufferLen) * 2.5;
+        const barWidth = (canvas.width / bufferLen) * 2;
         let x = 0;
 
-        // Draw Lows (Left, Red)
         for(let i = 0; i < bufferLen; i++) {
-            const barHeight = lowData[i] / 2;
-            ctx.fillStyle = `rgb(${barHeight + 100},50,50)`;
-            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-            x += barWidth + 1;
-        }
-        
-        // Draw Highs (Overlay, Blue)
-        x = 0;
-        for(let i = 0; i < bufferLen; i++) {
-            const barHeight = highData[i] / 2;
-            ctx.fillStyle = `rgba(50,50,${barHeight + 100}, 0.5)`;
-            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            // Lows = Red
+            const hLow = lowData[i] / 2.5;
+            ctx.fillStyle = `rgb(${lowData[i]}, 20, 20)`;
+            ctx.fillRect(x, canvas.height - hLow, barWidth, hLow);
+            
+            // Highs = Blue Overlay
+            const hHigh = highData[i] / 2.5;
+            if(hHigh > 5) {
+                ctx.fillStyle = `rgba(20, 20, ${highData[i]}, 0.6)`;
+                ctx.fillRect(x, canvas.height - hHigh - hLow, barWidth, hHigh);
+            }
             x += barWidth + 1;
         }
     }
 
     function analyzeRhythm() {
         if(!isListening) return;
-        setTimeout(analyzeRhythm, 20); // 50Hz check
+        setTimeout(analyzeRhythm, 20); // Loop ~50fps
 
         const lowData = new Uint8Array(analyserLow.frequencyBinCount);
-        const highData = new Uint8Array(analyserHigh.frequencyBinCount);
         analyserLow.getByteFrequencyData(lowData);
-        analyserHigh.getByteFrequencyData(highData);
+        
+        // Simple RMS calc for Low Band
+        let sum = 0; for(let i=0; i<lowData.length; i++) sum += lowData[i];
+        const avg = sum / lowData.length;
+        
+        // Threshold Logic
+        const threshold = micSens * 255 * 0.8; // Skaliert mit Slider
 
-        // Calculate Energy
-        let lowEnergy = 0, highEnergy = 0;
-        for(let i=0; i<lowData.length; i++) lowEnergy += lowData[i];
-        for(let i=0; i<highData.length; i++) highEnergy += highData[i];
-        lowEnergy /= lowData.length;
-        highEnergy /= highData.length;
-
-        // Visual Trigger for user
-        if(lowEnergy > micSens * 255) {
+        // Visual Feedback (Punkt)
+        if(avg > threshold) {
              document.getElementById('level-indicator').classList.add('hit');
              setTimeout(()=>document.getElementById('level-indicator').classList.remove('hit'), 100);
         }
 
-        // Beat Detection (Kick)
+        // Beat Counting
         const now = Date.now();
-        if(lowEnergy > (micSens * 255) && (now - lastBeat > 300)) {
+        if(avg > threshold && (now - lastBeat > 280)) { // ~214 BPM max
             processBeat(now);
             lastBeat = now;
-            
-            // Calculate Ratio on Beat
-            if(lowHits > 0) {
-                rhythmRatio = (highHits / lowHits).toFixed(1);
-                document.getElementById('density-display').innerText = rhythmRatio;
-                // Reset counters
-                lowHits = 0; highHits = 0;
-            }
-            lowHits++;
-        }
-
-        // Count Highs between Beats
-        if(highEnergy > (micSens * 200)) { // Slightly lower threshold for highs
-            highHits++;
         }
     }
 
@@ -562,7 +530,7 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- EXTERNAL INPUT --- */
+    /* --- CLOUD / AI --- */
     function connectNtfy(topic) {
         const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
         es.onmessage = (e) => {
@@ -604,8 +572,9 @@
 
         const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
 
+        // Lock UI to prevent local override
         aiLocked = true;
-        // WICHTIG: KEIN mainAction() mehr hier, damit Mic für Visualizer weiterläuft!
+        // isListening bleibt an für Visualizer!
         
         if(cached) {
             updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
@@ -632,13 +601,13 @@
                 body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], max_tokens: 60 })
             });
             
-            if(!res.ok) throw new Error("Error " + res.status);
             const data = await res.json();
+            if(data.error) throw new Error("API: " + data.error.message);
             
-            // ROBUSTER PARSER
+            // ROBUST PARSER
             const raw = data.choices[0].message.content;
             const match = raw.match(/\{[\s\S]*\}/);
-            if (!match) throw new Error("JSON Format Error");
+            if (!match) throw new Error("JSON Format");
             const result = JSON.parse(match[0]);
 
             danceHistory.unshift({
@@ -655,16 +624,12 @@
 
         } catch(e) {
             console.error(e);
-            let msg = "FEHLER";
-            if(e.message.includes("401")) msg = "KEY FALSCH";
-            else if(e.message.includes("429")) msg = "GUTHABEN/LIMIT";
-            else msg = "NETZWERK";
+            let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK " + e.message);
             updateDisplay(msg, "--", "!", false);
         }
         
         setTimeout(() => {
             document.getElementById('mic-btn').classList.remove('ai-mode');
-            // aiLocked bleibt true -> User muss neu starten für lokalen Modus
         }, 1000); 
     }
 
@@ -682,8 +647,6 @@
     function updateSpeedLabel(val) {
         playbackSpeed = parseFloat(val);
         document.getElementById('speed-val').innerText = playbackSpeed + "x";
-        const v = document.getElementById('main-video');
-        if(v) v.playbackRate = playbackSpeed;
     }
     function saveSettings() {
         localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
@@ -820,7 +783,7 @@
     function testFunk() { 
         const t = document.getElementById('ntfy-topic').value;
         if(!t) return alert("Topic fehlt!");
-        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Tanz Das! - Verbindung OK'})})
+        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})})
         .then(() => alert("Signal gesendet!"))
         .catch(e => alert("Funk Fehler: " + e));
     }
