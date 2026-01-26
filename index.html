@@ -88,6 +88,10 @@
         .row:last-child { border-bottom: none; margin-bottom: 0; }
         input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; user-select: text; -webkit-user-select: text; }
         
+        /* Slider Horizontal */
+        input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
+        input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
+
         /* Preferred Dances Tags */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
@@ -141,7 +145,7 @@
 
 <div id="top-bar">
     <button class="header-icon-btn" onclick="openOverlay('settings-overlay')">⚙️</button>
-    <button id="mic-btn" onclick="toggleMic()">START</button>
+    <button id="mic-btn" onclick="mainAction()">START</button>
     <div style="display:flex; justify-content: flex-end; gap: 15px;">
         <button class="header-icon-btn" onclick="openOverlay('tap-overlay')">🖐️</button>
         <button class="header-icon-btn" onclick="openOverlay('library-overlay')">?</button>
@@ -202,6 +206,19 @@
         <div class="row" style="margin-top:15px;">
             <label>Disco-Modus (Pulsieren)</label>
             <input type="checkbox" id="disco-mode">
+        </div>
+
+        <div class="row">
+            <label>Video Ton aktivieren</label>
+            <input type="checkbox" id="video-audio">
+        </div>
+
+        <div class="row">
+            <label>Video Geschwindigkeit</label>
+            <div style="width: 50%;">
+                <input type="range" class="horizontal" id="video-speed" min="0.25" max="1.0" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)">
+                <div id="speed-val" style="text-align:right; font-size:0.8rem; color:var(--blue);">1.0x</div>
+            </div>
         </div>
         
         <button class="btn-action btn-secondary" style="margin-top:20px;" onclick="openOverlay('expert-overlay')">Experten-Einstellungen & BPM</button>
@@ -302,6 +319,9 @@
     let lastBeat = 0, bpmBuffer = [], aiLocked = false;
     let micSens = 0.0045; 
     let discoEnabled = true;
+    let playbackSpeed = 1.0;
+    let videoSound = false;
+    
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     let sortKey = 'date', sortDir = -1;
@@ -353,6 +373,13 @@
         discoEnabled = localStorage.getItem('dm_disco') !== 'false';
         document.getElementById('disco-mode').checked = discoEnabled;
 
+        videoSound = localStorage.getItem('dm_vid_sound') === 'true';
+        document.getElementById('video-audio').checked = videoSound;
+
+        playbackSpeed = parseFloat(localStorage.getItem('dm_speed')) || 1.0;
+        document.getElementById('video-speed').value = playbackSpeed;
+        updateSpeedLabel(playbackSpeed);
+
         const savedSens = localStorage.getItem('dm_sens') || 45;
         updateSens(savedSens);
         
@@ -378,11 +405,18 @@
         const v = document.getElementById('main-video');
         if(!v.paused) v.pause();
     }
+    
+    function updateSpeedLabel(val) {
+        playbackSpeed = parseFloat(val);
+        document.getElementById('speed-val').innerText = playbackSpeed + "x";
+    }
 
     function saveSettings() {
         localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
         localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
         localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
+        localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
+        localStorage.setItem('dm_speed', playbackSpeed);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
         
         // Save Expert Ranges
@@ -400,53 +434,65 @@
     function updateSens(val) {
         document.getElementById('main-sens').value = val;
         document.getElementById('sens-val-display').innerText = val;
-        micSens = val / 10000; // Map 1-100 to internal threshold
+        // Simple mapping: 1-100 to appropriate rms threshold (approx 0.001 to 0.1)
+        micSens = val / 1000; 
         localStorage.setItem('dm_sens', val);
     }
 
     /* --- AUDIO / LOCAL --- */
-    async function toggleMic() {
+    function mainAction() {
         const btn = document.getElementById('mic-btn');
-        if (isListening) { location.reload(); } else {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const source = audioCtx.createMediaStreamSource(stream);
-                analyser = audioCtx.createAnalyser();
-                processor = audioCtx.createScriptProcessor(2048, 1, 1);
-                
-                source.connect(analyser);
-                analyser.connect(processor);
-                processor.connect(audioCtx.destination);
-
-                isListening = true;
-                btn.innerText = "STOP";
-                btn.classList.add('active');
-
-                processor.onaudioprocess = (e) => {
-                    const data = e.inputBuffer.getChannelData(0);
-                    let sum = 0;
-                    for(let i=0; i<data.length; i++) sum += data[i]*data[i];
-                    const rms = Math.sqrt(sum/data.length);
-                    
-                    // Visual Level Meter
-                    const level = Math.min(100, rms * 10000);
-                    document.getElementById('level-meter').style.height = level + "%";
-
-                    if(rms > micSens) {
-                        const now = Date.now();
-                        if(now - lastBeat > 300) { 
-                            processBeat(now);
-                            lastBeat = now;
-                            
-                            // Visual Pulse
-                            document.getElementById('level-meter').style.background = "rgba(52, 199, 89, 0.8)";
-                            setTimeout(()=>document.getElementById('level-meter').style.background = "rgba(52, 199, 89, 0.2)", 100);
-                        }
-                    }
-                };
-            } catch(e) { alert("Mikrofon Fehler: " + e); }
+        if(btn.innerText === "START") toggleMic();
+        else {
+            isListening = false;
+            if(audioCtx) audioCtx.close();
+            btn.innerText = "START";
+            btn.classList.remove('active');
+            document.getElementById('level-meter').style.height = "0%";
         }
+    }
+
+    async function toggleMic() {
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            processor = audioCtx.createScriptProcessor(2048, 1, 1);
+            
+            source.connect(analyser);
+            analyser.connect(processor);
+            processor.connect(audioCtx.destination);
+
+            isListening = true;
+            document.getElementById('mic-btn').innerText = "STOP";
+            document.getElementById('mic-btn').classList.add('active');
+
+            processor.onaudioprocess = (e) => {
+                if(!isListening) return;
+                const data = e.inputBuffer.getChannelData(0);
+                let sum = 0;
+                for(let i=0; i<data.length; i++) sum += data[i]*data[i];
+                const rms = Math.sqrt(sum/data.length);
+                
+                // Visual Level Meter (Green Bar)
+                // Normalize visualization: if rms is 0.1 -> 100%
+                const level = Math.min(100, rms * 1000); 
+                document.getElementById('level-meter').style.height = level + "%";
+
+                if(rms > micSens) {
+                    const now = Date.now();
+                    if(now - lastBeat > 300) { 
+                        processBeat(now);
+                        lastBeat = now;
+                        
+                        // Flash background on beat
+                        document.getElementById('level-meter').style.background = "rgba(52, 199, 89, 0.8)";
+                        setTimeout(()=>document.getElementById('level-meter').style.background = "rgba(52, 199, 89, 0.2)", 100);
+                    }
+                }
+            };
+        } catch(e) { alert("Mikrofon Fehler: " + e); }
     }
 
     function processBeat(now) {
@@ -555,7 +601,7 @@
         );
 
         aiLocked = true;
-        if(isListening) document.getElementById('mic-btn').click(); // Stop local
+        if(isListening) mainAction(); // Stop local
         
         if(cached) {
             updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
@@ -736,11 +782,13 @@
         const v = document.getElementById('main-video');
         o.classList.add('active');
         v.src = src; v.currentTime = s; curStart=s; curEnd=e;
+        v.playbackRate = playbackSpeed;
+        v.muted = !videoSound; 
         document.getElementById('vid-info').innerText = t;
         v.play();
         v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime=curEnd; } };
     }
-    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.play(); }
+    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
 
     let tapTimes = [];
     function handleTap(e) {
@@ -768,6 +816,19 @@
     function testFunk() { 
         const t = document.getElementById('ntfy-topic').value;
         fetch(`https://ntfy.sh/${t}`, {method:'POST', body:'Test Artist - Test Title'});
+    }
+    
+    async function testAI() {
+        const k = document.getElementById('api-key').value;
+        if(!k) return alert("Key fehlt!");
+        try {
+            const r = await fetch('https://api.openai.com/v1/chat/completions', {
+                method:'POST', 
+                headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
+                body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
+            });
+            if(r.ok) alert("Verbindung OK!"); else alert("Fehler!");
+        } catch(e) { alert("Verbindung fehlgeschlagen"); }
     }
 </script>
 </body>
