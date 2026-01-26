@@ -436,13 +436,22 @@
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
+            // WICHTIG: iOS/Safari braucht Resume nach User-Interaktion
             if(audioCtx.state === 'suspended') await audioCtx.resume();
             
             const source = audioCtx.createMediaStreamSource(stream);
+            
+            // OPTIMIERTER FILTER FÜR BASS (KICK DRUM)
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = "lowpass";
+            filter.frequency.value = 120; // 120Hz Lowpass
+            filter.Q.value = 1;
+
             analyser = audioCtx.createAnalyser();
             processor = audioCtx.createScriptProcessor(2048, 1, 1);
             
-            source.connect(analyser);
+            source.connect(filter);
+            filter.connect(analyser);
             analyser.connect(processor);
             processor.connect(audioCtx.destination);
 
@@ -558,7 +567,6 @@
         
         let artist = "Unbekannt";
         let title = clean;
-        // Shazam Format "Artist - Title" splitting
         if(clean.includes("-")) {
             const parts = clean.split("-");
             artist = parts[0].trim();
@@ -571,8 +579,8 @@
 
         const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
 
+        // FIX: NICHT STOPPEN, NUR SPERREN
         aiLocked = true;
-        if(isListening) mainAction(); // Stop local
         
         if(cached) {
             updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
@@ -608,16 +616,15 @@
                 })
             });
             
+            if(!res.ok) throw new Error("Error " + res.status);
+            
             const data = await res.json();
-            if(data.error) throw new Error("API: " + data.error.message);
             
-            // ROBUSTER JSON PARSER
+            // ROBUSTER JSON PARSER (EXTRAKTOR)
             const raw = data.choices[0].message.content;
-            const start = raw.indexOf('{');
-            const end = raw.lastIndexOf('}');
-            if(start === -1 || end === -1) throw new Error("JSON Format Error");
-            
-            const result = JSON.parse(raw.substring(start, end+1));
+            const match = raw.match(/\{[\s\S]*\}/);
+            if (!match) throw new Error("JSON Format Error");
+            const result = JSON.parse(match[0]);
 
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
@@ -647,8 +654,8 @@
         
         setTimeout(() => {
             document.getElementById('mic-btn').classList.remove('ai-mode');
-            aiLocked = false;
-        }, 30000); 
+            // Hier NICHT unlocken, damit das Ergebnis stehen bleibt, bis User neu startet
+        }, 1000); 
     }
 
     /* --- HELPERS --- */
@@ -680,9 +687,9 @@
             return `
             <div class="hist-card">
                 <div class="hist-del" onclick="delHist(${idx})">✕</div>
-                <div class="hist-main">${h.title}</div>
-                <div class="hist-sub">${h.artist || 'Unbekannt'}</div>
-                <div class="hist-meta">
+                <div class="hist-title">${h.title}</div>
+                <div class="hist-artist">${h.artist || 'Unbekannt'}</div>
+                <div class="hist-info">
                     <span>${h.dance}</span>
                     <span style="color:#666;">${h.date}</span>
                 </div>
