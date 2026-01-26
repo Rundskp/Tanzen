@@ -53,7 +53,6 @@
         #slider-sidebar { width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); padding: 10px 0; z-index: 10; flex-shrink: 0; }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
         
-        /* Vertikaler Slider Hack */
         input[type=range].vertical {
             writing-mode: bt-lr; /* IE */
             -webkit-appearance: slider-vertical; /* Webkit */
@@ -64,7 +63,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        /* Level Meter Hintergrund */
         #level-meter {
             position: absolute; bottom: 0; left: 0; right: 0;
             background: rgba(52, 199, 89, 0.2);
@@ -89,13 +87,11 @@
         .row:last-child { border-bottom: none; margin-bottom: 0; }
         input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; user-select: text; -webkit-user-select: text; }
         
-        /* Slider Horizontal */
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
         
         input[type="checkbox"] { transform: scale(1.5); accent-color: var(--blue); }
 
-        /* Preferred Dances Tags */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
@@ -104,7 +100,6 @@
         .btn-save { background: var(--green); color: white; }
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
 
-        /* Expert Table */
         .expert-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center; font-size: 0.9rem; }
         .expert-row input { text-align: center; padding: 8px; }
 
@@ -444,7 +439,7 @@
             btn.innerText = "START";
             btn.classList.remove('active');
             document.getElementById('level-meter').style.height = "0%";
-            bpmBuffer = []; lastBeat = 0; // Reset
+            bpmBuffer = []; lastBeat = 0; 
         }
     }
 
@@ -453,7 +448,7 @@
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
-            // Resume Context (wichtig für iOS)
+            // WICHTIG: iOS/Safari braucht Resume nach User-Interaktion
             if(audioCtx.state === 'suspended') await audioCtx.resume();
             
             const source = audioCtx.createMediaStreamSource(stream);
@@ -549,23 +544,19 @@
         };
     }
     
-    // Robuster Parser für das "Doppelt-JSON" Problem
     function cleanTitle(input) {
         if(!input) return "";
         try {
-            // Falls Input ein String ist, der wie JSON aussieht (z.B. "{\"message\":...}")
             if(typeof input === 'string' && (input.startsWith('{') || input.startsWith('"'))) {
                  const parsed = JSON.parse(input);
-                 return cleanTitle(parsed); // Rekursion
+                 return cleanTitle(parsed); 
             }
-            // Falls Input ein Objekt ist
             if(typeof input === 'object') {
                 if(input.body) return cleanTitle(input.body);
                 if(input.message) return cleanTitle(input.message);
                 if(input.title) return input.title;
             }
         } catch(e) {}
-        // Wenn kein JSON mehr, ist es wohl der String
         return input;
     }
 
@@ -575,6 +566,7 @@
         
         let artist = "Unbekannt";
         let title = clean;
+        // Shazam Format "Artist - Title" splitting
         if(clean.includes("-")) {
             const parts = clean.split("-");
             artist = parts[0].trim();
@@ -588,7 +580,7 @@
         const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
 
         aiLocked = true;
-        if(isListening) mainAction(); 
+        if(isListening) mainAction(); // Stop local
         
         if(cached) {
             updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
@@ -601,7 +593,10 @@
 
     async function askAI(artist, title) {
         const key = document.getElementById('api-key').value;
-        if(!key) return;
+        if(!key) {
+            updateDisplay("KEY?", "--", "", false);
+            return;
+        }
 
         updateDisplay("KI DENKT...", "", "", false);
         document.getElementById('mic-btn').classList.add('ai-mode');
@@ -622,6 +617,8 @@
             });
             
             const data = await res.json();
+            if(data.error) throw new Error(data.error.message);
+            
             const content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
             const result = JSON.parse(content);
 
@@ -643,7 +640,10 @@
 
         } catch(e) {
             console.error(e);
-            updateDisplay("FEHLER", "--", "", false);
+            // Verbesserte Fehleranzeige
+            if(e.message.includes("quota")) updateDisplay("QUOTA?", "--", "", false);
+            else if(e.message.includes("key")) updateDisplay("KEY?", "--", "", false);
+            else updateDisplay("NETZ?", "--", "", false);
         }
         
         setTimeout(() => {
