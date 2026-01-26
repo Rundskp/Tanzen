@@ -27,11 +27,21 @@
         .detail-badge { background: #333; padding: 2px 6px; border-radius: 4px; border: 1px solid #444; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
-        #dance-name { font-size: clamp(2.5rem, 12vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; transition: color 0.3s, transform 0.1s; }
+        #dance-name { 
+            font-size: clamp(2.5rem, 12vw, 5rem); 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            margin: 0; 
+            line-height: 0.9; 
+            color: #fff; 
+            /* Soft Transition für Disco Mode */
+            transition: color 0.3s, transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            transform-origin: center;
+        }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 20px rgba(52, 199, 89, 0.5); }
         
-        /* Disco Effekt */
-        .pulse-effect { transform: scale(1.15); text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+        /* Disco Effekt: Sanfteres Skalieren */
+        .pulse-effect { transform: scale(1.08); text-shadow: 0 0 15px rgba(255,255,255,0.4); }
 
         /* Calibration Success Message */
         #calib-toast { position: absolute; top: 40%; background: rgba(0,0,0,0.9); border: 2px solid var(--green); color: var(--green); padding: 15px 20px; border-radius: 15px; font-weight: 900; font-size: 1.2rem; transform: scale(0); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; z-index: 50; text-align: center; }
@@ -170,11 +180,11 @@
 
         <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
             <label>Video Geschwindigkeit</label>
-            <input type="range" id="video-speed" min="0.5" max="1.5" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)">
+            <input type="range" id="video-speed" min="0.25" max="1.0" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)">
             <div class="range-vals">
-                <span>0.5x</span>
+                <span>0.25x</span>
                 <span id="speed-val" style="color:var(--blue); font-weight:bold;">1.0x</span>
-                <span>1.5x</span>
+                <span>1.0x</span>
             </div>
         </div>
 
@@ -357,21 +367,13 @@
     }
 
     function handleBeat(now) {
-        // DISCO PULSE
+        // DISCO PULSE (SMOOTH)
         if(discoEnabled) {
             const danceEl = document.getElementById('dance-name');
-            const bpmEl = document.getElementById('bpm-display');
-            
-            // CSS Klasse entfernen und neu hinzufügen für Restart der Animation
             danceEl.classList.remove('pulse-effect');
-            bpmEl.classList.remove('stat-val-pulse'); // Custom pulse needed?
-            
-            // Force Reflow
-            void danceEl.offsetWidth;
-            
+            void danceEl.offsetWidth; // Force Reflow
             danceEl.classList.add('pulse-effect');
-            // Timeout um Klasse wieder zu entfernen (cleaner look)
-            setTimeout(() => danceEl.classList.remove('pulse-effect'), 150);
+            setTimeout(() => danceEl.classList.remove('pulse-effect'), 200);
         }
 
         if (lastBeatTime > 0) {
@@ -387,8 +389,13 @@
             if (bpmBuffer.length > 5) bpmBuffer.shift();
             
             const avgRaw = bpmBuffer.reduce((a, b) => a + b, 0) / bpmBuffer.length;
+            
+            // Apply Calibration (Sicherheit: Wenn Faktor explodiert ist, reset)
             localBpm = Math.round(avgRaw * calibrationFactor);
             
+            // Notbremse falls 400 BPM berechnet werden
+            if(localBpm > 250) localBpm = Math.round(localBpm / 2); 
+
             document.getElementById('bpm-display').innerText = localBpm;
 
             if(!currentAIResult) {
@@ -424,6 +431,37 @@
         return "HÖRE ZU...";
     }
 
+    // --- JSON PARSER HELPERS ---
+    function cleanTitle(input) {
+        if(!input) return "";
+        let result = input;
+        
+        // Versuche rekursiv JSON zu parsen bis es nicht mehr geht
+        try {
+            // Check if input is object with body?
+            if(typeof input === 'object' && input.body) {
+                return cleanTitle(input.body);
+            }
+            if(typeof input === 'object' && input.message) {
+                return cleanTitle(input.message);
+            }
+            if(typeof input === 'object' && input.title) {
+                return input.title;
+            }
+
+            // String Parsing
+            if(typeof input === 'string') {
+                if(input.startsWith('{')) {
+                    const parsed = JSON.parse(input);
+                    return cleanTitle(parsed);
+                }
+            }
+        } catch(e) {
+            // Wenn JSON Parse fehlschlägt, ist es wohl der End-String
+        }
+        return result;
+    }
+
     // --- KI & NTFY ---
     function connectNtfy() {
         const topic = localStorage.getItem('dm_topic');
@@ -433,18 +471,8 @@
         eventSource.onmessage = (e) => {
             try {
                 const data = JSON.parse(e.data);
-                // Robustes Parsen: Ntfy sendet manchmal reinen Text im 'message' Feld
-                // oder ein JSON String im 'message' Feld.
-                let title = data.message || "";
-                
-                // Falls message selbst JSON ist (z.B. {"title": "xyz"})
-                if(title.startsWith('{')) {
-                    try {
-                        const inner = JSON.parse(title);
-                        if(inner.title) title = inner.title;
-                    } catch(e) { /* ignore, just use text */ }
-                }
-                
+                // Deep Parse Logic
+                let title = cleanTitle(data.message);
                 if(title && title !== "Test") handleNewSong(title);
             } catch(x) { console.log("SSE Error", x); }
         };
@@ -460,6 +488,9 @@
         titleEl.style.opacity = 1;
         document.getElementById('dance-name').innerText = "ANALYSE...";
         document.getElementById('ai-details').style.opacity = 0;
+        
+        // Reset old AI data to avoid mixing local guess with old rhythm
+        currentAIResult = null; 
 
         const systemPrompt = `
 Du bist ein Tanzexperte. Nutze EXAKT diese Daten:
@@ -496,17 +527,29 @@ Antworte NUR JSON: {"dance": "Name", "bpm": number, "takt": "4/4", "rhythm": "St
 
             currentAIResult = result;
             
-            // --- AUTO-KALIBRIERUNG ---
+            // --- AUTO-KALIBRIERUNG (Safe Mode) ---
             if(localBpm > 0) {
-                calibrationFactor = result.bpm / (localBpm / calibrationFactor);
-                document.getElementById('conf-display').innerText = "AUTO-TUNED";
-                document.getElementById('conf-display').style.color = "var(--green)";
-                if(isListening) document.getElementById('mic-btn').classList.add('calibrated');
+                // Berechne neuen Faktor
+                let newFactor = result.bpm / (localBpm / calibrationFactor);
                 
-                // Show Success Message
-                const toast = document.getElementById('calib-toast');
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 3000);
+                // SAFETY CHECK: Faktor darf nicht wild abweichen (0.8 bis 1.25)
+                // Wenn wir z.B. Rauschen (130) hatten und Lied ist (100), Faktor wäre 0.76 -> OK
+                // Wenn wir Beat (100) hatten und Lied ist (100), Faktor 1.0 -> OK
+                // Wenn wir Rauschen (20) hatten und Lied ist (100), Faktor 5.0 -> VERBOTEN
+                
+                if(newFactor > 0.75 && newFactor < 1.3) {
+                    calibrationFactor = newFactor;
+                    document.getElementById('conf-display').innerText = "TUNED";
+                    document.getElementById('conf-display').style.color = "var(--green)";
+                    if(isListening) document.getElementById('mic-btn').classList.add('calibrated');
+                    
+                    const toast = document.getElementById('calib-toast');
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                } else {
+                    document.getElementById('conf-display').innerText = "BAD SIGNAL";
+                    document.getElementById('conf-display').style.color = "var(--red)";
+                }
             } else {
                 document.getElementById('conf-display').innerText = "KI ZIEL";
             }
