@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tanz das! Ultimate Fix</title>
+    <title>Tanz das! Ultimate Fix v2</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
         
@@ -345,11 +345,6 @@
         updateSens(savedSens);
         
         renderPrefs(); renderHistory(); renderExpert();
-        
-        // Touch Wakeup für iOS AudioContext
-        document.body.addEventListener('touchstart', function() {
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        }, {once:true});
     };
 
     function loadData() {
@@ -358,13 +353,13 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-    /* --- AUDIO ENGINE --- */
+    /* --- AUDIO ENGINE (MULTI-BAND) --- */
     function mainAction() {
         const btn = document.getElementById('mic-btn');
         if(btn.innerText === "START") toggleMic();
         else {
             isListening = false;
-            // Nicht schließen, nur stoppen damit wir wieder starten können ohne user gesture probleme
+            // Stop
             if(audioCtx) audioCtx.suspend();
             btn.innerText = "START";
             btn.classList.remove('active', 'loading');
@@ -377,6 +372,7 @@
         btn.classList.add('loading');
         
         try {
+            // ONLY create AudioContext here on user gesture!
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') await audioCtx.resume();
 
@@ -439,12 +435,13 @@
 
         for(let i = 0; i < bufferLen; i++) {
             // Lows = Red
-            const hLow = lowData[i] / 2.5;
+            // Multiply for visual boost
+            const hLow = (lowData[i] * 1.5) / 2.5; 
             ctx.fillStyle = `rgb(${lowData[i]}, 20, 20)`;
             ctx.fillRect(x, canvas.height - hLow, barWidth, hLow);
             
             // Highs = Blue Overlay
-            const hHigh = highData[i] / 2.5;
+            const hHigh = (highData[i] * 1.5) / 2.5;
             if(hHigh > 5) {
                 ctx.fillStyle = `rgba(20, 20, ${highData[i]}, 0.6)`;
                 ctx.fillRect(x, canvas.height - hHigh - hLow, barWidth, hHigh);
@@ -572,9 +569,8 @@
 
         const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
 
-        // Lock UI to prevent local override
+        // Lock UI to prevent local override, but KEEP MIC RUNNING
         aiLocked = true;
-        // isListening bleibt an für Visualizer!
         
         if(cached) {
             updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
@@ -601,14 +597,20 @@
                 body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], max_tokens: 60 })
             });
             
+            if(!res.ok) throw new Error("Error " + res.status);
             const data = await res.json();
-            if(data.error) throw new Error("API: " + data.error.message);
             
-            // ROBUST PARSER
-            const raw = data.choices[0].message.content;
-            const match = raw.match(/\{[\s\S]*\}/);
-            if (!match) throw new Error("JSON Format");
-            const result = JSON.parse(match[0]);
+            // ROBUST PARSER - CLEAN UP MARKDOWN
+            let raw = data.choices[0].message.content;
+            
+            // Remove markdown code blocks if present
+            raw = raw.replace(/```json/g, "").replace(/```/g, "");
+            
+            const start = raw.indexOf('{');
+            const end = raw.lastIndexOf('}');
+            if (start === -1 || end === -1) throw new Error("JSON Format");
+            
+            const result = JSON.parse(raw.substring(start, end+1));
 
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
@@ -624,7 +626,11 @@
 
         } catch(e) {
             console.error(e);
-            let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK " + e.message);
+            let msg = "FEHLER";
+            if(e.message.includes("401")) msg = "KEY FALSCH";
+            else if(e.message.includes("429")) msg = "LIMIT";
+            else if(e.message.includes("JSON")) msg = "KI FORMAT";
+            else msg = "NETZ: " + e.message.substring(0, 10);
             updateDisplay(msg, "--", "!", false);
         }
         
@@ -783,7 +789,7 @@
     function testFunk() { 
         const t = document.getElementById('ntfy-topic').value;
         if(!t) return alert("Topic fehlt!");
-        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})})
+        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Tanz Das! - Verbindung OK'})})
         .then(() => alert("Signal gesendet!"))
         .catch(e => alert("Funk Fehler: " + e));
     }
