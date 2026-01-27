@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tanz das! Final Audio Fix</title>
+    <title>Tanz das! Final</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
         
@@ -44,8 +44,8 @@
             margin: 0; 
             line-height: 0.9; 
             color: #fff; 
-            transition: color 0.3s, transform 0.1s; 
             text-align: center;
+            transition: transform 0.1s;
         }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
@@ -59,10 +59,15 @@
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
 
         /* Slider Sidebar */
-        #slider-overlay { position: absolute; right: 0; top: 100px; bottom: 0; width: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; padding-bottom: 20px; }
-        input[type=range].vertical { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 4px; height: 60%; outline: none; background: rgba(255,255,255,0.1); border-radius: 4px; cursor: pointer; }
-        #level-indicator { width: 6px; height: 6px; background: #333; border-radius: 50%; margin-bottom: 5px; transition: 0.05s; }
+        #slider-sidebar { width: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #333; background: #111; padding: 10px 0; z-index: 10; flex-shrink: 0; }
+        
+        input[type=range].vertical {
+            writing-mode: bt-lr; -webkit-appearance: slider-vertical;
+            width: 6px; height: 100%; outline: none; background: #333; border-radius: 4px; cursor: pointer;
+        }
+        #level-indicator { width: 6px; height: 6px; background: #333; border-radius: 50%; margin-bottom: 10px; transition: 0.05s; }
         #level-indicator.hit { background: var(--green); box-shadow: 0 0 10px var(--green); transform: scale(1.5); }
+        #sens-val-display { font-family: monospace; font-size: 0.8rem; color: var(--blue); font-weight: bold; margin-top: 5px; }
 
         /* OVERLAYS */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
@@ -113,9 +118,11 @@
         #fs-controls { margin-top: 20px; display: flex; gap: 20px; justify-content: center; width: 100%; }
         .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; }
         
-        #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
-        .tap-area { width: 220px; height: 220px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; }
-        .tap-area:active { transform: scale(0.92); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
+        #tap-pad { flex: 1; display: flex; flex-direction: row; gap: 20px; align-items: center; justify-content: center; height: 100%; }
+        .tap-btn { border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.1s; cursor: pointer; border: 4px solid #444; background: #222; }
+        .tap-btn:active { border-color: var(--blue); background: var(--blue); transform: scale(0.95); }
+        #tap-main { width: 180px; height: 180px; }
+        #tap-high { width: 100px; height: 100px; }
     </style>
 </head>
 <body>
@@ -130,9 +137,11 @@
 </div>
 
 <div id="monitor">
+    
     <div id="vis-wrap">
         <canvas id="visualizer"></canvas>
     </div>
+
     <div id="main-display">
         <div id="song-info">
             <div id="song-title">Warte auf Musik...</div>
@@ -142,9 +151,11 @@
                 <span class="detail-badge" id="badge-rhythm"></span>
             </div>
         </div>
+
         <div class="dance-wrap">
             <h1 id="dance-name">BEREIT</h1>
         </div>
+
         <div class="status-indicators">
             <div class="stat-box">
                 <div id="bpm-display" class="stat-val">0</div>
@@ -160,9 +171,12 @@
             </div>
         </div>
     </div>
-    <div id="slider-overlay">
+
+    <div id="slider-sidebar">
+        <div style="font-size:0.6rem; color:#888; margin-bottom:5px;">SENS</div>
         <div id="level-indicator"></div>
         <input type="range" class="vertical" id="main-sens" min="1" max="100" value="45" oninput="updateSens(this.value)">
+        <div id="sens-val-display">45</div>
     </div>
 </div>
 
@@ -171,6 +185,7 @@
         <h2 class="overlay-title">Einstellungen</h2>
         <button class="close-btn" onclick="closeOverlays()">✕</button>
     </div>
+    
     <div class="settings-group">
         <div class="row">
             <label>OpenAI API Key</label>
@@ -204,6 +219,7 @@
         <button class="btn-action btn-secondary" style="margin-top:20px;" onclick="openOverlay('expert-overlay')">Experten-Einstellungen & BPM</button>
         <button class="btn-action btn-save" onclick="saveSettings()">Speichern</button>
     </div>
+
     <div class="settings-group">
         <div class="row"><label>Bevorzugte Tänze</label></div>
         <div style="font-size:0.8rem; color:#888; margin-bottom:5px;">Werden bei Übereinstimmung vorgezogen.</div>
@@ -213,6 +229,7 @@
             <button class="btn-save" style="width:auto; padding:0 20px;" onclick="addPref()">+</button>
         </div>
     </div>
+
     <div class="settings-group">
         <div class="row">
             <label>Datenbank (Lokal)</label>
@@ -269,14 +286,17 @@
         <button class="close-btn" onclick="closeOverlays()">✕</button>
     </div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Tippe im Takt auf den Kreis.
+        Tippe den Takt (Links: Beat / Rechts: High)
     </div>
     <div id="tap-pad">
-        <div class="tap-area" onpointerdown="handleTap(event)">🖐️</div>
-        <div id="tap-result">---</div>
-        <div id="tap-bpm" style="font-family:monospace; font-size:1.5rem; color:#666;">0 BPM</div>
+        <div class="tap-btn" id="tap-main" onpointerdown="handleTap(event, 'main')"></div>
+        <div class="tap-btn" id="tap-high" onpointerdown="handleTap(event, 'high')"></div>
     </div>
-    <button class="btn-action btn-secondary" onclick="resetTap()">Reset</button>
+    <div style="text-align:center; margin-top:20px;">
+        <div id="tap-bpm" style="font-size: 2rem; font-weight: bold; color: var(--green);">0 BPM</div>
+        <div id="tap-result" style="color: #aaa;">---</div>
+    </div>
+    <button class="btn-action btn-secondary" onclick="resetTap()" style="margin-top:20px;">Reset</button>
 </div>
 
 <script>
@@ -341,6 +361,8 @@
         playbackSpeed = parseFloat(localStorage.getItem('dm_speed')) || 1.0;
         document.getElementById('video-speed').value = playbackSpeed;
         updateSpeedLabel(playbackSpeed);
+        
+        // Fix Crash: Check if element exists before updating
         const savedSens = localStorage.getItem('dm_sens') || 45;
         updateSens(savedSens);
         
@@ -353,13 +375,12 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-    /* --- AUDIO ENGINE FIX --- */
+    /* --- AUDIO ENGINE --- */
     function mainAction() {
         const btn = document.getElementById('mic-btn');
         if(btn.innerText === "START") toggleMic();
         else {
             isListening = false;
-            // Stop logic
             if(audioCtx) audioCtx.suspend();
             btn.innerText = "START";
             btn.classList.remove('active', 'loading');
@@ -372,13 +393,10 @@
         btn.classList.add('loading');
         
         try {
-            // FORCE RESUME ON USER GESTURE (iOS FIX)
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') await audioCtx.resume();
 
-            // DEFAULT CONSTRAINTS (iOS FIX)
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
             const source = audioCtx.createMediaStreamSource(stream);
             
             // ANALYZERS
@@ -395,14 +413,6 @@
             analyserHigh.fftSize = 256;
             source.connect(highFilter);
             highFilter.connect(analyserHigh);
-
-            // DUMMY OUTPUT TO KEEP PROCESSOR ALIVE (iOS FIX)
-            // Send filtered (low volume) or mute it?
-            // GainNode(0) is best practice
-            const gainNode = audioCtx.createGain();
-            gainNode.gain.value = 0.0; // MUTE
-            source.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
 
             isListening = true;
             btn.innerText = "STOP";
@@ -437,7 +447,7 @@
         let x = 0;
 
         for(let i = 0; i < bufferLen; i++) {
-            // Visual Boost for low signals
+            // Visual Boost
             const hLow = (lowData[i] * 1.5) / 2.5; 
             ctx.fillStyle = `rgb(${lowData[i]}, 20, 20)`;
             ctx.fillRect(x, canvas.height - hLow, barWidth, hLow);
@@ -461,11 +471,15 @@
         let sum = 0; for(let i=0; i<lowData.length; i++) sum += lowData[i];
         const avg = sum / lowData.length;
         
+        // Scaling Threshold
         const threshold = micSens * 255 * 0.8; 
 
         if(avg > threshold) {
-             document.getElementById('level-indicator').classList.add('hit');
-             setTimeout(()=>document.getElementById('level-indicator').classList.remove('hit'), 100);
+             const el = document.getElementById('level-indicator');
+             if(el) {
+                 el.classList.add('hit');
+                 setTimeout(()=>el.classList.remove('hit'), 100);
+             }
         }
 
         const now = Date.now();
@@ -585,7 +599,6 @@
         document.getElementById('mic-btn').classList.add('ai-mode');
 
         try {
-            // FORCE JSON MODE
             const prompt = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
 
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -602,15 +615,16 @@
             if(!res.ok) throw new Error("Error " + res.status);
             const data = await res.json();
             
-            // CLEAN PARSE
+            // ROBUST PARSER - CLEAN UP MARKDOWN
             let raw = data.choices[0].message.content;
-            // Clean Markdown if present
+            
+            // Remove markdown code blocks if present
             raw = raw.replace(/```json/g, "").replace(/```/g, "");
             
+            // Find JSON Brackets
             const start = raw.indexOf('{');
             const end = raw.lastIndexOf('}');
             if (start === -1 || end === -1) {
-                // FALLBACK: SHOW RAW ERROR
                 throw new Error("RAW: " + raw.substring(0, 15));
             }
             
@@ -633,7 +647,7 @@
             let msg = "FEHLER";
             if(e.message.includes("401")) msg = "KEY FALSCH";
             else if(e.message.includes("429")) msg = "LIMIT";
-            else if(e.message.includes("RAW")) msg = e.message; // Show what AI said
+            else if(e.message.includes("RAW")) msg = "FORMAT"; 
             else msg = "NETZ";
             updateDisplay(msg, "--", "!", false);
         }
@@ -676,7 +690,10 @@
     }
     function updateSens(val) {
         document.getElementById('main-sens').value = val;
-        document.getElementById('sens-val-display').innerText = val;
+        
+        const disp = document.getElementById('sens-val-display');
+        if(disp) disp.innerText = val;
+        
         micSens = val / 1000; 
         localStorage.setItem('dm_sens', val);
     }
@@ -768,26 +785,60 @@
     }
     function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
 
-    let tapTimes = [];
-    function handleTap(e) {
+    // --- NEW TAP DETECTOR ---
+    let tapBuffer = [];
+    let tapTimeout = null;
+
+    function handleTap(e, type) {
         e.preventDefault();
+        
+        // Visuals
+        const el = document.getElementById(type === 'main' ? 'tap-main' : 'tap-high');
+        el.style.transform = "scale(0.9)"; 
+        setTimeout(() => el.style.transform = "scale(1)", 100);
+
         const now = Date.now();
-        const el = e.target;
-        el.style.transform = "scale(0.9)"; setTimeout(() => el.style.transform = "scale(1)", 100);
-        if(tapTimes.length > 0 && (now - tapTimes[tapTimes.length-1]) > 2000) tapTimes = [];
-        tapTimes.push(now);
-        if(tapTimes.length > 8) tapTimes.shift();
-        if(tapTimes.length >= 2) {
-            let intervals = [];
-            for(let i=1; i<tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i-1]);
-            const avgMs = intervals.reduce((a,b)=>a+b)/intervals.length;
-            const bpm = Math.round(60000/avgMs);
+        tapBuffer.push({ t: now, type: type });
+
+        // Reset inactivity timer
+        if(tapTimeout) clearTimeout(tapTimeout);
+        tapTimeout = setTimeout(analyzeTaps, 2000); // 2s silence triggers analysis
+        
+        document.getElementById('tap-result').innerText = "Aufnahme...";
+    }
+
+    function analyzeTaps() {
+        if(tapBuffer.length < 4) {
+            document.getElementById('tap-result').innerText = "Zu wenige Taps";
+            return;
+        }
+
+        // Calculate Average Interval of Main Beats
+        let mains = tapBuffer.filter(x => x.type === 'main');
+        let intervals = [];
+        for(let i=1; i<mains.length; i++) {
+            intervals.push(mains[i].t - mains[i-1].t);
+        }
+        
+        if(intervals.length > 0) {
+            const avgMs = intervals.reduce((a,b)=>a+b) / intervals.length;
+            const bpm = Math.round(60000 / avgMs);
             document.getElementById('tap-bpm').innerText = bpm + " BPM";
+            
+            // Basic Dance Guess via Expert Ranges
             detectDance(bpm);
             document.getElementById('tap-result').innerText = document.getElementById('dance-name').innerText;
+        } else {
+            document.getElementById('tap-result').innerText = "Kein Takt erkannt";
         }
+        tapBuffer = [];
     }
-    function resetTap() { tapTimes = []; document.getElementById('tap-bpm').innerText = "0 BPM"; document.getElementById('tap-result').innerText = "---"; }
+
+    function resetTap() { 
+        tapBuffer = []; 
+        document.getElementById('tap-bpm').innerText = "0 BPM"; 
+        document.getElementById('tap-result').innerText = "---"; 
+    }
 
     function testFunk() { 
         const t = document.getElementById('ntfy-topic').value;
