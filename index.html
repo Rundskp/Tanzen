@@ -785,52 +785,114 @@
     }
     function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
 
-    // --- NEW TAP DETECTOR ---
+// --- SMART RHYTHM TAP DETECTOR ---
     let tapBuffer = [];
     let tapTimeout = null;
 
     function handleTap(e, type) {
         e.preventDefault();
         
-        // Visuals
+        // Visual Feedback
         const el = document.getElementById(type === 'main' ? 'tap-main' : 'tap-high');
         el.style.transform = "scale(0.9)"; 
-        setTimeout(() => el.style.transform = "scale(1)", 100);
+        el.style.borderColor = "var(--green)";
+        setTimeout(() => {
+            el.style.transform = "scale(1)";
+            el.style.borderColor = "#444";
+        }, 100);
 
         const now = Date.now();
         tapBuffer.push({ t: now, type: type });
 
-        // Reset inactivity timer
+        // Reset inactivity timer (3 Sekunden warten für Analyse)
         if(tapTimeout) clearTimeout(tapTimeout);
-        tapTimeout = setTimeout(analyzeTaps, 2000); // 2s silence triggers analysis
+        tapTimeout = setTimeout(analyzeTaps, 2500); 
         
-        document.getElementById('tap-result').innerText = "Aufnahme...";
+        document.getElementById('tap-result').innerText = "Erfasse Rhythmus...";
+        document.getElementById('tap-result').style.color = "#888";
     }
 
     function analyzeTaps() {
         if(tapBuffer.length < 4) {
-            document.getElementById('tap-result').innerText = "Zu wenige Taps";
+            document.getElementById('tap-result').innerText = "Zu wenige Taps (min. 4)";
+            tapBuffer = [];
             return;
         }
 
-        // Calculate Average Interval of Main Beats
-        let mains = tapBuffer.filter(x => x.type === 'main');
+        // 1. Intervalle berechnen
         let intervals = [];
-        for(let i=1; i<mains.length; i++) {
-            intervals.push(mains[i].t - mains[i-1].t);
+        for(let i=1; i<tapBuffer.length; i++) {
+            intervals.push(tapBuffer[i].t - tapBuffer[i-1].t);
         }
+
+        // 2. BPM berechnen (Durchschnitt)
+        const avgMs = intervals.reduce((a,b)=>a+b) / intervals.length;
+        const bpm = Math.round(60000 / avgMs);
+        document.getElementById('tap-bpm').innerText = bpm + " BPM";
+
+        // 3. Rhythmus-Analyse (Lang vs. Kurz)
+        // Wir suchen das kürzeste Intervall ("Schnell") und vergleichen den Rest
+        const minInterval = Math.min(...intervals);
+        let patternCode = "";
+        let isUneven = false;
+
+        // Toleranz: Alles bis 1.4x gilt noch als "gleich lang", darüber "Lang"
+        const detectedPattern = intervals.map(int => {
+            const ratio = int / minInterval;
+            if (ratio > 1.6) { isUneven = true; return "L"; } // Lang
+            return "S"; // Schnell (oder Gleich)
+        });
+
+        // String bauen (z.B. "LSS")
+        const rhythmString = detectedPattern.join(" "); // z.B. "S S L S S"
+
+        // 4. Intelligente Zuordnung
+        let bestMatch = "Unklar";
         
-        if(intervals.length > 0) {
-            const avgMs = intervals.reduce((a,b)=>a+b) / intervals.length;
-            const bpm = Math.round(60000 / avgMs);
-            document.getElementById('tap-bpm').innerText = bpm + " BPM";
-            
-            // Basic Dance Guess via Expert Ranges
-            detectDance(bpm);
-            document.getElementById('tap-result').innerText = document.getElementById('dance-name').innerText;
-        } else {
-            document.getElementById('tap-result').innerText = "Kein Takt erkannt";
+        // Zuerst in den Experten-Werten schauen, ob BPM passt
+        let candidates = [];
+        for(const [dance, range] of Object.entries(expertRanges)) {
+            if(bpm >= range.min && bpm <= range.max) {
+                candidates.push({name: dance, rhythm: range.rhythm || ""});
+            }
         }
+
+        // Jetzt filtern nach Rhythmus-Typ
+        let rhythmMatch = null;
+
+        if (!isUneven) {
+            // GLEICHMÄßIGER TAKT (1-2-3-4)
+            // Bevorzuge Walzer, Disco, Tango, Samba
+            rhythmMatch = candidates.find(c => 
+                c.name.includes("Walzer") || 
+                c.name.includes("Disco") || 
+                c.name.includes("Tango") ||
+                c.name.includes("Samba")
+            );
+            document.getElementById('tap-result').innerHTML = `Gleichmäßig<br><span style="color:var(--blue)">${rhythmMatch ? rhythmMatch.name : "Marsch / Disco"}</span>`;
+        } else {
+            // UNGLEICHER TAKT (Lang-Kurz Muster)
+            // Versuch: Erkenne typische Muster
+            let guess = "Rhythmus erkannt";
+            
+            // L-S-S (Rumba/ChaCha Grundschritt Timing)
+            if(rhythmString.includes("L S S") || rhythmString.includes("S S L")) {
+                // Entscheidung per BPM
+                if(bpm < 115) guess = "Rumba (Slow-Quick-Quick)";
+                else guess = "Cha Cha / Fox (Slow-Quick-Quick)";
+            } 
+            // S-S-L-L (Boogie)
+            else if(rhythmString.includes("S S L L")) {
+                guess = "Boogie / Jive 6-Count";
+            }
+            // L-L-S-S (Foxtrott)
+            else if(rhythmString.includes("L L S S")) {
+                guess = "Foxtrott / Quickstep";
+            }
+            
+            document.getElementById('tap-result').innerHTML = `${rhythmString}<br><span style="color:var(--yellow)">${guess}</span>`;
+        }
+
         tapBuffer = [];
     }
 
@@ -839,7 +901,6 @@
         document.getElementById('tap-bpm').innerText = "0 BPM"; 
         document.getElementById('tap-result').innerText = "---"; 
     }
-
     function testFunk() { 
         const t = document.getElementById('ntfy-topic').value;
         if(!t) return alert("Topic fehlt!");
@@ -865,3 +926,4 @@
 </script>
 </body>
 </html>
+
