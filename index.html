@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tanz das! Ultimate Fix v2</title>
+    <title>Tanz das! Ultimate JSON Fix</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
         
@@ -37,7 +37,16 @@
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
-        #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; transition: transform 0.1s; }
+        #dance-name { 
+            font-size: clamp(2.5rem, 11vw, 5rem); 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            margin: 0; 
+            line-height: 0.9; 
+            color: #fff; 
+            text-align: center;
+            transition: transform 0.1s;
+        }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
         @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
@@ -65,6 +74,7 @@
         /* Settings */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+        .row:last-child { border-bottom: none; margin-bottom: 0; }
         input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; user-select: text; -webkit-user-select: text; }
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
@@ -121,11 +131,9 @@
 </div>
 
 <div id="monitor">
-    
     <div id="vis-wrap">
         <canvas id="visualizer"></canvas>
     </div>
-
     <div id="main-display">
         <div id="song-info">
             <div id="song-title">Warte auf Musik...</div>
@@ -135,11 +143,9 @@
                 <span class="detail-badge" id="badge-rhythm"></span>
             </div>
         </div>
-
         <div class="dance-wrap">
             <h1 id="dance-name">BEREIT</h1>
         </div>
-
         <div class="status-indicators">
             <div class="stat-box">
                 <div id="bpm-display" class="stat-val">0</div>
@@ -155,7 +161,6 @@
             </div>
         </div>
     </div>
-
     <div id="slider-overlay">
         <div id="level-indicator"></div>
         <input type="range" class="vertical" id="main-sens" min="1" max="100" value="45" oninput="updateSens(this.value)">
@@ -167,7 +172,6 @@
         <h2 class="overlay-title">Einstellungen</h2>
         <button class="close-btn" onclick="closeOverlays()">✕</button>
     </div>
-    
     <div class="settings-group">
         <div class="row">
             <label>OpenAI API Key</label>
@@ -201,7 +205,6 @@
         <button class="btn-action btn-secondary" style="margin-top:20px;" onclick="openOverlay('expert-overlay')">Experten-Einstellungen & BPM</button>
         <button class="btn-action btn-save" onclick="saveSettings()">Speichern</button>
     </div>
-
     <div class="settings-group">
         <div class="row"><label>Bevorzugte Tänze</label></div>
         <div style="font-size:0.8rem; color:#888; margin-bottom:5px;">Werden bei Übereinstimmung vorgezogen.</div>
@@ -211,7 +214,6 @@
             <button class="btn-save" style="width:auto; padding:0 20px;" onclick="addPref()">+</button>
         </div>
     </div>
-
     <div class="settings-group">
         <div class="row">
             <label>Datenbank (Lokal)</label>
@@ -323,7 +325,6 @@
         "Walzer": { file: "", figures: [] }
     };
 
-    // --- VISUALIZER SETUP ---
     const canvas = document.getElementById('visualizer');
     const ctx = canvas.getContext('2d');
     
@@ -353,14 +354,14 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-    /* --- AUDIO ENGINE (MULTI-BAND) --- */
+    /* --- AUDIO ENGINE --- */
     function mainAction() {
         const btn = document.getElementById('mic-btn');
         if(btn.innerText === "START") toggleMic();
         else {
             isListening = false;
-            // Stop
-            if(audioCtx) audioCtx.suspend();
+            // Safari Stop Fix
+            if(audioCtx && audioCtx.state !== 'closed') audioCtx.suspend();
             btn.innerText = "START";
             btn.classList.remove('active', 'loading');
             bpmBuffer = []; lastBeat = 0; 
@@ -372,22 +373,15 @@
         btn.classList.add('loading');
         
         try {
-            // ONLY create AudioContext here on user gesture!
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if(audioCtx.state === 'suspended') await audioCtx.resume();
+            // FIX: Always create new context on user gesture to satisfy iOS
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            await audioCtx.resume(); 
 
-            // RAW AUDIO REQUEST (Kein Filter/EchoCancel)
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: { 
-                    echoCancellation: false, 
-                    noiseSuppression: false, 
-                    autoGainControl: false 
-                } 
-            });
+            // Simple constraints for better compatibility
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
             const source = audioCtx.createMediaStreamSource(stream);
             
-            // 1. Low Band (Kick)
             const lowFilter = audioCtx.createBiquadFilter();
             lowFilter.type = "lowpass"; lowFilter.frequency.value = 120; 
             analyserLow = audioCtx.createAnalyser();
@@ -395,7 +389,6 @@
             source.connect(lowFilter);
             lowFilter.connect(analyserLow);
 
-            // 2. High Band (Snare)
             const highFilter = audioCtx.createBiquadFilter();
             highFilter.type = "highpass"; highFilter.frequency.value = 2500;
             analyserHigh = audioCtx.createAnalyser();
@@ -421,6 +414,8 @@
         if(!isListening) return;
         requestAnimationFrame(visualize);
         
+        if(!analyserLow) return; 
+
         const bufferLen = analyserLow.frequencyBinCount;
         const lowData = new Uint8Array(bufferLen);
         const highData = new Uint8Array(bufferLen);
@@ -434,13 +429,10 @@
         let x = 0;
 
         for(let i = 0; i < bufferLen; i++) {
-            // Lows = Red
-            // Multiply for visual boost
             const hLow = (lowData[i] * 1.5) / 2.5; 
             ctx.fillStyle = `rgb(${lowData[i]}, 20, 20)`;
             ctx.fillRect(x, canvas.height - hLow, barWidth, hLow);
             
-            // Highs = Blue Overlay
             const hHigh = (highData[i] * 1.5) / 2.5;
             if(hHigh > 5) {
                 ctx.fillStyle = `rgba(20, 20, ${highData[i]}, 0.6)`;
@@ -451,28 +443,24 @@
     }
 
     function analyzeRhythm() {
-        if(!isListening) return;
-        setTimeout(analyzeRhythm, 20); // Loop ~50fps
+        if(!isListening || !analyserLow) return;
+        setTimeout(analyzeRhythm, 20); 
 
         const lowData = new Uint8Array(analyserLow.frequencyBinCount);
         analyserLow.getByteFrequencyData(lowData);
         
-        // Simple RMS calc for Low Band
         let sum = 0; for(let i=0; i<lowData.length; i++) sum += lowData[i];
         const avg = sum / lowData.length;
         
-        // Threshold Logic
-        const threshold = micSens * 255 * 0.8; // Skaliert mit Slider
+        const threshold = micSens * 255 * 0.8; 
 
-        // Visual Feedback (Punkt)
         if(avg > threshold) {
              document.getElementById('level-indicator').classList.add('hit');
              setTimeout(()=>document.getElementById('level-indicator').classList.remove('hit'), 100);
         }
 
-        // Beat Counting
         const now = Date.now();
-        if(avg > threshold && (now - lastBeat > 280)) { // ~214 BPM max
+        if(avg > threshold && (now - lastBeat > 280)) { 
             processBeat(now);
             lastBeat = now;
         }
@@ -527,7 +515,7 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- CLOUD / AI --- */
+    /* --- AI & CLOUD --- */
     function connectNtfy(topic) {
         const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
         es.onmessage = (e) => {
@@ -569,7 +557,6 @@
 
         const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
 
-        // Lock UI to prevent local override, but KEEP MIC RUNNING
         aiLocked = true;
         
         if(cached) {
@@ -594,23 +581,18 @@
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], max_tokens: 60 })
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [{ role: "system", content: "You output only valid JSON." }, { role: "user", content: prompt }],
+                    max_tokens: 60,
+                    response_format: { "type": "json_object" } // FORCE JSON MODE
+                })
             });
             
             if(!res.ok) throw new Error("Error " + res.status);
             const data = await res.json();
             
-            // ROBUST PARSER - CLEAN UP MARKDOWN
-            let raw = data.choices[0].message.content;
-            
-            // Remove markdown code blocks if present
-            raw = raw.replace(/```json/g, "").replace(/```/g, "");
-            
-            const start = raw.indexOf('{');
-            const end = raw.lastIndexOf('}');
-            if (start === -1 || end === -1) throw new Error("JSON Format");
-            
-            const result = JSON.parse(raw.substring(start, end+1));
+            const result = JSON.parse(data.choices[0].message.content);
 
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
@@ -629,7 +611,6 @@
             let msg = "FEHLER";
             if(e.message.includes("401")) msg = "KEY FALSCH";
             else if(e.message.includes("429")) msg = "LIMIT";
-            else if(e.message.includes("JSON")) msg = "KI FORMAT";
             else msg = "NETZ: " + e.message.substring(0, 10);
             updateDisplay(msg, "--", "!", false);
         }
@@ -661,7 +642,6 @@
         localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
         localStorage.setItem('dm_speed', playbackSpeed);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
-        
         const inputs = document.querySelectorAll('.expert-input');
         inputs.forEach(inp => {
             const dance = inp.dataset.dance;
