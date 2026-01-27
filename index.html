@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tanz das! Ultimate JSON Fix</title>
+    <title>Tanz das! Final Audio Fix</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
         
@@ -44,8 +44,8 @@
             margin: 0; 
             line-height: 0.9; 
             color: #fff; 
+            transition: color 0.3s, transform 0.1s; 
             text-align: center;
-            transition: transform 0.1s;
         }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
@@ -74,7 +74,6 @@
         /* Settings */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-        .row:last-child { border-bottom: none; margin-bottom: 0; }
         input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; user-select: text; -webkit-user-select: text; }
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
@@ -354,14 +353,14 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-    /* --- AUDIO ENGINE --- */
+    /* --- AUDIO ENGINE FIX --- */
     function mainAction() {
         const btn = document.getElementById('mic-btn');
         if(btn.innerText === "START") toggleMic();
         else {
             isListening = false;
-            // Safari Stop Fix
-            if(audioCtx && audioCtx.state !== 'closed') audioCtx.suspend();
+            // Stop logic
+            if(audioCtx) audioCtx.suspend();
             btn.innerText = "START";
             btn.classList.remove('active', 'loading');
             bpmBuffer = []; lastBeat = 0; 
@@ -373,15 +372,16 @@
         btn.classList.add('loading');
         
         try {
-            // FIX: Always create new context on user gesture to satisfy iOS
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            await audioCtx.resume(); 
+            // FORCE RESUME ON USER GESTURE (iOS FIX)
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if(audioCtx.state === 'suspended') await audioCtx.resume();
 
-            // Simple constraints for better compatibility
+            // DEFAULT CONSTRAINTS (iOS FIX)
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
             const source = audioCtx.createMediaStreamSource(stream);
             
+            // ANALYZERS
             const lowFilter = audioCtx.createBiquadFilter();
             lowFilter.type = "lowpass"; lowFilter.frequency.value = 120; 
             analyserLow = audioCtx.createAnalyser();
@@ -395,6 +395,14 @@
             analyserHigh.fftSize = 256;
             source.connect(highFilter);
             highFilter.connect(analyserHigh);
+
+            // DUMMY OUTPUT TO KEEP PROCESSOR ALIVE (iOS FIX)
+            // Send filtered (low volume) or mute it?
+            // GainNode(0) is best practice
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.0; // MUTE
+            source.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
 
             isListening = true;
             btn.innerText = "STOP";
@@ -429,6 +437,7 @@
         let x = 0;
 
         for(let i = 0; i < bufferLen; i++) {
+            // Visual Boost for low signals
             const hLow = (lowData[i] * 1.5) / 2.5; 
             ctx.fillStyle = `rgb(${lowData[i]}, 20, 20)`;
             ctx.fillRect(x, canvas.height - hLow, barWidth, hLow);
@@ -515,7 +524,7 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- AI & CLOUD --- */
+    /* --- CLOUD / AI --- */
     function connectNtfy(topic) {
         const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
         es.onmessage = (e) => {
@@ -576,23 +585,36 @@
         document.getElementById('mic-btn').classList.add('ai-mode');
 
         try {
+            // FORCE JSON MODE
             const prompt = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
 
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({
-                    model: "gpt-4o-mini",
-                    messages: [{ role: "system", content: "You output only valid JSON." }, { role: "user", content: prompt }],
+                body: JSON.stringify({ 
+                    model: "gpt-4o-mini", 
+                    messages: [{ role: "system", content: "You output JSON only." }, { role: "user", content: prompt }], 
                     max_tokens: 60,
-                    response_format: { "type": "json_object" } // FORCE JSON MODE
+                    response_format: { "type": "json_object" }
                 })
             });
             
             if(!res.ok) throw new Error("Error " + res.status);
             const data = await res.json();
             
-            const result = JSON.parse(data.choices[0].message.content);
+            // CLEAN PARSE
+            let raw = data.choices[0].message.content;
+            // Clean Markdown if present
+            raw = raw.replace(/```json/g, "").replace(/```/g, "");
+            
+            const start = raw.indexOf('{');
+            const end = raw.lastIndexOf('}');
+            if (start === -1 || end === -1) {
+                // FALLBACK: SHOW RAW ERROR
+                throw new Error("RAW: " + raw.substring(0, 15));
+            }
+            
+            const result = JSON.parse(raw.substring(start, end+1));
 
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
@@ -611,7 +633,8 @@
             let msg = "FEHLER";
             if(e.message.includes("401")) msg = "KEY FALSCH";
             else if(e.message.includes("429")) msg = "LIMIT";
-            else msg = "NETZ: " + e.message.substring(0, 10);
+            else if(e.message.includes("RAW")) msg = e.message; // Show what AI said
+            else msg = "NETZ";
             updateDisplay(msg, "--", "!", false);
         }
         
