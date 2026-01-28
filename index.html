@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tanz das! Final</title>
+    <title>Tanz das! Ultimate</title>
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
         
@@ -11,7 +11,7 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* HEADER */
+        /* --- HEADER --- */
         #top-bar { display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
@@ -21,25 +21,27 @@
         #mic-btn.loading { opacity: 0.7; animation: pulse-load 1s infinite; }
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
-        /* MONITOR */
+        /* --- MONITOR --- */
         #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
         
-        #vis-wrap { width: 100%; height: 100px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
+        /* VISUALIZER */
+        #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
+        /* MAIN DISPLAY */
         #main-display { 
-                    flex: 1; 
-                    display: flex; 
-                    flex-direction: column; 
-                    align-items: center; 
-                    justify-content: space-evenly; 
-                    padding: 10px; 
-                    width: 100%; 
-                    /* WICHTIG: Platz rechts für den Regler reservieren */
-                    padding-right: 60px; 
-                    z-index: 2; 
-                }
-        #song-info { width: 100%; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-evenly; 
+            padding: 10px; 
+            width: 100%; 
+            padding-right: 60px; /* Platz für Slider */
+            z-index: 2; 
+        }
+
+        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
@@ -55,11 +57,14 @@
             line-height: 0.9; 
             color: #fff; 
             text-align: center;
-            transition: transform 0.1s;
         }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
-        @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
+        @keyframes pump {
+            0% { transform: scale(1); text-shadow: 0 0 0 rgba(255,255,255,0); }
+            30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+            100% { transform: scale(1); text-shadow: 0 0 0 rgba(255,255,255,0); }
+        }
         .pulse-effect { animation: pump 0.15s ease-out; }
 
         .status-indicators { display: flex; gap: 15px; margin-top: 10px; align-items: flex-end; margin-bottom: 10px; width: 100%; justify-content: center; }
@@ -67,61 +72,58 @@
         .stat-val { font-size: 2.2rem; font-weight: 900; font-family: monospace; color: #555; line-height: 1; transition: color 0.2s; }
         .stat-val.active { color: #fff; }
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
-        /* Slider Sidebar (FIX: Absolut am rechten Rand festgenagelt) */
+
+        /* SLIDER SIDEBAR (Fixed Right) */
         #slider-sidebar { 
-            position: absolute; 
-            right: 0; 
-            top: 80px; /* Beginnt unter dem Visualizer (Höhe anpassbar) */
-            bottom: 0; 
-            width: 50px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            border-left: 1px solid #333; 
-            background: rgba(0,0,0,0.5); /* Halbtransparenter Hintergrund */
-            z-index: 10; 
-            padding-bottom: 20px;
+            position: absolute; right: 0; top: 80px; bottom: 0; width: 50px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 10; padding-bottom: 20px; 
         }
+        .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
+        
+        /* Level Meter im Hintergrund des Sliders */
+        #level-meter {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(52, 199, 89, 0.4);
+            height: 0%;
+            transition: height 0.05s;
+            pointer-events: none;
+            width: 100%;
+            z-index: -1; /* Hinter dem Regler */
+        }
+
         input[type=range].vertical {
             writing-mode: bt-lr; -webkit-appearance: slider-vertical;
-            width: 6px; height: 100%; outline: none; background: #333; border-radius: 4px; cursor: pointer;
+            width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2;
         }
-        #level-indicator { width: 6px; height: 6px; background: #333; border-radius: 50%; margin-bottom: 10px; transition: 0.05s; }
-        #level-indicator.hit { background: var(--green); box-shadow: 0 0 10px var(--green); transform: scale(1.5); }
-        #sens-val-display { font-family: monospace; font-size: 0.8rem; color: var(--blue); font-weight: bold; margin-top: 5px; }
+        #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* OVERLAYS */
+        /* --- OVERLAYS --- */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
-        /* Settings */
+        /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-        input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; user-select: text; -webkit-user-select: text; }
+        input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
         input[type="checkbox"] { transform: scale(1.5); accent-color: var(--blue); }
-
         .btn-action { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; margin-top: 10px; cursor: pointer; font-size: 1rem; }
         .btn-save { background: var(--green); color: white; }
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
-        .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; white-space: nowrap; }
+        .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* Expert */
+        /* Expert & History & Prefs */
         .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
         .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
         .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
-
-        /* Tags */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
-
-        /* History */
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
         .hist-del { position: absolute; top: 10px; right: 10px; color: #555; font-weight: bold; padding: 10px; cursor: pointer; }
@@ -132,19 +134,41 @@
         .star-btn { font-size: 1.6rem; color: #333; cursor: pointer; transition: 0.1s; }
         .star-btn.active { color: var(--yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
 
-        /* Video/Tap */
-        #fs-video-overlay { background: black; display: none; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
+        /* Video Library (Große Liste) */
+        .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
+        .figure-play { color: var(--green); font-size: 1.8rem; }
+        .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
+        .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
+
+        /* FULLSCREEN VIDEO & NAVIGATION */
+        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
         #fs-video-overlay.active { display: flex; }
-        #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 30px; }
-        #main-video { max-width: 100%; max-height: 80vh; width: auto; height: auto; object-fit: contain; }
-        #fs-controls { margin-top: 20px; display: flex; gap: 20px; justify-content: center; width: 100%; }
-        .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; }
         
-        #tap-pad { flex: 1; display: flex; flex-direction: row; gap: 20px; align-items: center; justify-content: center; height: 100%; }
-        .tap-btn { border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.1s; cursor: pointer; border: 4px solid #444; background: #222; }
-        .tap-btn:active { border-color: var(--blue); background: var(--blue); transform: scale(0.95); }
-        #tap-main { width: 180px; height: 180px; }
-        #tap-high { width: 100px; height: 100px; }
+        #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
+        
+        #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
+        
+        #main-video { max-width: 100%; max-height: 75vh; width: auto; height: auto; object-fit: contain; background: #000; }
+        
+        #fs-controls { margin-top: 15px; display: flex; gap: 15px; justify-content: center; width: 100%; align-items: center; }
+        
+        .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; min-width: 100px; }
+        .nav-btn { background: #333; color: white; border: 1px solid #555; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .nav-btn:active { background: var(--blue); }
+
+        /* Landscape Mode Fixes */
+        @media (orientation: landscape) {
+            #fs-video-container { flex-direction: row; flex-wrap: wrap; }
+            #vid-info { width: 100%; position: absolute; top: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
+            #main-video { max-height: 85vh; width: auto; margin-bottom: 40px; }
+            #fs-controls { position: absolute; bottom: 10px; }
+        }
+
+        #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
+        .tap-area { width: 220px; height: 220px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; }
+        .tap-area:active { transform: scale(0.92); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
     </style>
 </head>
 <body>
@@ -195,9 +219,10 @@
     </div>
 
     <div id="slider-sidebar">
-        <div style="font-size:0.6rem; color:#888; margin-bottom:5px;">SENS</div>
-        <div id="level-indicator"></div>
-        <input type="range" class="vertical" id="main-sens" min="1" max="100" value="45" oninput="updateSens(this.value)">
+        <div class="slider-wrap">
+            <div id="level-meter"></div>
+            <input type="range" class="vertical" id="main-sens" min="1" max="100" value="45" oninput="updateSens(this.value)">
+        </div>
         <div id="sens-val-display">45</div>
     </div>
 </div>
@@ -293,12 +318,14 @@
 
 <div id="fs-video-overlay" class="overlay">
     <div id="fs-video-container">
+        <div id="vid-info">Titel</div>
         <video id="main-video" playsinline muted></video>
         <div id="fs-controls">
+            <button class="nav-btn" onclick="prevFigure()">←</button>
             <button class="vid-btn" onclick="replayFigure()">↺ Nochmal</button>
             <button class="vid-btn" onclick="closeOverlays(); document.getElementById('main-video').pause()">Schließen</button>
+            <button class="nav-btn" onclick="nextFigure()">→</button>
         </div>
-        <div id="vid-info" style="color:white; text-align:center; margin-top:10px; font-weight:bold;"></div>
     </div>
 </div>
 
@@ -308,17 +335,14 @@
         <button class="close-btn" onclick="closeOverlays()">✕</button>
     </div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Tippe den Takt (Links: Beat / Rechts: High)
+        Tippe im Takt auf den Kreis.
     </div>
     <div id="tap-pad">
-        <div class="tap-btn" id="tap-main" onpointerdown="handleTap(event, 'main')"></div>
-        <div class="tap-btn" id="tap-high" onpointerdown="handleTap(event, 'high')"></div>
+        <div class="tap-area" onpointerdown="handleTap(event)">🖐️</div>
+        <div id="tap-result">---</div>
+        <div id="tap-bpm" style="font-family:monospace; font-size:1.5rem; color:#666;">0 BPM</div>
     </div>
-    <div style="text-align:center; margin-top:20px;">
-        <div id="tap-bpm" style="font-size: 2rem; font-weight: bold; color: var(--green);">0 BPM</div>
-        <div id="tap-result" style="color: #aaa;">---</div>
-    </div>
-    <button class="btn-action btn-secondary" onclick="resetTap()" style="margin-top:20px;">Reset</button>
+    <button class="btn-action btn-secondary" onclick="resetTap()">Reset</button>
 </div>
 
 <script>
@@ -329,25 +353,13 @@
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
-    
-    // Rhythm Logic
     let lowHits = 0, highHits = 0, rhythmRatio = 0.0;
     
-    const defaultRanges = {
-        "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "-" },
-        "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "1 2 3" },
-        "Samba": { min: 100, max: 120, tact: "2/4", rhythm: "L e L" },
-        "Rumba": { min: 100, max: 120, tact: "4/4", rhythm: "L S S" },
-        "Discofox": { min: 100, max: 145, tact: "4/4", rhythm: "1 2 3" },
-        "Cha Cha Cha": { min: 110, max: 135, tact: "4/4", rhythm: "1 2 3 4 +" },
-        "Jive": { min: 130, max: 180, tact: "4/4", rhythm: "1 2 3 e 4" },
-        "Wiener Walzer": { min: 135, max: 180, tact: "3/4", rhythm: "1 2 3" },
-        "Boogie Woogie": { min: 140, max: 200, tact: "4/4", rhythm: "S S L L" },
-        "Foxtrott": { min: 160, max: 200, tact: "4/4", rhythm: "L L S S" },
-        "Salsa": { min: 160, max: 200, tact: "4/4", rhythm: "S S L S S L" }
-    };
-    let expertRanges = JSON.parse(JSON.stringify(defaultRanges));
+    // Video Playback State
+    let currentDance = "";
+    let currentFigIdx = 0;
 
+    // --- VIDEO DATEN ---
     const videoLibrary = {
         "Cha Cha Cha": {
             file: "media/chacha.mp4",
@@ -425,7 +437,6 @@
                 { name: "6. Botafogos", start: 81.60, end: 97.97 }
             ]
         },
-        // Platzhalter für Tänze ohne Video (damit die App nicht abstürzt, wenn diese erkannt werden)
         "Walzer": { file: "", figures: [] },
         "Langsamer Walzer": { file: "", figures: [] },
         "Wiener Walzer": { file: "", figures: [] },
@@ -433,6 +444,21 @@
         "Foxtrott": { file: "", figures: [] },
         "Salsa": { file: "", figures: [] }
     };
+
+    const defaultRanges = {
+        "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "-" },
+        "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "1 2 3" },
+        "Samba": { min: 100, max: 120, tact: "2/4", rhythm: "L e L" },
+        "Rumba": { min: 100, max: 120, tact: "4/4", rhythm: "L S S" },
+        "Discofox": { min: 100, max: 145, tact: "4/4", rhythm: "1 2 3" },
+        "Cha Cha Cha": { min: 110, max: 135, tact: "4/4", rhythm: "1 2 3 4 +" },
+        "Jive": { min: 130, max: 180, tact: "4/4", rhythm: "1 2 3 e 4" },
+        "Wiener Walzer": { min: 135, max: 180, tact: "3/4", rhythm: "1 2 3" },
+        "Boogie Woogie": { min: 140, max: 200, tact: "4/4", rhythm: "S S L L" },
+        "Foxtrott": { min: 160, max: 200, tact: "4/4", rhythm: "L L S S" },
+        "Salsa": { min: 160, max: 200, tact: "4/4", rhythm: "S S L S S L" }
+    };
+    let expertRanges = JSON.parse(JSON.stringify(defaultRanges));
 
     const canvas = document.getElementById('visualizer');
     const ctx = canvas.getContext('2d');
@@ -451,12 +477,14 @@
         playbackSpeed = parseFloat(localStorage.getItem('dm_speed')) || 1.0;
         document.getElementById('video-speed').value = playbackSpeed;
         updateSpeedLabel(playbackSpeed);
-        
-        // Fix Crash: Check if element exists before updating
         const savedSens = localStorage.getItem('dm_sens') || 45;
         updateSens(savedSens);
         
         renderPrefs(); renderHistory(); renderExpert();
+        
+        document.body.addEventListener('touchstart', function() {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }, {once:true});
     };
 
     function loadData() {
@@ -474,6 +502,7 @@
             if(audioCtx) audioCtx.suspend();
             btn.innerText = "START";
             btn.classList.remove('active', 'loading');
+            document.getElementById('level-meter').style.height = "0%";
             bpmBuffer = []; lastBeat = 0; 
         }
     }
@@ -486,34 +515,35 @@
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') await audioCtx.resume();
 
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+            });
             const source = audioCtx.createMediaStreamSource(stream);
             
-            // ANALYZERS
             const lowFilter = audioCtx.createBiquadFilter();
             lowFilter.type = "lowpass"; lowFilter.frequency.value = 120; 
             analyserLow = audioCtx.createAnalyser();
-            analyserLow.fftSize = 256;
+            analyserLow.fftSize = 512;
             source.connect(lowFilter);
             lowFilter.connect(analyserLow);
 
             const highFilter = audioCtx.createBiquadFilter();
-            highFilter.type = "highpass"; highFilter.frequency.value = 2500;
+            highFilter.type = "highpass"; highFilter.frequency.value = 2000;
             analyserHigh = audioCtx.createAnalyser();
-            analyserHigh.fftSize = 256;
+            analyserHigh.fftSize = 512;
             source.connect(highFilter);
             highFilter.connect(analyserHigh);
 
             isListening = true;
             btn.innerText = "STOP";
-            btn.classList.remove('loading');
+            btn.classList.remove('loading', 'active');
             btn.classList.add('active');
 
             visualize();
             analyzeRhythm();
 
         } catch(e) { 
-            alert("Mikrofon Fehler: " + e.message); 
+            alert("Mic Error: " + e.message); 
             btn.classList.remove('loading');
         }
     }
@@ -522,8 +552,6 @@
         if(!isListening) return;
         requestAnimationFrame(visualize);
         
-        if(!analyserLow) return; 
-
         const bufferLen = analyserLow.frequencyBinCount;
         const lowData = new Uint8Array(bufferLen);
         const highData = new Uint8Array(bufferLen);
@@ -533,44 +561,41 @@
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        const barWidth = (canvas.width / bufferLen) * 2;
+        let sumLow = 0;
+        const barWidth = (canvas.width / bufferLen) * 2.5;
         let x = 0;
 
         for(let i = 0; i < bufferLen; i++) {
-            // Visual Boost
-            const hLow = (lowData[i] * 1.5) / 2.5; 
-            ctx.fillStyle = `rgb(${lowData[i]}, 20, 20)`;
-            ctx.fillRect(x, canvas.height - hLow, barWidth, hLow);
-            
-            const hHigh = (highData[i] * 1.5) / 2.5;
-            if(hHigh > 5) {
-                ctx.fillStyle = `rgba(20, 20, ${highData[i]}, 0.6)`;
-                ctx.fillRect(x, canvas.height - hHigh - hLow, barWidth, hHigh);
-            }
+            sumLow += lowData[i];
+            const barHeight = lowData[i] / 2;
+            ctx.fillStyle = `rgb(${barHeight + 100},50,50)`;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            x += barWidth + 1;
+        }
+        
+        // Level Meter Update
+        const avgVol = sumLow / bufferLen;
+        const volPercent = Math.min(100, (avgVol / 128) * 100); 
+        document.getElementById('level-meter').style.height = volPercent + "%";
+
+        x = 0;
+        for(let i = 0; i < bufferLen; i++) {
+            const barHeight = highData[i] / 2;
+            ctx.fillStyle = `rgba(50,50,${barHeight + 100}, 0.5)`;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
             x += barWidth + 1;
         }
     }
 
     function analyzeRhythm() {
-        if(!isListening || !analyserLow) return;
+        if(!isListening) return;
         setTimeout(analyzeRhythm, 20); 
 
         const lowData = new Uint8Array(analyserLow.frequencyBinCount);
         analyserLow.getByteFrequencyData(lowData);
-        
         let sum = 0; for(let i=0; i<lowData.length; i++) sum += lowData[i];
         const avg = sum / lowData.length;
-        
-        // Scaling Threshold
         const threshold = micSens * 255 * 0.8; 
-
-        if(avg > threshold) {
-             const el = document.getElementById('level-indicator');
-             if(el) {
-                 el.classList.add('hit');
-                 setTimeout(()=>el.classList.remove('hit'), 100);
-             }
-        }
 
         const now = Date.now();
         if(avg > threshold && (now - lastBeat > 280)) { 
@@ -587,15 +612,11 @@
                 void el.offsetWidth;
                 el.classList.add('pulse-effect');
             }
-
             const bpm = Math.round(60000 / (now - lastBeat));
             bpmBuffer.push(bpm);
             if(bpmBuffer.length > 8) bpmBuffer.shift();
-            
             const avgBpm = Math.round(bpmBuffer.reduce((a,b)=>a+b,0) / bpmBuffer.length);
             document.getElementById('bpm-display').innerText = avgBpm;
-            document.getElementById('bpm-display').classList.add('active');
-            
             detectDance(avgBpm);
         }
     }
@@ -608,10 +629,8 @@
             }
         }
         if(matches.length === 0) { updateDisplay("---", "--", "", false); return; }
-        
         const preferredMatches = matches.filter(m => preferredDances.some(p => m.name.toLowerCase().includes(p.toLowerCase())));
         let winner = preferredMatches.length > 0 ? preferredMatches[0] : matches[0];
-        
         if(preferredMatches.length > 1) {
             const nonDisco = preferredMatches.find(m => !m.name.toLowerCase().includes("disco"));
             if(nonDisco) winner = nonDisco;
@@ -628,7 +647,7 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- CLOUD / AI --- */
+    /* --- EXTERNAL INPUT --- */
     function connectNtfy(topic) {
         const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
         es.onmessage = (e) => {
@@ -655,23 +674,17 @@
     function handleExternalInput(rawStr) {
         let clean = cleanTitle(rawStr);
         if(!clean || typeof clean !== 'string' || clean.includes("Test")) return;
-        
-        let artist = "Unbekannt";
-        let title = clean;
+        let artist = "Unbekannt", title = clean;
         if(clean.includes("-")) {
             const parts = clean.split("-");
             artist = parts[0].trim();
             title = parts.slice(1).join("-").trim();
         }
-
         document.getElementById('song-title').innerText = title;
         document.getElementById('song-artist').innerText = artist;
         document.getElementById('song-info').style.opacity = 1;
-
         const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
-
-        aiLocked = true;
-        
+        aiLocked = true; 
         if(cached) {
             updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
             document.getElementById('bpm-display').innerText = cached.bpm || "DB";
@@ -684,42 +697,21 @@
     async function askAI(artist, title) {
         const key = document.getElementById('api-key').value;
         if(!key) { updateDisplay("KEY?", "--", "", false); return; }
-
         updateDisplay("KI DENKT...", "", "", false);
         document.getElementById('mic-btn').classList.add('ai-mode');
-
         try {
             const prompt = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
-
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({ 
-                    model: "gpt-4o-mini", 
-                    messages: [{ role: "system", content: "You output JSON only." }, { role: "user", content: prompt }], 
-                    max_tokens: 60,
-                    response_format: { "type": "json_object" }
-                })
+                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], max_tokens: 60 })
             });
-            
-            if(!res.ok) throw new Error("Error " + res.status);
             const data = await res.json();
-            
-            // ROBUST PARSER - CLEAN UP MARKDOWN
-            let raw = data.choices[0].message.content;
-            
-            // Remove markdown code blocks if present
-            raw = raw.replace(/```json/g, "").replace(/```/g, "");
-            
-            // Find JSON Brackets
-            const start = raw.indexOf('{');
-            const end = raw.lastIndexOf('}');
-            if (start === -1 || end === -1) {
-                throw new Error("RAW: " + raw.substring(0, 15));
-            }
-            
-            const result = JSON.parse(raw.substring(start, end+1));
-
+            if(data.error) throw new Error("API: " + data.error.message);
+            const raw = data.choices[0].message.content;
+            const match = raw.match(/\{[\s\S]*\}/);
+            if (!match) throw new Error("JSON Format");
+            const result = JSON.parse(match[0]);
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
                 title: title, artist: artist,
@@ -728,23 +720,13 @@
             });
             localStorage.setItem('dm_history', JSON.stringify(danceHistory));
             renderHistory();
-            
             updateDisplay(result.dance, result.tact, result.rhythm, true);
             document.getElementById('bpm-display').innerText = result.bpm;
-
         } catch(e) {
-            console.error(e);
-            let msg = "FEHLER";
-            if(e.message.includes("401")) msg = "KEY FALSCH";
-            else if(e.message.includes("429")) msg = "LIMIT";
-            else if(e.message.includes("RAW")) msg = "FORMAT"; 
-            else msg = "NETZ";
+            let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK " + e.message);
             updateDisplay(msg, "--", "!", false);
         }
-        
-        setTimeout(() => {
-            document.getElementById('mic-btn').classList.remove('ai-mode');
-        }, 1000); 
+        setTimeout(() => { document.getElementById('mic-btn').classList.remove('ai-mode'); }, 1000); 
     }
 
     /* --- HELPERS --- */
@@ -761,6 +743,8 @@
     function updateSpeedLabel(val) {
         playbackSpeed = parseFloat(val);
         document.getElementById('speed-val').innerText = playbackSpeed + "x";
+        const v = document.getElementById('main-video');
+        if(v) v.playbackRate = playbackSpeed;
     }
     function saveSettings() {
         localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
@@ -780,10 +764,7 @@
     }
     function updateSens(val) {
         document.getElementById('main-sens').value = val;
-        
-        const disp = document.getElementById('sens-val-display');
-        if(disp) disp.innerText = val;
-        
+        document.getElementById('sens-val-display').innerText = val;
         micSens = val / 1000; 
         localStorage.setItem('dm_sens', val);
     }
@@ -800,17 +781,9 @@
         const list = document.getElementById('history-list');
         let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f) || (h.artist && h.artist.toLowerCase().includes(f)));
         filtered.sort((a,b) => new Date(b.date.split('.').reverse().join('-')) - new Date(a.date.split('.').reverse().join('-')));
-
         list.innerHTML = filtered.map(h => {
             const idx = danceHistory.indexOf(h);
-            return `
-            <div class="hist-card">
-                <div class="hist-del" onclick="delHist(${idx})">✕</div>
-                <div class="hist-title">${h.title}</div>
-                <div class="hist-artist">${h.artist || 'Unbekannt'}</div>
-                <div class="hist-info"><span>${h.dance}</span><span style="color:#666;">${h.date}</span></div>
-                <div class="hist-stars">${[1,2,3,4,5].map(s => `<span class="star-btn ${s<=h.stars?'active':''}" onclick="setStar(${idx},${s})">★</span>`).join('')}</div>
-            </div>`;
+            return `<div class="hist-card"><div class="hist-del" onclick="delHist(${idx})">✕</div><div class="hist-title">${h.title}</div><div class="hist-artist">${h.artist || 'Unbekannt'}</div><div class="hist-info"><span>${h.dance}</span><span style="color:#666;">${h.date}</span></div><div class="hist-stars">${[1,2,3,4,5].map(s => `<span class="star-btn ${s<=h.stars?'active':''}" onclick="setStar(${idx},${s})">★</span>`).join('')}</div></div>`;
         }).join('');
     }
     function setStar(idx, n) { danceHistory[idx].stars = n; localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); }
@@ -828,14 +801,7 @@
     }
     function renderExpert() {
         const el = document.getElementById('expert-list');
-        el.innerHTML = Object.keys(expertRanges).map(d => `
-            <div class="expert-row">
-                <span>${d}</span>
-                <input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}">
-                <input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}">
-                <input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}">
-            </div>
-        `).join('');
+        el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}"><input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}"><input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}"></div>`).join('');
     }
     function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
     
@@ -855,146 +821,81 @@
         const data = videoLibrary[dance];
         if(!data.file) return alert("Kein Video vorhanden.");
         const c = document.getElementById('library-content');
+        currentDance = dance; // Merken für Navigation
         let html = `<button class="btn-action btn-secondary" style="margin-bottom:15px;" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`;
-        data.figures.forEach(fig => {
-            html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}')"><span>${fig.name}</span><span class="figure-play">▶</span></div>`;
+        data.figures.forEach((fig, idx) => {
+            html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span class="figure-play">▶</span></div>`;
         });
         c.innerHTML = html + "</div>";
     }
+    
     let curStart=0, curEnd=0;
-    function playVid(src, s, e, t) {
+    function playVid(src, s, e, t, idx) {
         const o = document.getElementById('fs-video-overlay');
         const v = document.getElementById('main-video');
         o.classList.add('active');
-        v.src = src; v.currentTime = s; curStart=s; curEnd=e;
+        
+        currentFigIdx = idx; // Aktuellen Index speichern
+        document.getElementById('vid-info').innerText = t;
+        
+        // Puffer hinzufügen (Start +0.1s, End -0.2s)
+        const safeStart = s + 0.1;
+        const safeEnd = Math.max(safeStart, e - 0.2); 
+
+        v.src = src; 
+        v.currentTime = safeStart; 
+        curStart = safeStart; 
+        curEnd = safeEnd;
+        
         v.playbackRate = playbackSpeed;
         v.muted = !videoSound; 
-        document.getElementById('vid-info').innerText = t;
+        
         v.play();
-        v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime=curEnd; } };
+        v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime = curEnd; } };
     }
     function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
+    
+    function nextFigure() {
+        const figs = videoLibrary[currentDance].figures;
+        if (currentFigIdx < figs.length - 1) {
+            const nextFig = figs[currentFigIdx + 1];
+            playVid(videoLibrary[currentDance].file, nextFig.start, nextFig.end, nextFig.name, currentFigIdx + 1);
+        }
+    }
+    
+    function prevFigure() {
+        const figs = videoLibrary[currentDance].figures;
+        if (currentFigIdx > 0) {
+            const prevFig = figs[currentFigIdx - 1];
+            playVid(videoLibrary[currentDance].file, prevFig.start, prevFig.end, prevFig.name, currentFigIdx - 1);
+        }
+    }
 
-// --- SMART RHYTHM TAP DETECTOR ---
-    let tapBuffer = [];
-    let tapTimeout = null;
-
-    function handleTap(e, type) {
+    let tapTimes = [];
+    function handleTap(e) {
         e.preventDefault();
-        
-        // Visual Feedback
-        const el = document.getElementById(type === 'main' ? 'tap-main' : 'tap-high');
-        el.style.transform = "scale(0.9)"; 
-        el.style.borderColor = "var(--green)";
-        setTimeout(() => {
-            el.style.transform = "scale(1)";
-            el.style.borderColor = "#444";
-        }, 100);
-
         const now = Date.now();
-        tapBuffer.push({ t: now, type: type });
-
-        // Reset inactivity timer (3 Sekunden warten für Analyse)
-        if(tapTimeout) clearTimeout(tapTimeout);
-        tapTimeout = setTimeout(analyzeTaps, 2500); 
-        
-        document.getElementById('tap-result').innerText = "Erfasse Rhythmus...";
-        document.getElementById('tap-result').style.color = "#888";
+        const el = e.target;
+        el.style.transform = "scale(0.9)"; setTimeout(() => el.style.transform = "scale(1)", 100);
+        if(tapTimes.length > 0 && (now - tapTimes[tapTimes.length-1]) > 2000) tapTimes = [];
+        tapTimes.push(now);
+        if(tapTimes.length > 8) tapTimes.shift();
+        if(tapTimes.length >= 2) {
+            let intervals = [];
+            for(let i=1; i<tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i-1]);
+            const avgMs = intervals.reduce((a,b)=>a+b)/intervals.length;
+            const bpm = Math.round(60000/avgMs);
+            document.getElementById('tap-bpm').innerText = bpm + " BPM";
+            detectDance(bpm);
+            document.getElementById('tap-result').innerText = document.getElementById('dance-name').innerText;
+        }
     }
+    function resetTap() { tapTimes = []; document.getElementById('tap-bpm').innerText = "0 BPM"; document.getElementById('tap-result').innerText = "---"; }
 
-    function analyzeTaps() {
-        if(tapBuffer.length < 4) {
-            document.getElementById('tap-result').innerText = "Zu wenige Taps (min. 4)";
-            tapBuffer = [];
-            return;
-        }
-
-        // 1. Intervalle berechnen
-        let intervals = [];
-        for(let i=1; i<tapBuffer.length; i++) {
-            intervals.push(tapBuffer[i].t - tapBuffer[i-1].t);
-        }
-
-        // 2. BPM berechnen (Durchschnitt)
-        const avgMs = intervals.reduce((a,b)=>a+b) / intervals.length;
-        const bpm = Math.round(60000 / avgMs);
-        document.getElementById('tap-bpm').innerText = bpm + " BPM";
-
-        // 3. Rhythmus-Analyse (Lang vs. Kurz)
-        // Wir suchen das kürzeste Intervall ("Schnell") und vergleichen den Rest
-        const minInterval = Math.min(...intervals);
-        let patternCode = "";
-        let isUneven = false;
-
-        // Toleranz: Alles bis 1.4x gilt noch als "gleich lang", darüber "Lang"
-        const detectedPattern = intervals.map(int => {
-            const ratio = int / minInterval;
-            if (ratio > 1.6) { isUneven = true; return "L"; } // Lang
-            return "S"; // Schnell (oder Gleich)
-        });
-
-        // String bauen (z.B. "LSS")
-        const rhythmString = detectedPattern.join(" "); // z.B. "S S L S S"
-
-        // 4. Intelligente Zuordnung
-        let bestMatch = "Unklar";
-        
-        // Zuerst in den Experten-Werten schauen, ob BPM passt
-        let candidates = [];
-        for(const [dance, range] of Object.entries(expertRanges)) {
-            if(bpm >= range.min && bpm <= range.max) {
-                candidates.push({name: dance, rhythm: range.rhythm || ""});
-            }
-        }
-
-        // Jetzt filtern nach Rhythmus-Typ
-        let rhythmMatch = null;
-
-        if (!isUneven) {
-            // GLEICHMÄßIGER TAKT (1-2-3-4)
-            // Bevorzuge Walzer, Disco, Tango, Samba
-            rhythmMatch = candidates.find(c => 
-                c.name.includes("Walzer") || 
-                c.name.includes("Disco") || 
-                c.name.includes("Tango") ||
-                c.name.includes("Samba")
-            );
-            document.getElementById('tap-result').innerHTML = `Gleichmäßig<br><span style="color:var(--blue)">${rhythmMatch ? rhythmMatch.name : "Marsch / Disco"}</span>`;
-        } else {
-            // UNGLEICHER TAKT (Lang-Kurz Muster)
-            // Versuch: Erkenne typische Muster
-            let guess = "Rhythmus erkannt";
-            
-            // L-S-S (Rumba/ChaCha Grundschritt Timing)
-            if(rhythmString.includes("L S S") || rhythmString.includes("S S L")) {
-                // Entscheidung per BPM
-                if(bpm < 115) guess = "Rumba (Slow-Quick-Quick)";
-                else guess = "Cha Cha / Fox (Slow-Quick-Quick)";
-            } 
-            // S-S-L-L (Boogie)
-            else if(rhythmString.includes("S S L L")) {
-                guess = "Boogie / Jive 6-Count";
-            }
-            // L-L-S-S (Foxtrott)
-            else if(rhythmString.includes("L L S S")) {
-                guess = "Foxtrott / Quickstep";
-            }
-            
-            document.getElementById('tap-result').innerHTML = `${rhythmString}<br><span style="color:var(--yellow)">${guess}</span>`;
-        }
-
-        tapBuffer = [];
-    }
-
-    function resetTap() { 
-        tapBuffer = []; 
-        document.getElementById('tap-bpm').innerText = "0 BPM"; 
-        document.getElementById('tap-result').innerText = "---"; 
-    }
     function testFunk() { 
         const t = document.getElementById('ntfy-topic').value;
         if(!t) return alert("Topic fehlt!");
-        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Tanz Das! - Verbindung OK'})})
+        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})})
         .then(() => alert("Signal gesendet!"))
         .catch(e => alert("Funk Fehler: " + e));
     }
@@ -1016,5 +917,3 @@
 </script>
 </body>
 </html>
-
-
