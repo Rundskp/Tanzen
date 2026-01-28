@@ -11,7 +11,7 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* --- HEADER --- */
+        /* HEADER */
         #top-bar { display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
@@ -21,50 +21,28 @@
         #mic-btn.loading { opacity: 0.7; animation: pulse-load 1s infinite; }
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
-        /* --- MONITOR --- */
+        /* MONITOR */
         #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
-        
-        /* VISUALIZER */
         #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
         /* MAIN DISPLAY */
         #main-display { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: space-evenly; 
-            padding: 10px; 
-            width: 100%; 
-            padding-right: 60px; /* Platz für Slider */
-            z-index: 2; 
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; 
+            padding: 10px; width: 100%; padding-right: 60px; z-index: 2; 
         }
 
-        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
+        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
-        #dance-name { 
-            font-size: clamp(2.5rem, 11vw, 5rem); 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            margin: 0; 
-            line-height: 0.9; 
-            color: #fff; 
-            text-align: center;
-        }
+        #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
-        @keyframes pump {
-            0% { transform: scale(1); text-shadow: 0 0 0 rgba(255,255,255,0); }
-            30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); }
-            100% { transform: scale(1); text-shadow: 0 0 0 rgba(255,255,255,0); }
-        }
+        @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
         .pulse-effect { animation: pump 0.15s ease-out; }
 
         .status-indicators { display: flex; gap: 15px; margin-top: 10px; align-items: flex-end; margin-bottom: 10px; width: 100%; justify-content: center; }
@@ -80,32 +58,17 @@
             border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 10; padding-bottom: 20px; 
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
-        
-        /* Level Meter im Hintergrund des Sliders */
-        #level-meter {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: rgba(52, 199, 89, 0.4);
-            height: 0%;
-            transition: height 0.05s;
-            pointer-events: none;
-            width: 100%;
-            z-index: -1; /* Hinter dem Regler */
-        }
-
-        input[type=range].vertical {
-            writing-mode: bt-lr; -webkit-appearance: slider-vertical;
-            width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2;
-        }
+        #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
+        input[type=range].vertical { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* --- OVERLAYS --- */
+        /* OVERLAYS */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
-        /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
         input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
@@ -117,13 +80,14 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* Expert & History & Prefs */
-        .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
-        .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
-        .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
-        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
-        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
+        /* Video Library & Hist */
+        .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
+        .figure-play { color: var(--green); font-size: 1.8rem; }
+        .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
+        .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
+        
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
         .hist-del { position: absolute; top: 10px; right: 10px; color: #555; font-weight: bold; padding: 10px; cursor: pointer; }
@@ -134,31 +98,25 @@
         .star-btn { font-size: 1.6rem; color: #333; cursor: pointer; transition: 0.1s; }
         .star-btn.active { color: var(--yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
 
-        /* Video Library (Große Liste) */
-        .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
-        .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
-        .figure-play { color: var(--green); font-size: 1.8rem; }
-        .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
-        .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
+        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
+        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
 
-        /* FULLSCREEN VIDEO & NAVIGATION */
+        .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
+        .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
+        .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
+
+        /* Fullscreen Video */
         #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
         #fs-video-overlay.active { display: flex; }
-        
         #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
-        
         #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
-        
         #main-video { max-width: 100%; max-height: 75vh; width: auto; height: auto; object-fit: contain; background: #000; }
-        
         #fs-controls { margin-top: 15px; display: flex; gap: 15px; justify-content: center; width: 100%; align-items: center; }
-        
         .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; min-width: 100px; }
         .nav-btn { background: #333; color: white; border: 1px solid #555; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .nav-btn:active { background: var(--blue); }
-
-        /* Landscape Mode Fixes */
+        
         @media (orientation: landscape) {
             #fs-video-container { flex-direction: row; flex-wrap: wrap; }
             #vid-info { width: 100%; position: absolute; top: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
@@ -166,9 +124,15 @@
             #fs-controls { position: absolute; bottom: 10px; }
         }
 
+        /* NEUER TAP DETECTOR STYLE */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
-        .tap-area { width: 220px; height: 220px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; }
-        .tap-area:active { transform: scale(0.92); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
+        .tap-area { width: 220px; height: 220px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; user-select: none; }
+        .tap-area:active { transform: scale(0.95); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
+        
+        /* Fortschrittsbalken für Tap */
+        #tap-progress-container { width: 80%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+        #tap-progress-bar { width: 0%; height: 100%; background: var(--blue); transition: width 0.1s linear; }
+        #tap-status { font-size: 0.9rem; color: #888; min-height: 20px; }
     </style>
 </head>
 <body>
@@ -183,11 +147,7 @@
 </div>
 
 <div id="monitor">
-    
-    <div id="vis-wrap">
-        <canvas id="visualizer"></canvas>
-    </div>
-
+    <div id="vis-wrap"><canvas id="visualizer"></canvas></div>
     <div id="main-display">
         <div id="song-info">
             <div id="song-title">Warte auf Musik...</div>
@@ -197,27 +157,15 @@
                 <span class="detail-badge" id="badge-rhythm"></span>
             </div>
         </div>
-
         <div class="dance-wrap">
             <h1 id="dance-name">BEREIT</h1>
         </div>
-
         <div class="status-indicators">
-            <div class="stat-box">
-                <div id="bpm-display" class="stat-val">0</div>
-                <div class="stat-label">BPM</div>
-            </div>
-            <div class="stat-box">
-                <div id="takt-display" class="stat-val">--</div>
-                <div class="stat-label">TAKT</div>
-            </div>
-            <div class="stat-box">
-                <div id="density-display" class="stat-val" style="font-size:1.5rem; color:#888;">0.0</div>
-                <div class="stat-label">DICHTE</div>
-            </div>
+            <div class="stat-box"><div id="bpm-display" class="stat-val">0</div><div class="stat-label">BPM</div></div>
+            <div class="stat-box"><div id="takt-display" class="stat-val">--</div><div class="stat-label">TAKT</div></div>
+            <div class="stat-box"><div id="density-display" class="stat-val" style="font-size:1.5rem; color:#888;">0.0</div><div class="stat-label">DICHTE</div></div>
         </div>
     </div>
-
     <div id="slider-sidebar">
         <div class="slider-wrap">
             <div id="level-meter"></div>
@@ -232,87 +180,39 @@
         <h2 class="overlay-title">Einstellungen</h2>
         <button class="close-btn" onclick="closeOverlays()">✕</button>
     </div>
-    
     <div class="settings-group">
-        <div class="row">
-            <label>OpenAI API Key</label>
-            <div style="display:flex; gap:10px; align-items:center; width:65%;">
-                <input type="password" id="api-key" placeholder="sk-..." style="flex:1;">
-                <button class="btn-test-small" onclick="testAI()">TEST</button>
-            </div>
-        </div>
-        <div class="row">
-            <label>Funk-Topic (Shazam)</label>
-            <div style="display:flex; gap:10px; align-items:center; width:65%;">
-                <input type="text" id="ntfy-topic" placeholder="Tanz_Das_DeinName" style="flex:1;">
-                <button class="btn-test-small" onclick="testFunk()">TEST</button>
-            </div>
-        </div>
-        <div class="row" style="margin-top:15px;">
-            <label>Disco-Modus (Pulsieren)</label>
-            <input type="checkbox" id="disco-mode">
-        </div>
-        <div class="row">
-            <label>Video Ton aktivieren</label>
-            <input type="checkbox" id="video-audio">
-        </div>
-        <div class="row">
-            <label>Video Geschwindigkeit</label>
-            <div style="width: 50%;">
-                <input type="range" class="horizontal" id="video-speed" min="0.25" max="1.0" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)">
-                <div id="speed-val" style="text-align:right; font-size:0.8rem; color:var(--blue);">1.0x</div>
-            </div>
-        </div>
-        <button class="btn-action btn-secondary" style="margin-top:20px;" onclick="openOverlay('expert-overlay')">Experten-Einstellungen & BPM</button>
+        <div class="row"><label>OpenAI API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="sk-..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
+        <div class="row"><label>Funk-Topic (Shazam)</label><div style="display:flex; gap:10px; width:65%;"><input type="text" id="ntfy-topic" placeholder="Topic..."><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
+        <div class="row" style="margin-top:15px;"><label>Disco-Modus</label><input type="checkbox" id="disco-mode"></div>
+        <div class="row"><label>Video Ton</label><input type="checkbox" id="video-audio"></div>
+        <div class="row"><label>Video Speed</label><div style="width: 50%;"><input type="range" class="horizontal" id="video-speed" min="0.25" max="1.0" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)"><div id="speed-val" style="text-align:right; font-size:0.8rem; color:var(--blue);">1.0x</div></div></div>
+        <button class="btn-action btn-secondary" style="margin-top:20px;" onclick="openOverlay('expert-overlay')">Experten & BPM</button>
         <button class="btn-action btn-save" onclick="saveSettings()">Speichern</button>
     </div>
-
     <div class="settings-group">
         <div class="row"><label>Bevorzugte Tänze</label></div>
-        <div style="font-size:0.8rem; color:#888; margin-bottom:5px;">Werden bei Übereinstimmung vorgezogen.</div>
         <div id="pref-list"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <input type="text" id="new-pref" placeholder="Neuer Tanz...">
-            <button class="btn-save" style="width:auto; padding:0 20px;" onclick="addPref()">+</button>
-        </div>
+        <div style="display:flex; gap:10px; margin-top:10px;"><input type="text" id="new-pref" placeholder="Neuer Tanz..."><button class="btn-save" style="width:auto; padding:0 20px;" onclick="addPref()">+</button></div>
     </div>
-
     <div class="settings-group">
-        <div class="row">
-            <label>Datenbank (Lokal)</label>
-            <input type="text" id="search-hist" placeholder="Suche..." style="width:40%;" oninput="renderHistory()">
-        </div>
+        <div class="row"><label>Datenbank</label><input type="text" id="search-hist" placeholder="Suche..." style="width:40%;" oninput="renderHistory()"></div>
         <div id="history-list"></div>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-action btn-secondary" onclick="exportData()">Export JSON</button>
-            <button class="btn-action btn-secondary" onclick="document.getElementById('file-imp').click()">Import</button>
-            <input type="file" id="file-imp" style="display:none" onchange="importData(this)">
-        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-action btn-secondary" onclick="exportData()">Export</button><button class="btn-action btn-secondary" onclick="document.getElementById('file-imp').click()">Import</button><input type="file" id="file-imp" style="display:none" onchange="importData(this)"></div>
     </div>
 </div>
 
 <div id="expert-overlay" class="overlay">
-    <div class="overlay-header">
-        <h2 class="overlay-title">Experten-Parameter</h2>
-        <button class="close-btn" onclick="openOverlay('settings-overlay')">←</button>
-    </div>
+    <div class="overlay-header"><h2 class="overlay-title">Experten-Parameter</h2><button class="close-btn" onclick="openOverlay('settings-overlay')">←</button></div>
     <div class="settings-group">
-        <div style="margin-bottom:15px; text-align:right;">
-             <button class="btn-action btn-secondary" onclick="resetExpert()" style="font-size:0.8rem;">Auf Standard zurücksetzen</button>
-        </div>
-        <div class="expert-row expert-header">
-            <span>Tanz</span><span>Min</span><span>Max</span><span>Rhythmus</span>
-        </div>
+        <div style="margin-bottom:15px; text-align:right;"><button class="btn-action btn-secondary" onclick="resetExpert()" style="font-size:0.8rem;">Reset Standard</button></div>
+        <div class="expert-row expert-header"><span>Tanz</span><span>Min</span><span>Max</span><span>Rhythmus</span></div>
         <div id="expert-list"></div>
         <button class="btn-action btn-save" onclick="saveSettings()">Werte Speichern</button>
     </div>
 </div>
 
 <div id="library-overlay" class="overlay">
-    <div class="overlay-header">
-        <h2 class="overlay-title">Videothek</h2>
-        <button class="close-btn" onclick="closeOverlays()">✕</button>
-    </div>
+    <div class="overlay-header"><h2 class="overlay-title">Videothek</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div id="library-content"></div>
 </div>
 
@@ -330,17 +230,16 @@
 </div>
 
 <div id="tap-overlay" class="overlay">
-    <div class="overlay-header">
-        <h2 class="overlay-title">Tap Detektor</h2>
-        <button class="close-btn" onclick="closeOverlays()">✕</button>
-    </div>
+    <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Tippe im Takt auf den Kreis.
+        Klopfe den Rhythmus (kurz/lang) auf den Kreis.
     </div>
     <div id="tap-pad">
-        <div class="tap-area" onpointerdown="handleTap(event)">🖐️</div>
-        <div id="tap-result">---</div>
-        <div id="tap-bpm" style="font-family:monospace; font-size:1.5rem; color:#666;">0 BPM</div>
+        <div class="tap-area" onpointerdown="handleTapInput(event)">🖐️</div>
+        <div id="tap-progress-container"><div id="tap-progress-bar"></div></div>
+        <div id="tap-status">Warte auf Eingabe...</div>
+        <div id="tap-result" style="font-size: 1.5rem; font-weight:bold; color:white; margin-top:10px;">---</div>
+        <div id="tap-bpm" style="font-family:monospace; font-size:1.2rem; color:#666;">0 BPM</div>
     </div>
     <button class="btn-action btn-secondary" onclick="resetTap()">Reset</button>
 </div>
@@ -351,13 +250,13 @@
     let lastBeat = 0, bpmBuffer = [], aiLocked = false;
     let micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
+    // Standard Liste (Wiederhergestellt)
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     let lowHits = 0, highHits = 0, rhythmRatio = 0.0;
     
-    // Video Playback State
-    let currentDance = "";
-    let currentFigIdx = 0;
+    // Video Playback
+    let currentDance = "", currentFigIdx = 0;
 
     // --- VIDEO DATEN ---
     const videoLibrary = {
@@ -446,17 +345,17 @@
     };
 
     const defaultRanges = {
-        "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "-" },
-        "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "1 2 3" },
-        "Samba": { min: 100, max: 120, tact: "2/4", rhythm: "L e L" },
+        "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "L L S" },
+        "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "L L L" },
+        "Samba": { min: 100, max: 120, tact: "2/4", rhythm: "L S L" },
         "Rumba": { min: 100, max: 120, tact: "4/4", rhythm: "L S S" },
-        "Discofox": { min: 100, max: 145, tact: "4/4", rhythm: "1 2 3" },
-        "Cha Cha Cha": { min: 110, max: 135, tact: "4/4", rhythm: "1 2 3 4 +" },
-        "Jive": { min: 130, max: 180, tact: "4/4", rhythm: "1 2 3 e 4" },
-        "Wiener Walzer": { min: 135, max: 180, tact: "3/4", rhythm: "1 2 3" },
+        "Discofox": { min: 100, max: 145, tact: "4/4", rhythm: "S S L" },
+        "Cha Cha Cha": { min: 110, max: 135, tact: "4/4", rhythm: "S S S L L" },
+        "Jive": { min: 130, max: 180, tact: "4/4", rhythm: "S S L S S L" },
+        "Wiener Walzer": { min: 135, max: 180, tact: "3/4", rhythm: "L L L" },
         "Boogie Woogie": { min: 140, max: 200, tact: "4/4", rhythm: "S S L L" },
         "Foxtrott": { min: 160, max: 200, tact: "4/4", rhythm: "L L S S" },
-        "Salsa": { min: 160, max: 200, tact: "4/4", rhythm: "S S L S S L" }
+        "Salsa": { min: 160, max: 200, tact: "4/4", rhythm: "S S L" }
     };
     let expertRanges = JSON.parse(JSON.stringify(defaultRanges));
 
@@ -488,7 +387,10 @@
     };
 
     function loadData() {
-        if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
+        // Falls gespeicherte Prefs da sind, laden - sonst Standard
+        if(localStorage.getItem('dm_prefs')) {
+            preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
+        }
         if(localStorage.getItem('dm_history')) danceHistory = JSON.parse(localStorage.getItem('dm_history'));
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
@@ -510,7 +412,6 @@
     async function toggleMic() {
         const btn = document.getElementById('mic-btn');
         btn.classList.add('loading');
-        
         try {
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') await audioCtx.resume();
@@ -536,12 +437,11 @@
 
             isListening = true;
             btn.innerText = "STOP";
-            btn.classList.remove('loading', 'active');
+            btn.classList.remove('loading');
             btn.classList.add('active');
 
             visualize();
             analyzeRhythm();
-
         } catch(e) { 
             alert("Mic Error: " + e.message); 
             btn.classList.remove('loading');
@@ -551,7 +451,6 @@
     function visualize() {
         if(!isListening) return;
         requestAnimationFrame(visualize);
-        
         const bufferLen = analyserLow.frequencyBinCount;
         const lowData = new Uint8Array(bufferLen);
         const highData = new Uint8Array(bufferLen);
@@ -564,7 +463,6 @@
         let sumLow = 0;
         const barWidth = (canvas.width / bufferLen) * 2.5;
         let x = 0;
-
         for(let i = 0; i < bufferLen; i++) {
             sumLow += lowData[i];
             const barHeight = lowData[i] / 2;
@@ -572,8 +470,6 @@
             ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
             x += barWidth + 1;
         }
-        
-        // Level Meter Update
         const avgVol = sumLow / bufferLen;
         const volPercent = Math.min(100, (avgVol / 128) * 100); 
         document.getElementById('level-meter').style.height = volPercent + "%";
@@ -590,13 +486,11 @@
     function analyzeRhythm() {
         if(!isListening) return;
         setTimeout(analyzeRhythm, 20); 
-
         const lowData = new Uint8Array(analyserLow.frequencyBinCount);
         analyserLow.getByteFrequencyData(lowData);
         let sum = 0; for(let i=0; i<lowData.length; i++) sum += lowData[i];
         const avg = sum / lowData.length;
         const threshold = micSens * 255 * 0.8; 
-
         const now = Date.now();
         if(avg > threshold && (now - lastBeat > 280)) { 
             processBeat(now);
@@ -645,6 +539,96 @@
         const m = document.getElementById('dance-name');
         if(verified) m.classList.add('verified'); else m.classList.remove('verified');
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
+    }
+
+    /* --- TAP LOGIC (NEW) --- */
+    let tapTimestamps = [];
+    const MAX_TAP_SAMPLES = 8; // Anzahl der Taps für Analyse
+
+    function handleTapInput(e) {
+        e.preventDefault();
+        e.target.style.transform = "scale(0.9)"; 
+        setTimeout(() => e.target.style.transform = "scale(1)", 100);
+
+        const now = Date.now();
+        // Reset wenn Pause zu lang (>2.5s)
+        if(tapTimestamps.length > 0 && (now - tapTimestamps[tapTimestamps.length-1]) > 2500) {
+            resetTap();
+        }
+
+        tapTimestamps.push(now);
+        
+        // Progress Bar
+        const progress = Math.min(100, (tapTimestamps.length / MAX_TAP_SAMPLES) * 100);
+        document.getElementById('tap-progress-bar').style.width = progress + "%";
+        
+        if (tapTimestamps.length > 1) {
+            analyzeTaps();
+        } else {
+            document.getElementById('tap-status').innerText = "Rhythmus aufnehmen...";
+        }
+    }
+
+    function analyzeTaps() {
+        // 1. BPM berechnen
+        let intervals = [];
+        for(let i=1; i<tapTimestamps.length; i++) intervals.push(tapTimestamps[i] - tapTimestamps[i-1]);
+        const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+        const bpm = Math.round(60000/avgMs);
+        document.getElementById('tap-bpm').innerText = bpm + " BPM";
+
+        // 2. Muster erkennen (Kurz/Lang)
+        // Kleinster Intervall finden (Basis für "Kurz")
+        const minInterval = Math.min(...intervals);
+        // Toleranz: Alles unter 1.5x Min ist "Kurz" (S), alles drüber "Lang" (L)
+        const pattern = intervals.map(i => (i < minInterval * 1.5) ? "S" : "L").join(" ");
+        
+        document.getElementById('tap-status').innerText = "Muster: " + pattern;
+
+        // 3. Match finding
+        let matches = [];
+        for(const [dance, data] of Object.entries(expertRanges)) {
+            // BPM Check
+            if (bpm >= data.min - 5 && bpm <= data.max + 5) {
+                // Rhythmus Check (einfacher String Match)
+                // Wir schauen, ob das erkannte Muster im Rhythmus-String enthalten ist
+                // (z.B. "S S L" in "S S L S S L")
+                const expertPattern = (data.rhythm || "").replace(/[^SL]/g, ''); // Nur S und L
+                const myPattern = pattern.replace(/ /g, '');
+                
+                if (expertPattern && (expertPattern.includes(myPattern) || myPattern.includes(expertPattern))) {
+                    matches.push(dance);
+                } else if (!expertPattern && matches.length === 0) {
+                    // Fallback nur BPM wenn kein Rhythmus definiert
+                    matches.push(dance + " (?)");
+                }
+            }
+        }
+
+        if(matches.length > 0) {
+            // Bevorzugte filtern
+            const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
+            document.getElementById('tap-result').innerText = preferred.length > 0 ? preferred[0] : matches[0];
+        } else {
+            document.getElementById('tap-result').innerText = "???";
+        }
+
+        if(tapTimestamps.length >= MAX_TAP_SAMPLES) {
+            document.getElementById('tap-status').innerText = "Analyse fertig: " + pattern;
+            // Buffer leeren für neuen Versuch nach kurzem Delay, oder User drückt Reset
+            setTimeout(() => { 
+                if(tapTimestamps.length >= MAX_TAP_SAMPLES) tapTimestamps = []; 
+                document.getElementById('tap-progress-bar').style.width = "0%";
+            }, 2000);
+        }
+    }
+
+    function resetTap() {
+        tapTimestamps = [];
+        document.getElementById('tap-bpm').innerText = "0 BPM";
+        document.getElementById('tap-result').innerText = "---";
+        document.getElementById('tap-status').innerText = "Bereit";
+        document.getElementById('tap-progress-bar').style.width = "0%";
     }
 
     /* --- EXTERNAL INPUT --- */
@@ -821,7 +805,7 @@
         const data = videoLibrary[dance];
         if(!data.file) return alert("Kein Video vorhanden.");
         const c = document.getElementById('library-content');
-        currentDance = dance; // Merken für Navigation
+        currentDance = dance; 
         let html = `<button class="btn-action btn-secondary" style="margin-bottom:15px;" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`;
         data.figures.forEach((fig, idx) => {
             html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span class="figure-play">▶</span></div>`;
@@ -834,11 +818,9 @@
         const o = document.getElementById('fs-video-overlay');
         const v = document.getElementById('main-video');
         o.classList.add('active');
-        
-        currentFigIdx = idx; // Aktuellen Index speichern
+        currentFigIdx = idx; 
         document.getElementById('vid-info').innerText = t;
         
-        // Puffer hinzufügen (Start +0.1s, End -0.2s)
         const safeStart = s + 0.1;
         const safeEnd = Math.max(safeStart, e - 0.2); 
 
@@ -846,10 +828,8 @@
         v.currentTime = safeStart; 
         curStart = safeStart; 
         curEnd = safeEnd;
-        
         v.playbackRate = playbackSpeed;
         v.muted = !videoSound; 
-        
         v.play();
         v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime = curEnd; } };
     }
@@ -862,7 +842,6 @@
             playVid(videoLibrary[currentDance].file, nextFig.start, nextFig.end, nextFig.name, currentFigIdx + 1);
         }
     }
-    
     function prevFigure() {
         const figs = videoLibrary[currentDance].figures;
         if (currentFigIdx > 0) {
@@ -870,27 +849,6 @@
             playVid(videoLibrary[currentDance].file, prevFig.start, prevFig.end, prevFig.name, currentFigIdx - 1);
         }
     }
-
-    let tapTimes = [];
-    function handleTap(e) {
-        e.preventDefault();
-        const now = Date.now();
-        const el = e.target;
-        el.style.transform = "scale(0.9)"; setTimeout(() => el.style.transform = "scale(1)", 100);
-        if(tapTimes.length > 0 && (now - tapTimes[tapTimes.length-1]) > 2000) tapTimes = [];
-        tapTimes.push(now);
-        if(tapTimes.length > 8) tapTimes.shift();
-        if(tapTimes.length >= 2) {
-            let intervals = [];
-            for(let i=1; i<tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i-1]);
-            const avgMs = intervals.reduce((a,b)=>a+b)/intervals.length;
-            const bpm = Math.round(60000/avgMs);
-            document.getElementById('tap-bpm').innerText = bpm + " BPM";
-            detectDance(bpm);
-            document.getElementById('tap-result').innerText = document.getElementById('dance-name').innerText;
-        }
-    }
-    function resetTap() { tapTimes = []; document.getElementById('tap-bpm').innerText = "0 BPM"; document.getElementById('tap-result').innerText = "---"; }
 
     function testFunk() { 
         const t = document.getElementById('ntfy-topic').value;
