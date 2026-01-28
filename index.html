@@ -330,18 +330,86 @@
         "Cha Cha Cha": {
             file: "media/chacha.mp4",
             figures: [
-                { name: "1. Grundschritt", start: 0.00, end: 17.55 },
-                { name: "2. Wiegeschritt", start: 17.55, end: 30.48 },
+                { name: "1. Grundschritt am Platz / Timestep", start: 0.00, end: 17.55 },
+                { name: "2. Grundschritt mit Wiegeschritt", start: 17.55, end: 30.48 },
                 { name: "3. Damensolo", start: 30.48, end: 52.88 },
-                { name: "4. New Yorker", start: 52.88, end: 80.30 },
+                { name: "4. New Yorker/Promenade", start: 52.88, end: 80.30 },
                 { name: "5. Hand to Hand", start: 80.30, end: 103.50 },
                 { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 },
                 { name: "7. Fan & Alemana", start: 123.37, end: 141.97 },
-                { name: "8. Hockeystick", start: 141.97, end: 169.44 },
+                { name: "8. Hockeystick & Open Hip Twist", start: 141.97, end: 169.44 },
                 { name: "9. Aida", start: 169.44, end: 197.17 }
             ]
         },
-        "Walzer": { file: "", figures: [] }
+        "Rumba": {
+            file: "media/rumba.mp4",
+            figures: [
+                { name: "1. Grundschritt", start: 0.00, end: 17.13 },
+                { name: "2. Damensolo", start: 17.13, end: 36.33 },
+                { name: "3. Hand to Hand", start: 36.33, end: 64.93 },
+                { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 },
+                { name: "5. Fan & Alemana", start: 93.73, end: 115.33 },
+                { name: "6. Hockeystick & Open Hip Twist", start: 115.33, end: 149.10 },
+                { name: "7. Aida", start: 149.10, end: 177.73 }
+            ]
+        },
+        "Discofox": {
+            file: "media/discofox.mp4",
+            figures: [
+                { name: "1. Grundschritt am Platz", start: 0.00, end: 16.00 },
+                { name: "2. Gelaufener Grundschritt", start: 16.00, end: 26.90 },
+                { name: "3. Brezel", start: 26.90, end: 63.60 },
+                { name: "4. Körbchen", start: 63.60, end: 83.77 },
+                { name: "5. He goes, She goes", start: 83.77, end: 99.93 },
+                { name: "6. Travoltaschritt", start: 99.93, end: 119.90 },
+                { name: "7. Tunnel mit Flirt", start: 119.90, end: 138.80 },
+                { name: "8. Sweetheart/ Schiebetür", start: 138.80, end: 160.07 },
+                { name: "9. Swing In, Swing Out", start: 160.07, end: 180.03 },
+                { name: "10. Knochenbrecher", start: 180.03, end: 196.43 }
+            ]
+        },
+        "Jive": {
+            file: "media/jive.mp4",
+            figures: [
+                { name: "1. Grundschritt", start: 0.00, end: 12.03 },
+                { name: "2. Flirt", start: 12.03, end: 27.53 },
+                { name: "3. Hand- und Platzwechsel", start: 27.53, end: 46.97 },
+                { name: "4. Stop'n'Go", start: 46.97, end: 64.03 }
+            ]
+        },
+        "Boogie Woogie": { 
+            file: "media/rock.mp4",
+            figures: [
+                { name: "1. 6er Grundschritt", start: 0.00, end: 12.17 },
+                { name: "2. 9er Grundschritt", start: 12.17, end: 21.93 },
+                { name: "3. Platzwechsel", start: 21.93, end: 36.37 },
+                { name: "4. Swing In, Swing Out", start: 36.37, end: 59.97 },
+                { name: "5. Flic Flac", start: 59.97, end: 90.63 },
+                { name: "6. Lasso", start: 90.63, end: 104.17 },
+                { name: "7. Hand- & Platzwechsel", start: 104.17, end: 116.90 },
+                { name: "8. American Spin", start: 116.90, end: 126.00 },
+                { name: "9. Tausendfüssler", start: 126.00, end: 143.83 },
+                { name: "10. Grätsche", start: 143.83, end: 156.37 }
+            ]
+        },
+        "Samba": {
+            file: "media/samba.mp4",
+            figures: [
+                { name: "1. Grundschritt", start: 0.00, end: 25.10 },
+                { name: "2. Wischer", start: 25.10, end: 41.33 },
+                { name: "3. Damensolo aus dem Wischer", start: 41.33, end: 52.20 },
+                { name: "4. Promenaden Walks", start: 52.20, end: 67.13 },
+                { name: "5. Side Walks", start: 67.13, end: 81.60 },
+                { name: "6. Botafogos", start: 81.60, end: 97.97 }
+            ]
+        },
+        // Platzhalter für Tänze ohne Video (damit die App nicht abstürzt, wenn diese erkannt werden)
+        "Walzer": { file: "", figures: [] },
+        "Langsamer Walzer": { file: "", figures: [] },
+        "Wiener Walzer": { file: "", figures: [] },
+        "Tango Argentino": { file: "", figures: [] },
+        "Foxtrott": { file: "", figures: [] },
+        "Salsa": { file: "", figures: [] }
     };
 
     const canvas = document.getElementById('visualizer');
@@ -926,4 +994,5 @@
 </script>
 </body>
 </html>
+
 
