@@ -15,8 +15,12 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* HEADER */
-        #top-bar { display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
+        /* HEADER (Z-Index 5000 = Immer ganz oben!) */
+        #top-bar { 
+            display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; 
+            padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; 
+            z-index: 5000; flex-shrink: 0; position: relative;
+        }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
         #mic-btn { background: #333; border: 2px solid #444; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 110px; transition: 0.2s; }
@@ -26,7 +30,7 @@
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
         /* MONITOR */
-        #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
+        #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; z-index: 1; }
         #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
@@ -38,16 +42,14 @@
         #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
         #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
-        
-        @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
         .pulse-effect { animation: pump 0.15s ease-out; }
+        @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
 
         .status-indicators { display: flex; gap: 15px; margin-top: 10px; align-items: flex-end; margin-bottom: 10px; width: 100%; justify-content: center; }
         .stat-box { display: flex; flex-direction: column; align-items: center; width: 80px; }
@@ -55,7 +57,7 @@
         .stat-val.active { color: #fff; }
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
 
-        /* Slider */
+        /* Slider Sidebar */
         #slider-sidebar { 
             position: absolute; right: 0; top: 80px; bottom: 0; width: 50px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
@@ -70,13 +72,13 @@
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
         /* OVERLAYS */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
-        /* Settings */
+        /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
         input[type="text"], input[type="password"], input[type="number"], select { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
@@ -101,7 +103,7 @@
         .btn-donate-small { background: #333; color: #fff; border: 1px solid #444; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; flex:1; }
         .donate-actions { display: flex; gap: 10px; }
 
-        /* Lists */
+        /* Other Styles */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
@@ -127,7 +129,7 @@
         .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
         .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
 
-        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
+        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 7000; }
         #fs-video-overlay.active { display: flex; }
         #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
         #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
@@ -144,20 +146,22 @@
             #fs-controls { position: absolute; bottom: 10px; }
         }
 
-        /* Tap Detector 4.0 - Clean */
+        /* Tap Detector 5.0 - PRO */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
         .tap-area { 
             width: 220px; height: 220px; 
             background: radial-gradient(circle, #333 0%, #111 100%); 
             border: 4px solid #444; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; user-select: none; 
+            font-size: 4rem; transition: 0.05s; cursor: pointer; 
+            touch-action: manipulation; color: #666; user-select: none; 
+            -webkit-tap-highlight-color: transparent;
         }
-        .tap-area:active { transform: scale(0.95); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
+        .tap-area.active { transform: scale(0.92); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
         #tap-status { font-size: 1rem; color: #aaa; min-height: 20px; text-align:center; margin-top:10px; }
-        #tap-result { font-size: 2.2rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); min-height: 40px; text-align: center; }
-        .tap-viz-container { display: flex; gap: 4px; margin-top: 10px; height: 20px; align-items: center; }
-        .tap-viz-dot { width: 12px; height: 12px; background: #333; border-radius: 50%; transition: 0.2s; }
+        #tap-result { font-size: 2.5rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.4); min-height: 50px; text-align: center; }
+        .tap-viz-container { display: flex; gap: 6px; margin-top: 10px; height: 20px; align-items: center; }
+        .tap-viz-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; transition: 0.2s; }
         .tap-viz-dot.accent { background: var(--red); box-shadow: 0 0 8px var(--red); transform: scale(1.3); }
         .tap-viz-dot.normal { background: var(--green); box-shadow: 0 0 5px var(--green); }
     </style>
@@ -209,8 +213,8 @@
         <div class="row">
             <label>KI Modell</label>
             <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
-                <option value="openai">OpenAI (GPT)</option>
-                <option value="gemini">Google Gemini (Free)</option>
+                <option value="openai">OpenAI (GPT-4o)</option>
+                <option value="gemini">Google Gemini (Flash 1.5)</option>
             </select>
         </div>
         <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier einfügen..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
@@ -285,11 +289,11 @@
 <div id="tap-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Klopfe den Rhythmus. Bleibe länger drauf für Betonung.<br>
-        <span style="font-size:0.8rem; color:#666;">Analysiert ab 4 Taps kontinuierlich.</span>
+        Klopfe im Takt. Langer Druck = Starker Schlag.<br>
+        <span style="font-size:0.8rem; color:#666;">Analysiert laufend...</span>
     </div>
     <div id="tap-pad">
-        <div class="tap-area" onpointerdown="tapDown(event)" onpointerup="tapUp(event)" oncontextmenu="return false;">🖐️</div>
+        <div class="tap-area" id="tapBtn" oncontextmenu="return false;">🖐️</div>
         <div class="tap-viz-container" id="tap-viz"></div>
         <div id="tap-bpm" style="font-family:monospace; font-size:1.5rem; color:#666; margin-top:10px;">0 BPM</div>
         <div id="tap-result">...</div>
@@ -299,10 +303,22 @@
 
 <script>
     // LEGAL & CONSOLE
-    console.log(`%c Tanz das! Ultimate v2.7 `, "color: #2b7cff; font-weight: bold;");
+    console.log(`%c Tanz das! Ultimate v2.8 `, "color: #2b7cff; font-weight: bold;");
 
     // --- CONSTANTS ---
     const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
+
+    // --- HELPER TO PREVENT CLICK BLOCK ---
+    function openOverlay(id) {
+        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'library-overlay') renderLibrary();
+    }
+    function closeOverlays() {
+        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
+        const v = document.getElementById('main-video');
+        if(!v.paused) v.pause();
+    }
 
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
@@ -351,10 +367,9 @@
     // --- INIT ---
     window.onload = () => {
         loadData();
-        // Load Provider Setting
         aiProvider = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = aiProvider;
-        loadKeyIntoInput(); // FIX: Lade korrekten Key
+        loadKeyIntoInput(); 
 
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
@@ -375,23 +390,27 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }, {once:true});
 
+        // Initialize Tap Detector
+        initTapDetector();
+
         // Donate Listener
-        document.getElementById('btnPaypalQR').addEventListener("click", () => {
-            const img = document.getElementById('paypalQrImg');
-            img.style.display = (img.style.display === 'block') ? 'none' : 'block';
-            if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
-        });
-        document.getElementById('btnBtcQR').addEventListener("click", () => {
-            const img = document.getElementById('btcQrImg');
-            img.style.display = (img.style.display === 'block') ? 'none' : 'block';
-            if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
-        });
-        document.getElementById('btnCopyBtc').addEventListener("click", () => {
-            navigator.clipboard.writeText(DONATE.btc).then(() => alert("Adresse kopiert!"));
-        });
+        if(document.getElementById('btnPaypalQR')) {
+            document.getElementById('btnPaypalQR').addEventListener("click", () => {
+                const img = document.getElementById('paypalQrImg');
+                img.style.display = (img.style.display === 'block') ? 'none' : 'block';
+                if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
+            });
+            document.getElementById('btnBtcQR').addEventListener("click", () => {
+                const img = document.getElementById('btcQrImg');
+                img.style.display = (img.style.display === 'block') ? 'none' : 'block';
+                if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
+            });
+            document.getElementById('btnCopyBtc').addEventListener("click", () => {
+                navigator.clipboard.writeText(DONATE.btc).then(() => alert("Adresse kopiert!"));
+            });
+        }
     };
 
-    // --- FIX: API KEY HANDLING ---
     function loadKeyIntoInput() {
         const prov = document.getElementById('ai-provider').value;
         let val = "";
@@ -400,9 +419,7 @@
         document.getElementById('api-key').value = val;
     }
 
-    function handleProviderChange() {
-        loadKeyIntoInput(); // Sofort Key wechseln
-    }
+    function handleProviderChange() { loadKeyIntoInput(); }
 
     function loadData() {
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
@@ -459,7 +476,7 @@
 
             visualize();
             analyzeRhythm();
-            setInterval(updateDensityUI, 3000);
+            setInterval(updateDensityUI, 3000); 
 
         } catch(e) { 
             alert("Mic Error: " + e.message); 
@@ -579,42 +596,60 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- ROLLING TAP LOGIC (Pressure/Rolling) --- */
-    let tapBuffer = []; // Speichert alle Taps (Zeit & Type)
+    /* --- TAP LOGIC PRO (Rolling + Pressure) --- */
+    let tapBuffer = [];
     let tapDownTime = 0;
+
+    function initTapDetector() {
+        const pad = document.getElementById('tapBtn');
+        if(pad) {
+            pad.addEventListener('pointerdown', tapDown);
+            pad.addEventListener('pointerup', tapUp);
+            pad.addEventListener('pointerleave', tapUp); // Handle drag out
+        }
+    }
 
     function tapDown(e) {
         e.preventDefault();
-        e.target.style.transform = "scale(0.9)";
+        const el = e.target;
+        el.classList.add('active');
         tapDownTime = Date.now();
+        // Check for 3D Touch (if available)
+        if(e.pressure && e.pressure > 0.5) el.style.borderColor = 'var(--red)';
     }
 
     function tapUp(e) {
         e.preventDefault();
-        e.target.style.transform = "scale(1)";
-        const now = Date.now();
-        const duration = now - tapDownTime; // Press duration (Pressure simulation)
+        const el = e.target;
+        el.classList.remove('active');
+        el.style.borderColor = '#444';
         
+        const now = Date.now();
+        const duration = now - tapDownTime;
+        
+        // PRESSURE CHECK
+        let isHeavy = false;
+        // 1. Hardware Pressure (Apple Pencil / 3D Touch legacy)
+        if(e.pressure && e.pressure > 0.4) isHeavy = true;
+        // 2. Fallback: Duration (Long Press = Heavy)
+        else if(duration > 140) isHeavy = true;
+
         // Reset if pause too long (> 2.5s)
         if (tapBuffer.length > 0) {
             const lastTap = tapBuffer[tapBuffer.length - 1].time;
             if (now - lastTap > 2500) { resetTap(); tapBuffer = []; }
         }
 
-        // Heavy/Light detection via Duration
-        // iPhone Touch: <100ms usually Light tap, >150ms intended Heavy
-        const type = (duration > 130) ? "H" : "L"; 
-        
-        // Rolling Buffer logic: Max 12 items
-        tapBuffer.push({ time: now, type: type });
+        tapBuffer.push({ time: now, type: isHeavy ? "H" : "L" });
+        // Rolling Buffer (Max 12)
         if(tapBuffer.length > 12) tapBuffer.shift();
 
-        // Visualize Dots
+        // Visualize
         const viz = document.getElementById('tap-viz');
         viz.innerHTML = tapBuffer.map(t => `<div class="tap-viz-dot ${t.type === 'H' ? 'accent' : 'normal'}"></div>`).join('');
 
-        // Analyze if we have enough data (min 4 taps = 3 intervals)
-        if (tapBuffer.length >= 4) {
+        if(tapBuffer.length >= 4) {
+            document.getElementById('tap-status').innerText = "Analysiere...";
             analyzeRollingTaps();
         } else {
             document.getElementById('tap-result').innerText = "...";
@@ -622,42 +657,42 @@
     }
 
     function analyzeRollingTaps() {
-        // 1. Calculate BPM from intervals
+        // BPM Calculation
         let intervals = [];
         for(let i=1; i<tapBuffer.length; i++) intervals.push(tapBuffer[i].time - tapBuffer[i-1].time);
         
-        // Average Interval & BPM
         const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
         const bpm = Math.round(60000/avgMs);
         document.getElementById('tap-bpm').innerText = bpm + " BPM";
 
-        // 2. Determine Pattern (Short/Long Intervals)
+        // Pattern: Interval based
         const minInterval = Math.min(...intervals);
-        // Heuristic: If interval > 1.4x min, it's a Long beat (pause)
-        // Pattern string e.g. "S S L"
-        const rhythmPattern = intervals.map(i => (i < minInterval * 1.45) ? "S" : "L").join(" "); 
+        // "S" = Short interval, "L" = Long interval (~pause)
+        // "H" = Heavy tap type
+        const rhythmPattern = intervals.map((int, i) => {
+            // Check interval length
+            const isLong = int > minInterval * 1.45;
+            // Check tap type of the START of the interval
+            const type = tapBuffer[i].type; 
+            return (isLong ? "L" : "S"); 
+        }).join(""); 
 
-        // 3. Match against Database
         let matches = [];
         for(const [dance, data] of Object.entries(expertRanges)) {
-            // Strict BPM Check
             if (bpm >= data.min - 12 && bpm <= data.max + 12) { 
-                const targetP = (data.rhythm || "").replace(/[^SL]/g, '');
+                const targetP = (data.rhythm || "").replace(/[^SL]/g, ''); // Nur S/L vom Expert
                 const userP = rhythmPattern.replace(/ /g, '');
                 
-                // Fuzzy Substring Match
-                // Does User Pattern fit into Target? OR Target into User?
                 if (targetP && (targetP.includes(userP) || userP.includes(targetP))) {
                     matches.push(dance);
                 } else if (!targetP) {
-                    matches.push(dance + "?"); // Match based on BPM only
+                    matches.push(dance + "?");
                 }
             }
         }
 
         const resEl = document.getElementById('tap-result');
         if(matches.length > 0) {
-            // Pick Preferred Dance if available
             const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
             resEl.innerText = preferred.length > 0 ? preferred[0] : matches[0];
             resEl.style.color = preferred.length > 0 ? "var(--green)" : "var(--yellow)";
@@ -672,6 +707,7 @@
         document.getElementById('tap-bpm').innerText = "0 BPM";
         document.getElementById('tap-result').innerText = "---";
         document.getElementById('tap-viz').innerHTML = "";
+        document.getElementById('tap-status').innerText = "Bereit";
     }
 
     /* --- EXTERNAL INPUT --- */
@@ -722,9 +758,8 @@
     }
 
     async function askAI(artist, title) {
-        // Read key dynamically
-        const prov = document.getElementById('ai-provider').value; 
         const key = document.getElementById('api-key').value.trim();
+        const prov = document.getElementById('ai-provider').value;
 
         if(!key) { updateDisplay("KEY?", "--", "", false); return; }
         
@@ -807,6 +842,48 @@
             alert("Verbindung OK! ✅");
         } catch(e) { alert("Fehler: " + e.message); }
     }
+
+    function openOverlay(id) { document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'library-overlay') renderLibrary(); }
+    function closeOverlays() { document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active')); const v = document.getElementById('main-video'); if(!v.paused) v.pause(); }
+    function updateSpeedLabel(val) { playbackSpeed = parseFloat(val); document.getElementById('speed-val').innerText = playbackSpeed + "x"; const v = document.getElementById('main-video'); if(v) v.playbackRate = playbackSpeed; }
+    function saveSettings() {
+        const currentKey = document.getElementById('api-key').value.trim();
+        const currentProv = document.getElementById('ai-provider').value;
+        if (currentProv === 'gemini') localStorage.setItem('dm_gemini_key', currentKey);
+        else localStorage.setItem('dm_openai_key', currentKey);
+        localStorage.setItem('dm_ai_provider', currentProv);
+        localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
+        localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
+        localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
+        localStorage.setItem('dm_speed', playbackSpeed);
+        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+        const inputs = document.querySelectorAll('.expert-input');
+        inputs.forEach(inp => {
+            const dance = inp.dataset.dance;
+            const type = inp.dataset.type;
+            if(expertRanges[dance]) expertRanges[dance][type] = (type === 'rhythm' ? inp.value : parseInt(inp.value));
+        });
+        localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+        location.reload();
+    }
+    function updateSens(val) { document.getElementById('main-sens').value = val; document.getElementById('sens-val-display').innerText = val; micSens = val / 1000; localStorage.setItem('dm_sens', val); }
+    function renderPrefs() { const list = document.getElementById('pref-list'); list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join(''); }
+    function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); } }
+    function renderHistory() { const f = document.getElementById('search-hist').value.toLowerCase(); const list = document.getElementById('history-list'); let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f) || (h.artist && h.artist.toLowerCase().includes(f))); filtered.sort((a,b) => new Date(b.date.split('.').reverse().join('-')) - new Date(a.date.split('.').reverse().join('-'))); list.innerHTML = filtered.map(h => { const idx = danceHistory.indexOf(h); return `<div class="hist-card"><div class="hist-del" onclick="delHist(${idx})">✕</div><div class="hist-title">${h.title}</div><div class="hist-artist">${h.artist || 'Unbekannt'}</div><div class="hist-info"><span>${h.dance}</span><span style="color:#666;">${h.date}</span></div><div class="hist-stars">${[1,2,3,4,5].map(s => `<span class="star-btn ${s<=h.stars?'active':''}" onclick="setStar(${idx},${s})">★</span>`).join('')}</div></div>`; }).join(''); }
+    function setStar(idx, n) { danceHistory[idx].stars = n; localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); }
+    function delHist(idx) { if(confirm("Löschen?")) { danceHistory.splice(idx,1); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); } }
+    function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(danceHistory)); a.download = "tanz_db.json"; document.body.appendChild(a); a.click(); a.remove(); }
+    function importData(input) { const r = new FileReader(); r.onload = (e) => { try { danceHistory=JSON.parse(e.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); alert("Import OK!"); } catch(x){ alert("Fehler!"); } }; r.readAsText(input.files[0]); }
+    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}"><input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}"><input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
+    function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
+    function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
+    function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video vorhanden."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" style="margin-bottom:15px;" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span class="figure-play">▶</span></div>`; }); c.innerHTML = html + "</div>"; }
+    let curStart=0, curEnd=0;
+    function playVid(src, s, e, t, idx) { const o = document.getElementById('fs-video-overlay'); const v = document.getElementById('main-video'); o.classList.add('active'); currentFigIdx = idx; document.getElementById('vid-info').innerText = t; const safeStart = s + 0.1; const safeEnd = Math.max(safeStart, e - 0.2); v.src = src; v.currentTime = safeStart; curStart = safeStart; curEnd = safeEnd; v.playbackRate = playbackSpeed; v.muted = !videoSound; v.play(); v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime = curEnd; } }; }
+    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
+    function nextFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx < figs.length - 1) { const nextFig = figs[currentFigIdx + 1]; playVid(videoLibrary[currentDance].file, nextFig.start, nextFig.end, nextFig.name, currentFigIdx + 1); } }
+    function prevFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx > 0) { const prevFig = figs[currentFigIdx - 1]; playVid(videoLibrary[currentDance].file, prevFig.start, prevFig.end, prevFig.name, currentFigIdx - 1); } }
+    function testFunk() { const t = document.getElementById('ntfy-topic').value; if(!t) return alert("Topic fehlt!"); fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})}).then(() => alert("Signal gesendet!")).catch(e => alert("Funk Fehler: " + e)); }
 </script>
 </body>
 </html>
