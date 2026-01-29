@@ -64,16 +64,10 @@
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
         
-        /* FIX: Modern Vertical Slider CSS */
+        /* Modern Vertical Slider CSS */
         input[type=range].vertical {
-            writing-mode: vertical-lr; /* Ersetzt slider-vertical */
-            direction: rtl; /* Stellt sicher, dass 'oben' 100% ist */
-            width: 6px; 
-            height: 100%; 
-            outline: none; 
-            background: transparent; 
-            cursor: pointer; 
-            z-index: 2;
+            writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; 
+            outline: none; background: transparent; cursor: pointer; z-index: 2;
         }
         
         #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
@@ -89,7 +83,7 @@
         /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-        input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
+        input[type="text"], input[type="password"], input[type="number"], select { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
         input[type="checkbox"] { transform: scale(1.5); accent-color: var(--blue); }
@@ -98,7 +92,7 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* --- DONATE STYLES (Compact & Exact) --- */
+        /* Donate Styles */
         .ctaGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px; }
         @media (max-width:600px){ .ctaGrid{ grid-template-columns: 1fr; } }
         .payCard { background: rgba(255,255,255,.05); border-radius: 12px; padding: 15px; border: 1px solid #333; }
@@ -206,7 +200,14 @@
 <div id="settings-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Einstellungen</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div class="settings-group">
-        <div class="row"><label>OpenAI API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="sk-..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
+        <div class="row">
+            <label>KI Modell</label>
+            <select id="ai-provider" style="width:65%;">
+                <option value="openai">OpenAI (GPT)</option>
+                <option value="gemini">Google Gemini (Free)</option>
+            </select>
+        </div>
+        <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier einfügen..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
         <div class="row"><label>Funk-Topic (Shazam)</label><div style="display:flex; gap:10px; width:65%;"><input type="text" id="ntfy-topic" placeholder="Topic..."><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
         <div class="row" style="margin-top:15px;"><label>Disco-Modus</label><input type="checkbox" id="disco-mode"></div>
         <div class="row"><label>Video Ton</label><input type="checkbox" id="video-audio"></div>
@@ -313,7 +314,7 @@
    | | (_| | | | \\__ \\ |__| | |  |  __/ (_| |    
    \\_/\\__,_|_| |_|___/_____/|_|   \\___|\\__,_|    
 `, "color: #2b7cff; font-weight: bold;");
-    console.log("%c[System]%c Tanz das! Ultimate v2.1 - Non-Commercial Edition", "color: #34C759", "color: inherit");
+    console.log("%c[System]%c Tanz das! Ultimate v2.2 - Multi-AI Edition", "color: #34C759", "color: inherit");
     console.log("%c[Legal]%c (c) 2026 rundskp. No derivatives allowed. Support the creator.", "color: #FF3B30; font-weight: bold;", "color: inherit");
 
     // --- DONATE CONSTANTS ---
@@ -327,6 +328,7 @@
     let lastBeat = 0, bpmBuffer = [], aiLocked = false;
     let micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
+    let aiProvider = "openai"; // Default: OpenAI
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     let lowHits = 0, highHits = 0, rhythmRatio = 0.0;
@@ -441,6 +443,10 @@
     // --- INIT ---
     window.onload = () => {
         loadData();
+        // Lade Provider Setting
+        aiProvider = localStorage.getItem('dm_ai_provider') || 'openai';
+        document.getElementById('ai-provider').value = aiProvider;
+        
         document.getElementById('api-key').value = localStorage.getItem('dm_key') || "";
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
@@ -757,36 +763,90 @@
     async function askAI(artist, title) {
         const key = document.getElementById('api-key').value;
         if(!key) { updateDisplay("KEY?", "--", "", false); return; }
+        
         updateDisplay("KI DENKT...", "", "", false);
         document.getElementById('mic-btn').classList.add('ai-mode');
+        
+        const promptText = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return ONLY JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
+
         try {
-            const prompt = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
-            const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], max_tokens: 60 })
-            });
-            const data = await res.json();
-            if(data.error) throw new Error("API: " + data.error.message);
-            const raw = data.choices[0].message.content;
-            const match = raw.match(/\{[\s\S]*\}/);
-            if (!match) throw new Error("JSON Format");
-            const result = JSON.parse(match[0]);
+            let data;
+            
+            if (aiProvider === 'gemini') {
+                // GOOGLE GEMINI CALL
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                });
+                const json = await res.json();
+                if(json.error) throw new Error("Gemini: " + json.error.message);
+                
+                // Extract text from Gemini structure
+                const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+                // Clean markdown code blocks if present
+                const cleanJson = rawText.replace(/```json|```/g, '').trim();
+                data = JSON.parse(cleanJson);
+
+            } else {
+                // OPENAI CALL (Default)
+                const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+                    body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: promptText }], max_tokens: 60 })
+                });
+                if(!res.ok) throw new Error("OpenAI: " + res.status);
+                const json = await res.json();
+                const raw = json.choices[0].message.content;
+                const match = raw.match(/\{[\s\S]*\}/);
+                if (!match) throw new Error("JSON Format Error");
+                data = JSON.parse(match[0]);
+            }
+
+            // Success Handling
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
                 title: title, artist: artist,
-                dance: result.dance, bpm: result.bpm,
-                tact: result.tact, rhythm: result.rhythm, stars: 0
+                dance: data.dance, bpm: data.bpm,
+                tact: data.tact, rhythm: data.rhythm, stars: 0
             });
             localStorage.setItem('dm_history', JSON.stringify(danceHistory));
             renderHistory();
-            updateDisplay(result.dance, result.tact, result.rhythm, true);
-            document.getElementById('bpm-display').innerText = result.bpm;
+            updateDisplay(data.dance, data.tact, data.rhythm, true);
+            document.getElementById('bpm-display').innerText = data.bpm;
+
         } catch(e) {
-            let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK " + e.message);
+            console.error(e);
+            let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK/KI");
             updateDisplay(msg, "--", "!", false);
         }
         setTimeout(() => { document.getElementById('mic-btn').classList.remove('ai-mode'); }, 1000); 
+    }
+
+    async function testAI() {
+        const k = document.getElementById('api-key').value;
+        if(!k) return alert("Key fehlt!");
+        
+        try {
+            if (aiProvider === 'gemini') {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
+                const r = await fetch(url, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
+                });
+                const d = await r.json();
+                if(d.error) throw new Error(d.error.message);
+            } else {
+                const r = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method:'POST', 
+                    headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
+                    body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
+                });
+                if(!r.ok) throw new Error(r.status);
+            }
+            alert("Verbindung OK! ✅");
+        } catch(e) { alert("Fehler: " + e.message); }
     }
 
     /* --- HELPERS --- */
@@ -813,6 +873,10 @@
         localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
         localStorage.setItem('dm_speed', playbackSpeed);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+        // Save Provider
+        aiProvider = document.getElementById('ai-provider').value;
+        localStorage.setItem('dm_ai_provider', aiProvider);
+
         const inputs = document.querySelectorAll('.expert-input');
         inputs.forEach(inp => {
             const dance = inp.dataset.dance;
@@ -935,16 +999,26 @@
     async function testAI() {
         const k = document.getElementById('api-key').value;
         if(!k) return alert("Key fehlt!");
+        
         try {
-            const r = await fetch('https://api.openai.com/v1/chat/completions', {
-                method:'POST', 
-                headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
-                body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
-            });
-            const data = await r.json();
-            if(r.ok) alert("Verbindung OK! ✅");
-            else alert("Fehler: " + (data.error?.message || "Unbekannt"));
-        } catch(e) { alert("Netzwerkfehler! (Offline?)"); }
+            if (aiProvider === 'gemini') {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
+                const r = await fetch(url, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
+                });
+                const d = await r.json();
+                if(d.error) throw new Error(d.error.message);
+            } else {
+                const r = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method:'POST', 
+                    headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
+                    body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
+                });
+                if(!r.ok) throw new Error(r.status);
+            }
+            alert("Verbindung OK! ✅");
+        } catch(e) { alert("Fehler: " + e.message); }
     }
 </script>
 </body>
