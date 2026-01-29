@@ -15,7 +15,7 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* --- HEADER --- */
+        /* HEADER */
         #top-bar { display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
@@ -25,9 +25,8 @@
         #mic-btn.loading { opacity: 0.7; animation: pulse-load 1s infinite; }
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
-        /* --- MONITOR --- */
+        /* MONITOR */
         #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
-        
         #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
@@ -39,7 +38,6 @@
         #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
@@ -69,18 +67,16 @@
             writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; 
             outline: none; background: transparent; cursor: pointer; z-index: 2;
         }
-        
         #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* --- OVERLAYS --- */
+        /* OVERLAYS */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
-        /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
         input[type="text"], input[type="password"], input[type="number"], select { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
@@ -92,7 +88,7 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* Donate Styles */
+        /* Donate */
         .ctaGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px; }
         @media (max-width:600px){ .ctaGrid{ grid-template-columns: 1fr; } }
         .payCard { background: rgba(255,255,255,.05); border-radius: 12px; padding: 15px; border: 1px solid #333; }
@@ -105,11 +101,10 @@
         .btn-donate-small { background: #333; color: #fff; border: 1px solid #444; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; flex:1; }
         .donate-actions { display: flex; gap: 10px; }
 
-        /* Other Styles */
+        /* Lists */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
-        
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
         .hist-del { position: absolute; top: 10px; right: 10px; color: #555; font-weight: bold; padding: 10px; cursor: pointer; }
@@ -124,7 +119,7 @@
         .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
         .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
 
-        /* Video */
+        /* Video & FS */
         .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
         .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
         .figure-play { color: var(--green); font-size: 1.8rem; }
@@ -140,6 +135,7 @@
         #fs-controls { margin-top: 15px; display: flex; gap: 15px; justify-content: center; width: 100%; align-items: center; }
         .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; min-width: 100px; }
         .nav-btn { background: #333; color: white; border: 1px solid #555; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .nav-btn:active { background: var(--blue); }
         
         @media (orientation: landscape) {
             #fs-video-container { flex-direction: row; flex-wrap: wrap; }
@@ -148,12 +144,20 @@
             #fs-controls { position: absolute; bottom: 10px; }
         }
 
-        /* Tap Detector */
+        /* Tap Detector 2.0 */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
-        .tap-area { width: 220px; height: 220px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; user-select: none; }
+        .tap-area { 
+            width: 220px; height: 220px; 
+            background: radial-gradient(circle, #333 0%, #111 100%); 
+            border: 4px solid #444; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; user-select: none; 
+        }
         .tap-area:active { transform: scale(0.95); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
-        #tap-progress-container { width: 80%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; margin-top: 10px; }
-        #tap-progress-bar { width: 0%; height: 100%; background: var(--blue); transition: width 0.1s linear; }
+        #tap-status { font-size: 1rem; color: #aaa; min-height: 20px; text-align:center; }
+        #tap-result { font-size: 1.8rem; font-weight: 900; color: var(--yellow); margin-top: 10px; text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); }
+        .pattern-dot { display:inline-block; width:10px; height:10px; background:#555; border-radius:50%; margin:2px; }
+        .pattern-dot.active { background: var(--green); box-shadow:0 0 5px var(--green); }
     </style>
 </head>
 <body>
@@ -202,7 +206,7 @@
     <div class="settings-group">
         <div class="row">
             <label>KI Modell</label>
-            <select id="ai-provider" style="width:65%;">
+            <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
                 <option value="openai">OpenAI (GPT)</option>
                 <option value="gemini">Google Gemini (Free)</option>
             </select>
@@ -228,35 +232,20 @@
 </div>
 
 <div id="donate-overlay" class="overlay">
-    <div class="overlay-header">
-        <h2 class="overlay-title">☕️ Spenden</h2>
-        <button class="close-btn" onclick="closeOverlays()">✕</button>
-    </div>
+    <div class="overlay-header"><h2 class="overlay-title">☕️ Spenden</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div class="settings-group">
-        <p class="donate-text">
-            Falls dir mein Tool gefällt und du mich unterstützen willst:
-            <b>PayPal</b> oder <b>Bitcoin</b> – super einfach. ❤️
-        </p>
-
+        <p class="donate-text">Support via PayPal oder Bitcoin. ❤️</p>
         <div class="ctaGrid">
             <div class="payCard">
                 <div class="payCardHeading">PayPal</div>
-                <a class="payBtnBig" href="https://paypal.me/rophko" target="_blank" rel="noopener">
-                    <img class="paypalImg" alt="PayPal" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='140' viewBox='0 0 420 140'><rect width='420' height='140' rx='24' fill='%23f5f7ff'/><text x='50%25' y='55%25' text-anchor='middle' font-family='Arial' font-size='44' fill='%23003087'>PayPal</text><text x='50%25' y='80%25' text-anchor='middle' font-family='Arial' font-size='20' fill='%23003087'>Jetzt spenden</text></svg>"/>
-                </a>
-                <div class="donate-actions">
-                    <button id="btnPaypalQR" type="button" class="btn-donate-small">QR anzeigen</button>
-                </div>
+                <a class="payBtnBig" href="https://paypal.me/rophko" target="_blank" rel="noopener"><img class="paypalImg" alt="PayPal" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='140' viewBox='0 0 420 140'><rect width='420' height='140' rx='24' fill='%23f5f7ff'/><text x='50%25' y='55%25' text-anchor='middle' font-family='Arial' font-size='44' fill='%23003087'>PayPal</text><text x='50%25' y='80%25' text-anchor='middle' font-family='Arial' font-size='20' fill='%23003087'>Jetzt spenden</text></svg>"/></a>
+                <div class="donate-actions"><button id="btnPaypalQR" type="button" class="btn-donate-small">QR anzeigen</button></div>
                 <img id="paypalQrImg" class="qrImg" alt="PayPal QR" />
             </div>
-
             <div class="payCard">
                 <div class="payCardHeading">Bitcoin</div>
                 <div class="addrBox" id="btcAddr">bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f</div>
-                <div class="donate-actions">
-                    <button id="btnCopyBtc" type="button" class="btn-donate-small">Kopieren</button>
-                    <button id="btnBtcQR" type="button" class="btn-donate-small">QR Code</button>
-                </div>
+                <div class="donate-actions"><button id="btnCopyBtc" type="button" class="btn-donate-small">Kopieren</button><button id="btnBtcQR" type="button" class="btn-donate-small">QR Code</button></div>
                 <img id="btcQrImg" class="qrImg" alt="Bitcoin QR" />
             </div>
         </div>
@@ -293,13 +282,15 @@
 
 <div id="tap-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
-    <div style="text-align:center; color:#888; margin-bottom:20px;">Klopfe den Rhythmus (kurz/lang) auf den Kreis.</div>
+    <div style="text-align:center; color:#888; margin-bottom:20px;">
+        Klopfe den Rhythmus (kurz/lang) auf den Kreis.<br>
+        <span style="font-size:0.8rem; color:#666;">Mind. 2 Takte (ca. 8 Taps) für Analyse.</span>
+    </div>
     <div id="tap-pad">
-        <div class="tap-area" onpointerdown="handleTapInput(event)">🖐️</div>
-        <div id="tap-progress-container"><div id="tap-progress-bar"></div></div>
-        <div id="tap-status">Warte auf Eingabe...</div>
-        <div id="tap-result" style="font-size: 1.5rem; font-weight:bold; color:white; margin-top:10px;">---</div>
-        <div id="tap-bpm" style="font-family:monospace; font-size:1.2rem; color:#666;">0 BPM</div>
+        <div class="tap-area" onpointerdown="tapDown(event)" onpointerup="tapUp(event)" oncontextmenu="return false;">🖐️</div>
+        <div id="tap-status">Warte auf Start...</div>
+        <div id="tap-bpm" style="font-family:monospace; font-size:1.5rem; color:#666; margin-top:10px;">0 BPM</div>
+        <div id="tap-result">---</div>
     </div>
     <button class="btn-action btn-secondary" onclick="resetTap()">Reset</button>
 </div>
@@ -314,112 +305,34 @@
    | | (_| | | | \\__ \\ |__| | |  |  __/ (_| |    
    \\_/\\__,_|_| |_|___/_____/|_|   \\___|\\__,_|    
 `, "color: #2b7cff; font-weight: bold;");
-    console.log("%c[System]%c Tanz das! Ultimate v2.2 - Multi-AI Edition", "color: #34C759", "color: inherit");
-    console.log("%c[Legal]%c (c) 2026 rundskp. No derivatives allowed. Support the creator.", "color: #FF3B30; font-weight: bold;", "color: inherit");
+    console.log("%c[System]%c Tanz das! Ultimate v2.5 - Fixed Key & Tap", "color: #34C759", "color: inherit");
 
     // --- DONATE CONSTANTS ---
-    const DONATE = {
-        paypal: "https://paypal.me/rophko",
-        btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f"
-    };
+    const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
 
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
     let lastBeat = 0, bpmBuffer = [], aiLocked = false;
     let micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
-    let aiProvider = "openai"; // Default: OpenAI
+    let aiProvider = "openai"; 
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
-    let lowHits = 0, highHits = 0, rhythmRatio = 0.0;
     
-    // Video Playback
+    // Density Logic Fix
+    let densityLow = 0, densityHigh = 0;
+    
     let currentDance = "", currentFigIdx = 0;
 
     // --- VIDEO DATEN ---
     const videoLibrary = {
-        "Cha Cha Cha": {
-            file: "media/chacha.mp4",
-            figures: [
-                { name: "1. Grundschritt am Platz / Timestep", start: 0.00, end: 17.55 },
-                { name: "2. Grundschritt mit Wiegeschritt", start: 17.55, end: 30.48 },
-                { name: "3. Damensolo", start: 30.48, end: 52.88 },
-                { name: "4. New Yorker/Promenade", start: 52.88, end: 80.30 },
-                { name: "5. Hand to Hand", start: 80.30, end: 103.50 },
-                { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 },
-                { name: "7. Fan & Alemana", start: 123.37, end: 141.97 },
-                { name: "8. Hockeystick & Open Hip Twist", start: 141.97, end: 169.44 },
-                { name: "9. Aida", start: 169.44, end: 197.17 }
-            ]
-        },
-        "Rumba": {
-            file: "media/rumba.mp4",
-            figures: [
-                { name: "1. Grundschritt", start: 0.00, end: 17.13 },
-                { name: "2. Damensolo", start: 17.13, end: 36.33 },
-                { name: "3. Hand to Hand", start: 36.33, end: 64.93 },
-                { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 },
-                { name: "5. Fan & Alemana", start: 93.73, end: 115.33 },
-                { name: "6. Hockeystick & Open Hip Twist", start: 115.33, end: 149.10 },
-                { name: "7. Aida", start: 149.10, end: 177.73 }
-            ]
-        },
-        "Discofox": {
-            file: "media/discofox.mp4",
-            figures: [
-                { name: "1. Grundschritt am Platz", start: 0.00, end: 16.00 },
-                { name: "2. Gelaufener Grundschritt", start: 16.00, end: 26.90 },
-                { name: "3. Brezel", start: 26.90, end: 63.60 },
-                { name: "4. Körbchen", start: 63.60, end: 83.77 },
-                { name: "5. He goes, She goes", start: 83.77, end: 99.93 },
-                { name: "6. Travoltaschritt", start: 99.93, end: 119.90 },
-                { name: "7. Tunnel mit Flirt", start: 119.90, end: 138.80 },
-                { name: "8. Sweetheart/ Schiebetür", start: 138.80, end: 160.07 },
-                { name: "9. Swing In, Swing Out", start: 160.07, end: 180.03 },
-                { name: "10. Knochenbrecher", start: 180.03, end: 196.43 }
-            ]
-        },
-        "Jive": {
-            file: "media/jive.mp4",
-            figures: [
-                { name: "1. Grundschritt", start: 0.00, end: 12.03 },
-                { name: "2. Flirt", start: 12.03, end: 27.53 },
-                { name: "3. Hand- und Platzwechsel", start: 27.53, end: 46.97 },
-                { name: "4. Stop'n'Go", start: 46.97, end: 64.03 }
-            ]
-        },
-        "Boogie Woogie": { 
-            file: "media/rock.mp4",
-            figures: [
-                { name: "1. 6er Grundschritt", start: 0.00, end: 12.17 },
-                { name: "2. 9er Grundschritt", start: 12.17, end: 21.93 },
-                { name: "3. Platzwechsel", start: 21.93, end: 36.37 },
-                { name: "4. Swing In, Swing Out", start: 36.37, end: 59.97 },
-                { name: "5. Flic Flac", start: 59.97, end: 90.63 },
-                { name: "6. Lasso", start: 90.63, end: 104.17 },
-                { name: "7. Hand- & Platzwechsel", start: 104.17, end: 116.90 },
-                { name: "8. American Spin", start: 116.90, end: 126.00 },
-                { name: "9. Tausendfüssler", start: 126.00, end: 143.83 },
-                { name: "10. Grätsche", start: 143.83, end: 156.37 }
-            ]
-        },
-        "Samba": {
-            file: "media/samba.mp4",
-            figures: [
-                { name: "1. Grundschritt", start: 0.00, end: 25.10 },
-                { name: "2. Wischer", start: 25.10, end: 41.33 },
-                { name: "3. Damensolo aus dem Wischer", start: 41.33, end: 52.20 },
-                { name: "4. Promenaden Walks", start: 52.20, end: 67.13 },
-                { name: "5. Side Walks", start: 67.13, end: 81.60 },
-                { name: "6. Botafogos", start: 81.60, end: 97.97 }
-            ]
-        },
-        "Walzer": { file: "", figures: [] },
-        "Langsamer Walzer": { file: "", figures: [] },
-        "Wiener Walzer": { file: "", figures: [] },
-        "Tango Argentino": { file: "", figures: [] },
-        "Foxtrott": { file: "", figures: [] },
-        "Salsa": { file: "", figures: [] }
+        "Cha Cha Cha": { file: "media/chacha.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.55 }, { name: "2. Wiegeschritt", start: 17.55, end: 30.48 }, { name: "3. Damensolo", start: 30.48, end: 52.88 }, { name: "4. New Yorker", start: 52.88, end: 80.30 }, { name: "5. Hand to Hand", start: 80.30, end: 103.50 }, { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 }, { name: "7. Fan & Alemana", start: 123.37, end: 141.97 }, { name: "8. Hockeystick", start: 141.97, end: 169.44 }, { name: "9. Aida", start: 169.44, end: 197.17 }] },
+        "Rumba": { file: "media/rumba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.13 }, { name: "2. Damensolo", start: 17.13, end: 36.33 }, { name: "3. Hand to Hand", start: 36.33, end: 64.93 }, { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 }, { name: "5. Fan & Alemana", start: 93.73, end: 115.33 }, { name: "6. Hockeystick", start: 115.33, end: 149.10 }, { name: "7. Aida", start: 149.10, end: 177.73 }] },
+        "Discofox": { file: "media/discofox.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 16.00 }, { name: "2. Gelaufener GS", start: 16.00, end: 26.90 }, { name: "3. Brezel", start: 26.90, end: 63.60 }, { name: "4. Körbchen", start: 63.60, end: 83.77 }, { name: "5. He goes, She goes", start: 83.77, end: 99.93 }, { name: "6. Travolta", start: 99.93, end: 119.90 }, { name: "7. Tunnel", start: 119.90, end: 138.80 }, { name: "8. Schiebetür", start: 138.80, end: 160.07 }, { name: "9. Swing In/Out", start: 160.07, end: 180.03 }, { name: "10. Knochenbrecher", start: 180.03, end: 196.43 }] },
+        "Jive": { file: "media/jive.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 12.03 }, { name: "2. Flirt", start: 12.03, end: 27.53 }, { name: "3. Platzwechsel", start: 27.53, end: 46.97 }, { name: "4. Stop'n'Go", start: 46.97, end: 64.03 }] },
+        "Boogie Woogie": { file: "media/rock.mp4", figures: [{ name: "1. 6er GS", start: 0.00, end: 12.17 }, { name: "2. 9er GS", start: 12.17, end: 21.93 }, { name: "3. Platzwechsel", start: 21.93, end: 36.37 }, { name: "4. Swing In/Out", start: 36.37, end: 59.97 }, { name: "5. Flic Flac", start: 59.97, end: 90.63 }, { name: "6. Lasso", start: 90.63, end: 104.17 }, { name: "7. Handwechsel", start: 104.17, end: 116.90 }, { name: "8. American Spin", start: 116.90, end: 126.00 }, { name: "9. Tausendfüssler", start: 126.00, end: 143.83 }, { name: "10. Grätsche", start: 143.83, end: 156.37 }] },
+        "Samba": { file: "media/samba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 25.10 }, { name: "2. Wischer", start: 25.10, end: 41.33 }, { name: "3. Damensolo", start: 41.33, end: 52.20 }, { name: "4. Promenaden", start: 52.20, end: 67.13 }, { name: "5. Side Walks", start: 67.13, end: 81.60 }, { name: "6. Botafogos", start: 81.60, end: 97.97 }] },
+        "Walzer": { file: "", figures: [] }, "Langsamer Walzer": { file: "", figures: [] }, "Wiener Walzer": { file: "", figures: [] }, "Tango Argentino": { file: "", figures: [] }, "Foxtrott": { file: "", figures: [] }, "Salsa": { file: "", figures: [] }
     };
 
     const defaultRanges = {
@@ -443,11 +356,11 @@
     // --- INIT ---
     window.onload = () => {
         loadData();
-        // Lade Provider Setting
+        // Load Provider & Key
         aiProvider = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = aiProvider;
-        
-        document.getElementById('api-key').value = localStorage.getItem('dm_key') || "";
+        loadKeyIntoInput(); // FIX: Lade korrekten Key
+
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
         
@@ -470,22 +383,31 @@
         // Donate Listener
         document.getElementById('btnPaypalQR').addEventListener("click", () => {
             const img = document.getElementById('paypalQrImg');
-            if(img.style.display === 'block') { img.style.display = 'none'; } else {
-                img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
-                img.style.display = 'block';
-            }
+            img.style.display = (img.style.display === 'block') ? 'none' : 'block';
+            if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
         });
         document.getElementById('btnBtcQR').addEventListener("click", () => {
             const img = document.getElementById('btcQrImg');
-            if(img.style.display === 'block') { img.style.display = 'none'; } else {
-                img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
-                img.style.display = 'block';
-            }
+            img.style.display = (img.style.display === 'block') ? 'none' : 'block';
+            if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
         });
         document.getElementById('btnCopyBtc').addEventListener("click", () => {
             navigator.clipboard.writeText(DONATE.btc).then(() => alert("Adresse kopiert!"));
         });
     };
+
+    // --- FIX: API KEY HANDLING ---
+    function loadKeyIntoInput() {
+        const prov = document.getElementById('ai-provider').value;
+        let val = "";
+        if (prov === 'gemini') val = localStorage.getItem('dm_gemini_key') || "";
+        else val = localStorage.getItem('dm_openai_key') || "";
+        document.getElementById('api-key').value = val;
+    }
+
+    function handleProviderChange() {
+        loadKeyIntoInput(); // Sofort Key wechseln
+    }
 
     function loadData() {
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
@@ -540,6 +462,9 @@
 
             visualize();
             analyzeRhythm();
+            // Start Density Update Loop (alle 3 sek)
+            setInterval(updateDensityUI, 3000);
+
         } catch(e) { 
             alert("Mic Error: " + e.message); 
             btn.classList.remove('loading');
@@ -584,16 +509,42 @@
     function analyzeRhythm() {
         if(!isListening) return;
         setTimeout(analyzeRhythm, 20); 
+        
         const lowData = new Uint8Array(analyserLow.frequencyBinCount);
+        const highData = new Uint8Array(analyserHigh.frequencyBinCount);
         analyserLow.getByteFrequencyData(lowData);
-        let sum = 0; for(let i=0; i<lowData.length; i++) sum += lowData[i];
-        const avg = sum / lowData.length;
+        analyserHigh.getByteFrequencyData(highData);
+
+        let sumL = 0; for(let i=0; i<lowData.length; i++) sumL += lowData[i];
+        let sumH = 0; for(let i=0; i<highData.length; i++) sumH += highData[i];
+        
+        const avgL = sumL / lowData.length;
+        const avgH = sumH / highData.length;
         const threshold = micSens * 255 * 0.8; 
+
+        // Density Accumulation (FIX)
+        if(avgL > threshold) densityLow++;
+        if(avgH > (threshold * 0.7)) densityHigh++; // High hat oft weniger Energie
+
         const now = Date.now();
-        if(avg > threshold && (now - lastBeat > 280)) { 
+        if(avgL > threshold && (now - lastBeat > 280)) { 
             processBeat(now);
             lastBeat = now;
         }
+    }
+
+    function updateDensityUI() {
+        if(!isListening) return;
+        // Einfache Ratio Berechnung: Wieviel High pro Low?
+        let ratio = 0.0;
+        if(densityLow > 0) ratio = (densityHigh / densityLow).toFixed(1);
+        
+        // Glättung oder direkte Anzeige
+        document.getElementById('density-display').innerText = ratio;
+        
+        // Reset für nächstes Fenster
+        densityLow = 0; 
+        densityHigh = 0;
     }
 
     function processBeat(now) {
@@ -639,78 +590,103 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- TAP LOGIC --- */
-    let tapTimestamps = [];
-    const MAX_TAP_SAMPLES = 8; 
+    /* --- TAP LOGIC 2.0 (Pressure/Duration) --- */
+    let tapData = [];
+    let tapTimeout = null;
+    let tapDownTime = 0;
 
-    function handleTapInput(e) {
+    function tapDown(e) {
         e.preventDefault();
-        e.target.style.transform = "scale(0.9)"; 
-        setTimeout(() => e.target.style.transform = "scale(1)", 100);
+        e.target.style.transform = "scale(0.9)";
+        tapDownTime = Date.now();
+    }
 
+    function tapUp(e) {
+        e.preventDefault();
+        e.target.style.transform = "scale(1)";
+        
         const now = Date.now();
-        if(tapTimestamps.length > 0 && (now - tapTimestamps[tapTimestamps.length-1]) > 2500) {
-            resetTap();
+        const duration = now - tapDownTime; // Wie lange gedrückt? (Druck-Ersatz)
+        
+        // Reset nach Pause
+        if (tapData.length > 0) {
+            const lastTap = tapData[tapData.length - 1].time;
+            if (now - lastTap > 2500) { resetTap(); tapData = []; }
         }
 
-        tapTimestamps.push(now);
-        const progress = Math.min(100, (tapTimestamps.length / MAX_TAP_SAMPLES) * 100);
-        document.getElementById('tap-progress-bar').style.width = progress + "%";
-        
-        if (tapTimestamps.length > 1) {
-            analyzeTaps();
-        } else {
-            document.getElementById('tap-status').innerText = "Rhythmus aufnehmen...";
+        // Tap speichern: Zeitpunkt + Typ (Kurz/Lang)
+        // Schwelle für "Betonung" (Heavy Beat) ca. 150ms press
+        const type = (duration > 140) ? "H" : "L"; // Heavy / Light
+        tapData.push({ time: now, type: type });
+
+        // Feedback
+        const dots = tapData.map(t => `<span class="pattern-dot ${t.type === 'H' ? 'active' : ''}"></span>`).join("");
+        document.getElementById('tap-status').innerHTML = dots;
+
+        if (tapData.length >= 8) { // Warte auf 8 Taps (ca 2 Takte)
+            analyzeTapSequence();
         }
     }
 
-    function analyzeTaps() {
+    function analyzeTapSequence() {
+        // 1. BPM
         let intervals = [];
-        for(let i=1; i<tapTimestamps.length; i++) intervals.push(tapTimestamps[i] - tapTimestamps[i-1]);
+        for(let i=1; i<tapData.length; i++) intervals.push(tapData[i].time - tapData[i-1].time);
+        
+        // Konsistenz prüfen (Standardabweichung)
         const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+        const variance = intervals.reduce((a,b) => a + Math.pow(b - avgMs, 2), 0) / intervals.length;
+        const stdDev = Math.sqrt(variance);
+
+        // Wenn zu chaotisch -> Abbruch
+        if(stdDev > 150) {
+            document.getElementById('tap-result').innerText = "Schwankung...";
+            tapData = tapData.slice(-4); // Behalte nur die letzten 4, versuche weiter
+            return;
+        }
+
         const bpm = Math.round(60000/avgMs);
         document.getElementById('tap-bpm').innerText = bpm + " BPM";
 
+        // 2. Pattern Matching (Intervalle: Kurz/Lang)
+        // Wir schauen auf die Zeit ZWISCHEN den Taps
         const minInterval = Math.min(...intervals);
-        const pattern = intervals.map(i => (i < minInterval * 1.5) ? "S" : "L").join(" ");
-        document.getElementById('tap-status').innerText = "Muster: " + pattern;
+        const rhythmPattern = intervals.map(i => (i < minInterval * 1.4) ? "S" : "L").join(" "); // S S L ...
 
+        // 3. Match
         let matches = [];
         for(const [dance, data] of Object.entries(expertRanges)) {
-            if (bpm >= data.min - 5 && bpm <= data.max + 5) {
-                const expertPattern = (data.rhythm || "").replace(/[^SL]/g, ''); 
-                const myPattern = pattern.replace(/ /g, '');
+            if (bpm >= data.min - 10 && bpm <= data.max + 10) {
+                // Check Pattern
+                const targetP = (data.rhythm || "").replace(/[^SL]/g, '');
+                const userP = rhythmPattern.replace(/ /g, '');
                 
-                if (expertPattern && (expertPattern.includes(myPattern) || myPattern.includes(expertPattern))) {
+                // Einfacher Check: Ist UserPattern Teil vom Ziel?
+                if (targetP && (targetP.includes(userP) || userP.includes(targetP))) {
                     matches.push(dance);
-                } else if (!expertPattern && matches.length === 0) {
-                    matches.push(dance + " (?)");
+                } else if (!targetP) {
+                    matches.push(dance + "?"); // Match nur über BPM
                 }
             }
         }
 
         if(matches.length > 0) {
+            // Priorisiere Preferred
             const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
             document.getElementById('tap-result').innerText = preferred.length > 0 ? preferred[0] : matches[0];
         } else {
-            document.getElementById('tap-result').innerText = "???";
+            document.getElementById('tap-result').innerText = "Unbekannt";
         }
-
-        if(tapTimestamps.length >= MAX_TAP_SAMPLES) {
-            document.getElementById('tap-status').innerText = "Analyse fertig: " + pattern;
-            setTimeout(() => { 
-                if(tapTimestamps.length >= MAX_TAP_SAMPLES) tapTimestamps = []; 
-                document.getElementById('tap-progress-bar').style.width = "0%";
-            }, 2000);
-        }
+        
+        // Puffer leeren nach Erfolg
+        setTimeout(() => { tapData = []; document.getElementById('tap-status').innerHTML = "OK"; }, 1500);
     }
 
     function resetTap() {
-        tapTimestamps = [];
+        tapData = [];
         document.getElementById('tap-bpm').innerText = "0 BPM";
         document.getElementById('tap-result').innerText = "---";
         document.getElementById('tap-status').innerText = "Bereit";
-        document.getElementById('tap-progress-bar').style.width = "0%";
     }
 
     /* --- EXTERNAL INPUT --- */
@@ -773,24 +749,17 @@
             let data;
             
             if (aiProvider === 'gemini') {
-                // GOOGLE GEMINI CALL
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
                 const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                 });
                 const json = await res.json();
                 if(json.error) throw new Error("Gemini: " + json.error.message);
-                
-                // Extract text from Gemini structure
                 const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-                // Clean markdown code blocks if present
                 const cleanJson = rawText.replace(/```json|```/g, '').trim();
                 data = JSON.parse(cleanJson);
-
             } else {
-                // OPENAI CALL (Default)
                 const res = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
@@ -804,7 +773,6 @@
                 data = JSON.parse(match[0]);
             }
 
-            // Success Handling
             danceHistory.unshift({
                 date: new Date().toLocaleDateString('de-DE'),
                 title: title, artist: artist,
@@ -817,7 +785,6 @@
             document.getElementById('bpm-display').innerText = data.bpm;
 
         } catch(e) {
-            console.error(e);
             let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK/KI");
             updateDisplay(msg, "--", "!", false);
         }
@@ -825,11 +792,12 @@
     }
 
     async function testAI() {
-        const k = document.getElementById('api-key').value;
+        const k = document.getElementById('api-key').value.trim();
+        const prov = document.getElementById('ai-provider').value;
         if(!k) return alert("Key fehlt!");
         
         try {
-            if (aiProvider === 'gemini') {
+            if (prov === 'gemini') {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
                 const r = await fetch(url, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -843,7 +811,7 @@
                     headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
                     body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
                 });
-                if(!r.ok) throw new Error(r.status);
+                if(!r.ok) throw new Error("Status " + r.status);
             }
             alert("Verbindung OK! ✅");
         } catch(e) { alert("Fehler: " + e.message); }
@@ -867,15 +835,19 @@
         if(v) v.playbackRate = playbackSpeed;
     }
     function saveSettings() {
-        localStorage.setItem('dm_key', document.getElementById('api-key').value.trim());
+        // FIX: Speichere den Key zum passenden Provider
+        const currentKey = document.getElementById('api-key').value.trim();
+        const currentProv = document.getElementById('ai-provider').value;
+        
+        if (currentProv === 'gemini') localStorage.setItem('dm_gemini_key', currentKey);
+        else localStorage.setItem('dm_openai_key', currentKey);
+        
+        localStorage.setItem('dm_ai_provider', currentProv);
         localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
         localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
         localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
         localStorage.setItem('dm_speed', playbackSpeed);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
-        // Save Provider
-        aiProvider = document.getElementById('ai-provider').value;
-        localStorage.setItem('dm_ai_provider', aiProvider);
 
         const inputs = document.querySelectorAll('.expert-input');
         inputs.forEach(inp => {
@@ -996,30 +968,6 @@
         .catch(e => alert("Funk Fehler: " + e));
     }
     
-    async function testAI() {
-        const k = document.getElementById('api-key').value;
-        if(!k) return alert("Key fehlt!");
-        
-        try {
-            if (aiProvider === 'gemini') {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
-                const r = await fetch(url, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
-                });
-                const d = await r.json();
-                if(d.error) throw new Error(d.error.message);
-            } else {
-                const r = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method:'POST', 
-                    headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
-                    body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
-                });
-                if(!r.ok) throw new Error(r.status);
-            }
-            alert("Verbindung OK! ✅");
-        } catch(e) { alert("Fehler: " + e.message); }
-    }
 </script>
 </body>
 </html>
