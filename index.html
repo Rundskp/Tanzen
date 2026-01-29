@@ -38,6 +38,7 @@
         #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
@@ -54,7 +55,7 @@
         .stat-val.active { color: #fff; }
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
 
-        /* Slider */
+        /* Slider Sidebar */
         #slider-sidebar { 
             position: absolute; right: 0; top: 80px; bottom: 0; width: 50px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
@@ -77,6 +78,7 @@
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
+        /* Settings */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
         input[type="text"], input[type="password"], input[type="number"], select { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
@@ -144,7 +146,7 @@
             #fs-controls { position: absolute; bottom: 10px; }
         }
 
-        /* Tap Detector 2.0 */
+        /* Tap Detector 3.0 */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
         .tap-area { 
             width: 220px; height: 220px; 
@@ -154,10 +156,11 @@
             font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; user-select: none; 
         }
         .tap-area:active { transform: scale(0.95); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
-        #tap-status { font-size: 1rem; color: #aaa; min-height: 20px; text-align:center; }
-        #tap-result { font-size: 1.8rem; font-weight: 900; color: var(--yellow); margin-top: 10px; text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); }
-        .pattern-dot { display:inline-block; width:10px; height:10px; background:#555; border-radius:50%; margin:2px; }
-        .pattern-dot.active { background: var(--green); box-shadow:0 0 5px var(--green); }
+        #tap-status { font-size: 1rem; color: #aaa; min-height: 20px; text-align:center; margin-top:10px; }
+        #tap-result { font-size: 2rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 10px rgba(255, 204, 0, 0.3); min-height: 40px;}
+        .pattern-dot { display:inline-block; width:12px; height:12px; background:#444; border-radius:50%; margin:3px; }
+        .pattern-dot.heavy { background: var(--red); box-shadow:0 0 8px var(--red); transform: scale(1.2); }
+        .pattern-dot.light { background: var(--green); box-shadow:0 0 5px var(--green); }
     </style>
 </head>
 <body>
@@ -297,31 +300,24 @@
 
 <script>
     // LEGAL & CONSOLE
-    console.log(`%c
-  _____               _____  _____                
- |_   _|             |  __ \\|  __ \\               
-   | | __ _ _ __  ___| |  | | |__) |___  __ _     
-   | |/ _\` | '_ \\/ __| |  | |  ___/ _ \\/ _\` |    
-   | | (_| | | | \\__ \\ |__| | |  |  __/ (_| |    
-   \\_/\\__,_|_| |_|___/_____/|_|   \\___|\\__,_|    
-`, "color: #2b7cff; font-weight: bold;");
-    console.log("%c[System]%c Tanz das! Ultimate v2.5 - Fixed Key & Tap", "color: #34C759", "color: inherit");
+    console.log(`%c Tanz das! Ultimate v2.6 `, "color: #2b7cff; font-weight: bold;");
 
-    // --- DONATE CONSTANTS ---
+    // --- CONSTANTS ---
     const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
 
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
-    let lastBeat = 0, bpmBuffer = [], aiLocked = false;
+    let lastBeat = 0, aiLocked = false;
     let micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
     let aiProvider = "openai"; 
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     
-    // Density Logic Fix
+    // Density Logic
     let densityLow = 0, densityHigh = 0;
     
+    // Video
     let currentDance = "", currentFigIdx = 0;
 
     // --- VIDEO DATEN ---
@@ -356,10 +352,12 @@
     // --- INIT ---
     window.onload = () => {
         loadData();
-        // Load Provider & Key
+        // Load Provider Setting
         aiProvider = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = aiProvider;
-        loadKeyIntoInput(); // FIX: Lade korrekten Key
+        // Key sofort laden, aber NUR wenn Settings geöffnet werden oder hier initial?
+        // Besser: Wir laden es beim Start einmalig korrekt für den aktuellen Provider
+        updateKeyInput(); 
 
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
@@ -396,26 +394,26 @@
         });
     };
 
-    // --- FIX: API KEY HANDLING ---
-    function loadKeyIntoInput() {
-        const prov = document.getElementById('ai-provider').value;
-        let val = "";
-        if (prov === 'gemini') val = localStorage.getItem('dm_gemini_key') || "";
-        else val = localStorage.getItem('dm_openai_key') || "";
-        document.getElementById('api-key').value = val;
-    }
-
-    function handleProviderChange() {
-        loadKeyIntoInput(); // Sofort Key wechseln
-    }
-
     function loadData() {
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
         if(localStorage.getItem('dm_history')) danceHistory = JSON.parse(localStorage.getItem('dm_history'));
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
+    // --- FIX: API KEY LOGIC ---
+    function updateKeyInput() {
+        const prov = document.getElementById('ai-provider').value;
+        if(prov === 'gemini') document.getElementById('api-key').value = localStorage.getItem('dm_gemini_key') || "";
+        else document.getElementById('api-key').value = localStorage.getItem('dm_openai_key') || "";
+    }
+    
+    function handleProviderChange() {
+        updateKeyInput(); // Zeige sofort den gespeicherten Key für den neuen Provider
+    }
+
     /* --- AUDIO ENGINE --- */
+    let bpmBuffer = [];
+    
     function mainAction() {
         const btn = document.getElementById('mic-btn');
         if(btn.innerText === "START") toggleMic();
@@ -462,8 +460,7 @@
 
             visualize();
             analyzeRhythm();
-            // Start Density Update Loop (alle 3 sek)
-            setInterval(updateDensityUI, 3000);
+            setInterval(updateDensityUI, 3000); // 3s Loop für Density
 
         } catch(e) { 
             alert("Mic Error: " + e.message); 
@@ -522,9 +519,9 @@
         const avgH = sumH / highData.length;
         const threshold = micSens * 255 * 0.8; 
 
-        // Density Accumulation (FIX)
+        // Fix Density Logic
         if(avgL > threshold) densityLow++;
-        if(avgH > (threshold * 0.7)) densityHigh++; // High hat oft weniger Energie
+        if(avgH > (threshold * 0.6)) densityHigh++;
 
         const now = Date.now();
         if(avgL > threshold && (now - lastBeat > 280)) { 
@@ -535,16 +532,10 @@
 
     function updateDensityUI() {
         if(!isListening) return;
-        // Einfache Ratio Berechnung: Wieviel High pro Low?
         let ratio = 0.0;
         if(densityLow > 0) ratio = (densityHigh / densityLow).toFixed(1);
-        
-        // Glättung oder direkte Anzeige
         document.getElementById('density-display').innerText = ratio;
-        
-        // Reset für nächstes Fenster
-        densityLow = 0; 
-        densityHigh = 0;
+        densityLow = 0; densityHigh = 0;
     }
 
     function processBeat(now) {
@@ -590,9 +581,8 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- TAP LOGIC 2.0 (Pressure/Duration) --- */
+    /* --- TAP LOGIC 3.0 (Pressure/Interval) --- */
     let tapData = [];
-    let tapTimeout = null;
     let tapDownTime = 0;
 
     function tapDown(e) {
@@ -604,82 +594,74 @@
     function tapUp(e) {
         e.preventDefault();
         e.target.style.transform = "scale(1)";
-        
         const now = Date.now();
-        const duration = now - tapDownTime; // Wie lange gedrückt? (Druck-Ersatz)
+        const duration = now - tapDownTime; // Press duration (Heavy/Light)
         
-        // Reset nach Pause
+        // Reset if pause too long
         if (tapData.length > 0) {
             const lastTap = tapData[tapData.length - 1].time;
             if (now - lastTap > 2500) { resetTap(); tapData = []; }
         }
 
-        // Tap speichern: Zeitpunkt + Typ (Kurz/Lang)
-        // Schwelle für "Betonung" (Heavy Beat) ca. 150ms press
-        const type = (duration > 140) ? "H" : "L"; // Heavy / Light
+        const type = (duration > 140) ? "H" : "L"; // Heavy if held longer
         tapData.push({ time: now, type: type });
 
-        // Feedback
-        const dots = tapData.map(t => `<span class="pattern-dot ${t.type === 'H' ? 'active' : ''}"></span>`).join("");
-        document.getElementById('tap-status').innerHTML = dots;
-
-        if (tapData.length >= 8) { // Warte auf 8 Taps (ca 2 Takte)
+        // Feedback Text (Countdown)
+        const remain = 8 - tapData.length;
+        if(remain > 0) {
+            document.getElementById('tap-status').innerHTML = `Noch ${remain}... <span style="font-size:0.8rem">(${type})</span>`;
+        } else {
+            document.getElementById('tap-status').innerHTML = "Analysiere...";
             analyzeTapSequence();
         }
+        
+        // Visual Dots
+        const dots = tapData.map(t => `<span class="pattern-dot ${t.type === 'H' ? 'heavy' : 'light'}"></span>`).join("");
+        document.getElementById('tap-result').innerHTML = dots;
     }
 
     function analyzeTapSequence() {
-        // 1. BPM
+        if(tapData.length < 8) return;
+
+        // 1. BPM Calculation
         let intervals = [];
         for(let i=1; i<tapData.length; i++) intervals.push(tapData[i].time - tapData[i-1].time);
         
-        // Konsistenz prüfen (Standardabweichung)
         const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
-        const variance = intervals.reduce((a,b) => a + Math.pow(b - avgMs, 2), 0) / intervals.length;
-        const stdDev = Math.sqrt(variance);
-
-        // Wenn zu chaotisch -> Abbruch
-        if(stdDev > 150) {
-            document.getElementById('tap-result').innerText = "Schwankung...";
-            tapData = tapData.slice(-4); // Behalte nur die letzten 4, versuche weiter
-            return;
-        }
-
         const bpm = Math.round(60000/avgMs);
         document.getElementById('tap-bpm').innerText = bpm + " BPM";
 
-        // 2. Pattern Matching (Intervalle: Kurz/Lang)
-        // Wir schauen auf die Zeit ZWISCHEN den Taps
+        // 2. Pattern Analysis
+        // Logic: Compare Intervals (S/L) AND Press Types (H/L)
         const minInterval = Math.min(...intervals);
-        const rhythmPattern = intervals.map(i => (i < minInterval * 1.4) ? "S" : "L").join(" "); // S S L ...
+        const rhythmPattern = intervals.map(i => (i < minInterval * 1.4) ? "S" : "L").join(" "); 
+        // Note: Simple heuristic. Could be improved with clustering.
 
-        // 3. Match
         let matches = [];
         for(const [dance, data] of Object.entries(expertRanges)) {
-            if (bpm >= data.min - 10 && bpm <= data.max + 10) {
-                // Check Pattern
+            if (bpm >= data.min - 15 && bpm <= data.max + 15) { // Toleranz
                 const targetP = (data.rhythm || "").replace(/[^SL]/g, '');
                 const userP = rhythmPattern.replace(/ /g, '');
                 
-                // Einfacher Check: Ist UserPattern Teil vom Ziel?
+                // Fuzzy check
                 if (targetP && (targetP.includes(userP) || userP.includes(targetP))) {
                     matches.push(dance);
                 } else if (!targetP) {
-                    matches.push(dance + "?"); // Match nur über BPM
+                    matches.push(dance + "?");
                 }
             }
         }
 
+        const resEl = document.getElementById('tap-result');
         if(matches.length > 0) {
-            // Priorisiere Preferred
             const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
-            document.getElementById('tap-result').innerText = preferred.length > 0 ? preferred[0] : matches[0];
+            resEl.innerText = preferred.length > 0 ? preferred[0] : matches[0];
         } else {
-            document.getElementById('tap-result').innerText = "Unbekannt";
+            resEl.innerText = "Unbekannt";
         }
         
-        // Puffer leeren nach Erfolg
-        setTimeout(() => { tapData = []; document.getElementById('tap-status').innerHTML = "OK"; }, 1500);
+        // Auto Reset Buffer (but keep display)
+        tapData = [];
     }
 
     function resetTap() {
@@ -737,7 +719,11 @@
     }
 
     async function askAI(artist, title) {
-        const key = document.getElementById('api-key').value;
+        const prov = localStorage.getItem('dm_ai_provider') || 'openai';
+        let key = "";
+        if(prov === 'gemini') key = localStorage.getItem('dm_gemini_key');
+        else key = localStorage.getItem('dm_openai_key');
+
         if(!key) { updateDisplay("KEY?", "--", "", false); return; }
         
         updateDisplay("KI DENKT...", "", "", false);
@@ -747,9 +733,9 @@
 
         try {
             let data;
-            
-            if (aiProvider === 'gemini') {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+            if (prov === 'gemini') {
+                // FIXED GEMINI MODEL
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
                 const res = await fetch(url, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
@@ -785,6 +771,7 @@
             document.getElementById('bpm-display').innerText = data.bpm;
 
         } catch(e) {
+            console.error(e);
             let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK/KI");
             updateDisplay(msg, "--", "!", false);
         }
@@ -792,13 +779,15 @@
     }
 
     async function testAI() {
+        // Lese direkt aus Inputs (nicht LS), damit Test vor Speichern geht
         const k = document.getElementById('api-key').value.trim();
         const prov = document.getElementById('ai-provider').value;
+        
         if(!k) return alert("Key fehlt!");
         
         try {
             if (prov === 'gemini') {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${k}`;
                 const r = await fetch(url, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
@@ -835,7 +824,7 @@
         if(v) v.playbackRate = playbackSpeed;
     }
     function saveSettings() {
-        // FIX: Speichere den Key zum passenden Provider
+        // FIX: Save CURRENT input to CURRENT provider slot
         const currentKey = document.getElementById('api-key').value.trim();
         const currentProv = document.getElementById('ai-provider').value;
         
