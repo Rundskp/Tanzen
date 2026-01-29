@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <title>Tanz das! Ultimate</title>
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    
+
     <style>
-        :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
+        :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; --muted: #9aa0a6; }
         
         * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* HEADER */
-        #top-bar { display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
+        /* --- HEADER --- */
+        #top-bar { display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
         #mic-btn { background: #333; border: 2px solid #444; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 110px; transition: 0.2s; }
@@ -24,20 +25,21 @@
         #mic-btn.loading { opacity: 0.7; animation: pulse-load 1s infinite; }
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
-        /* MONITOR */
+        /* --- MONITOR --- */
         #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
+        
         #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
-        /* MAIN DISPLAY */
         #main-display { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; 
             padding: 10px; width: 100%; padding-right: 60px; z-index: 2; 
         }
 
-        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; text-align: center; }
+        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
@@ -54,24 +56,37 @@
         .stat-val.active { color: #fff; }
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
 
-        /* SLIDER SIDEBAR (Fixed Right) */
+        /* Slider */
         #slider-sidebar { 
             position: absolute; right: 0; top: 80px; bottom: 0; width: 50px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 10; padding-bottom: 20px; 
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
+        
+        /* FIX: Modern Vertical Slider CSS */
+        input[type=range].vertical {
+            writing-mode: vertical-lr; /* Ersetzt slider-vertical */
+            direction: rtl; /* Stellt sicher, dass 'oben' 100% ist */
+            width: 6px; 
+            height: 100%; 
+            outline: none; 
+            background: transparent; 
+            cursor: pointer; 
+            z-index: 2;
+        }
+        
         #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
-        input[type=range].vertical { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* OVERLAYS */
+        /* --- OVERLAYS --- */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
+        /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
         input[type="text"], input[type="password"], input[type="number"] { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
@@ -83,13 +98,23 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* Video Library & Hist */
-        .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
-        .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
-        .figure-play { color: var(--green); font-size: 1.8rem; }
-        .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
-        .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
+        /* --- DONATE STYLES (Compact & Exact) --- */
+        .ctaGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px; }
+        @media (max-width:600px){ .ctaGrid{ grid-template-columns: 1fr; } }
+        .payCard { background: rgba(255,255,255,.05); border-radius: 12px; padding: 15px; border: 1px solid #333; }
+        .payCardHeading { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; color: var(--muted); font-weight: bold; }
+        .payBtnBig { display:block; width: 100%; border-radius: 8px; overflow:hidden; border:1px solid rgba(255,255,255,.10); margin-bottom: 10px; }
+        .paypalImg { width:100%; height:auto; display:block; }
+        .addrBox { background: rgba(0,0,0,.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,.1); font-family: monospace; font-size: 0.85rem; word-break: break-all; margin-bottom: 10px; color: #ccc; }
+        .qrImg { width: 100%; height: auto; border-radius: 8px; border:1px solid rgba(255,255,255,.10); margin-top: 10px; display:none; }
+        .donate-text { font-size: 0.9rem; color: #aaa; line-height: 1.5; margin-bottom: 0; }
+        .btn-donate-small { background: #333; color: #fff; border: 1px solid #444; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; flex:1; }
+        .donate-actions { display: flex; gap: 10px; }
+
+        /* Other Styles */
+        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
+        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
         
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
@@ -101,15 +126,18 @@
         .star-btn { font-size: 1.6rem; color: #333; cursor: pointer; transition: 0.1s; }
         .star-btn.active { color: var(--yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
 
-        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
-        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
-
         .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
         .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
         .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
 
-        /* Fullscreen Video */
+        /* Video */
+        .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
+        .figure-play { color: var(--green); font-size: 1.8rem; }
+        .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
+        .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
+
         #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
         #fs-video-overlay.active { display: flex; }
         #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
@@ -118,7 +146,6 @@
         #fs-controls { margin-top: 15px; display: flex; gap: 15px; justify-content: center; width: 100%; align-items: center; }
         .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; min-width: 100px; }
         .nav-btn { background: #333; color: white; border: 1px solid #555; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .nav-btn:active { background: var(--blue); }
         
         @media (orientation: landscape) {
             #fs-video-container { flex-direction: row; flex-wrap: wrap; }
@@ -127,15 +154,12 @@
             #fs-controls { position: absolute; bottom: 10px; }
         }
 
-        /* NEUER TAP DETECTOR STYLE */
+        /* Tap Detector */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
         .tap-area { width: 220px; height: 220px; background: radial-gradient(circle, #333 0%, #111 100%); border: 4px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 4rem; transition: 0.1s; cursor: pointer; touch-action: manipulation; color: #666; user-select: none; }
         .tap-area:active { transform: scale(0.95); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
-        
-        /* Fortschrittsbalken für Tap */
         #tap-progress-container { width: 80%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; margin-top: 10px; }
         #tap-progress-bar { width: 0%; height: 100%; background: var(--blue); transition: width 0.1s linear; }
-        #tap-status { font-size: 0.9rem; color: #888; min-height: 20px; }
     </style>
 </head>
 <body>
@@ -144,6 +168,7 @@
     <button class="header-icon-btn" onclick="openOverlay('settings-overlay')">⚙️</button>
     <button id="mic-btn" onclick="mainAction()">START</button>
     <div style="display:flex; justify-content: flex-end; gap: 15px;">
+        <button class="header-icon-btn" onclick="openOverlay('donate-overlay')">☕️</button>
         <button class="header-icon-btn" onclick="openOverlay('tap-overlay')">🖐️</button>
         <button class="header-icon-btn" onclick="openOverlay('library-overlay')">?</button>
     </div>
@@ -179,10 +204,7 @@
 </div>
 
 <div id="settings-overlay" class="overlay">
-    <div class="overlay-header">
-        <h2 class="overlay-title">Einstellungen</h2>
-        <button class="close-btn" onclick="closeOverlays()">✕</button>
-    </div>
+    <div class="overlay-header"><h2 class="overlay-title">Einstellungen</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div class="settings-group">
         <div class="row"><label>OpenAI API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="sk-..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
         <div class="row"><label>Funk-Topic (Shazam)</label><div style="display:flex; gap:10px; width:65%;"><input type="text" id="ntfy-topic" placeholder="Topic..."><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
@@ -204,8 +226,44 @@
     </div>
 </div>
 
+<div id="donate-overlay" class="overlay">
+    <div class="overlay-header">
+        <h2 class="overlay-title">☕️ Spenden</h2>
+        <button class="close-btn" onclick="closeOverlays()">✕</button>
+    </div>
+    <div class="settings-group">
+        <p class="donate-text">
+            Falls dir mein Tool gefällt und du mich unterstützen willst:
+            <b>PayPal</b> oder <b>Bitcoin</b> – super einfach. ❤️
+        </p>
+
+        <div class="ctaGrid">
+            <div class="payCard">
+                <div class="payCardHeading">PayPal</div>
+                <a class="payBtnBig" href="https://paypal.me/rophko" target="_blank" rel="noopener">
+                    <img class="paypalImg" alt="PayPal" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='140' viewBox='0 0 420 140'><rect width='420' height='140' rx='24' fill='%23f5f7ff'/><text x='50%25' y='55%25' text-anchor='middle' font-family='Arial' font-size='44' fill='%23003087'>PayPal</text><text x='50%25' y='80%25' text-anchor='middle' font-family='Arial' font-size='20' fill='%23003087'>Jetzt spenden</text></svg>"/>
+                </a>
+                <div class="donate-actions">
+                    <button id="btnPaypalQR" type="button" class="btn-donate-small">QR anzeigen</button>
+                </div>
+                <img id="paypalQrImg" class="qrImg" alt="PayPal QR" />
+            </div>
+
+            <div class="payCard">
+                <div class="payCardHeading">Bitcoin</div>
+                <div class="addrBox" id="btcAddr">bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f</div>
+                <div class="donate-actions">
+                    <button id="btnCopyBtc" type="button" class="btn-donate-small">Kopieren</button>
+                    <button id="btnBtcQR" type="button" class="btn-donate-small">QR Code</button>
+                </div>
+                <img id="btcQrImg" class="qrImg" alt="Bitcoin QR" />
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="expert-overlay" class="overlay">
-    <div class="overlay-header"><h2 class="overlay-title">Experten-Parameter</h2><button class="close-btn" onclick="openOverlay('settings-overlay')">←</button></div>
+    <div class="overlay-header"><h2 class="overlay-title">Experten</h2><button class="close-btn" onclick="openOverlay('settings-overlay')">←</button></div>
     <div class="settings-group">
         <div style="margin-bottom:15px; text-align:right;"><button class="btn-action btn-secondary" onclick="resetExpert()" style="font-size:0.8rem;">Reset Standard</button></div>
         <div class="expert-row expert-header"><span>Tanz</span><span>Min</span><span>Max</span><span>Rhythmus</span></div>
@@ -234,9 +292,7 @@
 
 <div id="tap-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
-    <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Klopfe den Rhythmus (kurz/lang) auf den Kreis.
-    </div>
+    <div style="text-align:center; color:#888; margin-bottom:20px;">Klopfe den Rhythmus (kurz/lang) auf den Kreis.</div>
     <div id="tap-pad">
         <div class="tap-area" onpointerdown="handleTapInput(event)">🖐️</div>
         <div id="tap-progress-container"><div id="tap-progress-bar"></div></div>
@@ -248,12 +304,29 @@
 </div>
 
 <script>
+    // LEGAL & CONSOLE
+    console.log(`%c
+  _____               _____  _____                
+ |_   _|             |  __ \\|  __ \\               
+   | | __ _ _ __  ___| |  | | |__) |___  __ _     
+   | |/ _\` | '_ \\/ __| |  | |  ___/ _ \\/ _\` |    
+   | | (_| | | | \\__ \\ |__| | |  |  __/ (_| |    
+   \\_/\\__,_|_| |_|___/_____/|_|   \\___|\\__,_|    
+`, "color: #2b7cff; font-weight: bold;");
+    console.log("%c[System]%c Tanz das! Ultimate v2.1 - Non-Commercial Edition", "color: #34C759", "color: inherit");
+    console.log("%c[Legal]%c (c) 2026 rundskp. No derivatives allowed. Support the creator.", "color: #FF3B30; font-weight: bold;", "color: inherit");
+
+    // --- DONATE CONSTANTS ---
+    const DONATE = {
+        paypal: "https://paypal.me/rophko",
+        btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f"
+    };
+
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
     let lastBeat = 0, bpmBuffer = [], aiLocked = false;
     let micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
-    // Standard Liste (Wiederhergestellt)
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     let lowHits = 0, highHits = 0, rhythmRatio = 0.0;
@@ -387,13 +460,29 @@
         document.body.addEventListener('touchstart', function() {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }, {once:true});
+
+        // Donate Listener
+        document.getElementById('btnPaypalQR').addEventListener("click", () => {
+            const img = document.getElementById('paypalQrImg');
+            if(img.style.display === 'block') { img.style.display = 'none'; } else {
+                img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
+                img.style.display = 'block';
+            }
+        });
+        document.getElementById('btnBtcQR').addEventListener("click", () => {
+            const img = document.getElementById('btcQrImg');
+            if(img.style.display === 'block') { img.style.display = 'none'; } else {
+                img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
+                img.style.display = 'block';
+            }
+        });
+        document.getElementById('btnCopyBtc').addEventListener("click", () => {
+            navigator.clipboard.writeText(DONATE.btc).then(() => alert("Adresse kopiert!"));
+        });
     };
 
     function loadData() {
-        // Falls gespeicherte Prefs da sind, laden - sonst Standard
-        if(localStorage.getItem('dm_prefs')) {
-            preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
-        }
+        if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
         if(localStorage.getItem('dm_history')) danceHistory = JSON.parse(localStorage.getItem('dm_history'));
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
@@ -440,7 +529,7 @@
 
             isListening = true;
             btn.innerText = "STOP";
-            btn.classList.remove('loading');
+            btn.classList.remove('loading', 'active');
             btn.classList.add('active');
 
             visualize();
@@ -544,9 +633,9 @@
         document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
     }
 
-    /* --- TAP LOGIC (NEW) --- */
+    /* --- TAP LOGIC --- */
     let tapTimestamps = [];
-    const MAX_TAP_SAMPLES = 8; // Anzahl der Taps für Analyse
+    const MAX_TAP_SAMPLES = 8; 
 
     function handleTapInput(e) {
         e.preventDefault();
@@ -554,14 +643,11 @@
         setTimeout(() => e.target.style.transform = "scale(1)", 100);
 
         const now = Date.now();
-        // Reset wenn Pause zu lang (>2.5s)
         if(tapTimestamps.length > 0 && (now - tapTimestamps[tapTimestamps.length-1]) > 2500) {
             resetTap();
         }
 
         tapTimestamps.push(now);
-        
-        // Progress Bar
         const progress = Math.min(100, (tapTimestamps.length / MAX_TAP_SAMPLES) * 100);
         document.getElementById('tap-progress-bar').style.width = progress + "%";
         
@@ -573,43 +659,31 @@
     }
 
     function analyzeTaps() {
-        // 1. BPM berechnen
         let intervals = [];
         for(let i=1; i<tapTimestamps.length; i++) intervals.push(tapTimestamps[i] - tapTimestamps[i-1]);
         const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
         const bpm = Math.round(60000/avgMs);
         document.getElementById('tap-bpm').innerText = bpm + " BPM";
 
-        // 2. Muster erkennen (Kurz/Lang)
-        // Kleinster Intervall finden (Basis für "Kurz")
         const minInterval = Math.min(...intervals);
-        // Toleranz: Alles unter 1.5x Min ist "Kurz" (S), alles drüber "Lang" (L)
         const pattern = intervals.map(i => (i < minInterval * 1.5) ? "S" : "L").join(" ");
-        
         document.getElementById('tap-status').innerText = "Muster: " + pattern;
 
-        // 3. Match finding
         let matches = [];
         for(const [dance, data] of Object.entries(expertRanges)) {
-            // BPM Check
             if (bpm >= data.min - 5 && bpm <= data.max + 5) {
-                // Rhythmus Check (einfacher String Match)
-                // Wir schauen, ob das erkannte Muster im Rhythmus-String enthalten ist
-                // (z.B. "S S L" in "S S L S S L")
-                const expertPattern = (data.rhythm || "").replace(/[^SL]/g, ''); // Nur S und L
+                const expertPattern = (data.rhythm || "").replace(/[^SL]/g, ''); 
                 const myPattern = pattern.replace(/ /g, '');
                 
                 if (expertPattern && (expertPattern.includes(myPattern) || myPattern.includes(expertPattern))) {
                     matches.push(dance);
                 } else if (!expertPattern && matches.length === 0) {
-                    // Fallback nur BPM wenn kein Rhythmus definiert
                     matches.push(dance + " (?)");
                 }
             }
         }
 
         if(matches.length > 0) {
-            // Bevorzugte filtern
             const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
             document.getElementById('tap-result').innerText = preferred.length > 0 ? preferred[0] : matches[0];
         } else {
@@ -618,7 +692,6 @@
 
         if(tapTimestamps.length >= MAX_TAP_SAMPLES) {
             document.getElementById('tap-status').innerText = "Analyse fertig: " + pattern;
-            // Buffer leeren für neuen Versuch nach kurzem Delay, oder User drückt Reset
             setTimeout(() => { 
                 if(tapTimestamps.length >= MAX_TAP_SAMPLES) tapTimestamps = []; 
                 document.getElementById('tap-progress-bar').style.width = "0%";
@@ -823,10 +896,8 @@
         o.classList.add('active');
         currentFigIdx = idx; 
         document.getElementById('vid-info').innerText = t;
-        
         const safeStart = s + 0.1;
         const safeEnd = Math.max(safeStart, e - 0.2); 
-
         v.src = src; 
         v.currentTime = safeStart; 
         curStart = safeStart; 
