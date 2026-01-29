@@ -213,8 +213,8 @@
         <div class="row">
             <label>KI Modell</label>
             <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
-                <option value="openai">OpenAI (GPT-4o)</option>
-                <option value="gemini">Google Gemini (Flash 1.5)</option>
+                <option value="openai">OpenAI (gpt-5.2)</option>
+                <option value="gemini">Google gemini-1.5-pro</option>
             </select>
         </div>
         <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier einfügen..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
@@ -886,4 +886,5 @@
     function testFunk() { const t = document.getElementById('ntfy-topic').value; if(!t) return alert("Topic fehlt!"); fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})}).then(() => alert("Signal gesendet!")).catch(e => alert("Funk Fehler: " + e)); }
 </script>
 </body>
+
 </html>
