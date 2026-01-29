@@ -15,11 +15,11 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* HEADER (Z-Index 5000 = Immer ganz oben!) */
+        /* HEADER - HÖCHSTER Z-INDEX DAMIT KLICKBAR */
         #top-bar { 
             display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; 
             padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; 
-            z-index: 5000; flex-shrink: 0; position: relative;
+            z-index: 9999; flex-shrink: 0; position: relative;
         }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
@@ -42,6 +42,7 @@
         #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
@@ -64,6 +65,8 @@
             border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 10; padding-bottom: 20px; 
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
+        
+        /* Modern Vertical Slider CSS */
         input[type=range].vertical {
             writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; 
             outline: none; background: transparent; cursor: pointer; z-index: 2;
@@ -103,7 +106,7 @@
         .btn-donate-small { background: #333; color: #fff; border: 1px solid #444; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; flex:1; }
         .donate-actions { display: flex; gap: 10px; }
 
-        /* Other Styles */
+        /* Lists */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
@@ -213,8 +216,8 @@
         <div class="row">
             <label>KI Modell</label>
             <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
-                <option value="openai">OpenAI (gpt-5.2)</option>
-                <option value="gemini">Google gemini-1.5-pro</option>
+                <option value="openai">OpenAI (GPT-5.2)</option>
+                <option value="gemini">Google Gemini (2.5 Pro)</option>
             </select>
         </div>
         <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier einfügen..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
@@ -289,8 +292,8 @@
 <div id="tap-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Klopfe im Takt. Langer Druck = Starker Schlag.<br>
-        <span style="font-size:0.8rem; color:#666;">Analysiert laufend...</span>
+        Klopfe den Rhythmus. Langer Druck = Starker Schlag.<br>
+        <span style="font-size:0.8rem; color:#666;">Analysiert ab 4 Taps kontinuierlich.</span>
     </div>
     <div id="tap-pad">
         <div class="tap-area" id="tapBtn" oncontextmenu="return false;">🖐️</div>
@@ -367,9 +370,10 @@
     // --- INIT ---
     window.onload = () => {
         loadData();
+        // Load Provider Setting
         aiProvider = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = aiProvider;
-        loadKeyIntoInput(); 
+        loadKeyIntoInput(); // FIX: Lade korrekten Key
 
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
@@ -680,19 +684,22 @@
         let matches = [];
         for(const [dance, data] of Object.entries(expertRanges)) {
             if (bpm >= data.min - 12 && bpm <= data.max + 12) { 
-                const targetP = (data.rhythm || "").replace(/[^SL]/g, ''); // Nur S/L vom Expert
+                const targetP = (data.rhythm || "").replace(/[^SL]/g, '');
                 const userP = rhythmPattern.replace(/ /g, '');
                 
+                // Fuzzy Substring Match
+                // Does User Pattern fit into Target? OR Target into User?
                 if (targetP && (targetP.includes(userP) || userP.includes(targetP))) {
                     matches.push(dance);
                 } else if (!targetP) {
-                    matches.push(dance + "?");
+                    matches.push(dance + "?"); // Match based on BPM only
                 }
             }
         }
 
         const resEl = document.getElementById('tap-result');
         if(matches.length > 0) {
+            // Pick Preferred Dance if available
             const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
             resEl.innerText = preferred.length > 0 ? preferred[0] : matches[0];
             resEl.style.color = preferred.length > 0 ? "var(--green)" : "var(--yellow)";
@@ -758,8 +765,9 @@
     }
 
     async function askAI(artist, title) {
+        // Read key dynamically
+        const prov = document.getElementById('ai-provider').value; 
         const key = document.getElementById('api-key').value.trim();
-        const prov = document.getElementById('ai-provider').value;
 
         if(!key) { updateDisplay("KEY?", "--", "", false); return; }
         
@@ -773,7 +781,7 @@
             
             if (prov === 'gemini') {
                 // FIXED GEMINI MODEL
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${key}`;
                 const res = await fetch(url, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
@@ -787,7 +795,7 @@
                 const res = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                    body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: promptText }], max_tokens: 60 })
+                    body: JSON.stringify({ model: "gpt-5.2", messages: [{ role: "user", content: promptText }], max_tokens: 60 })
                 });
                 if(!res.ok) throw new Error("OpenAI: " + res.status);
                 const json = await res.json();
@@ -824,7 +832,7 @@
         
         try {
             if (prov === 'gemini') {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${k}`;
                 const r = await fetch(url, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
@@ -835,56 +843,13 @@
                 const r = await fetch('https://api.openai.com/v1/chat/completions', {
                     method:'POST', 
                     headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
-                    body:JSON.stringify({model:"gpt-4o-mini", messages:[{role: "user", content: "Hi"}], max_tokens:5})
+                    body:JSON.stringify({model:"gpt-5.2", messages:[{role: "user", content: "Hi"}], max_tokens:5})
                 });
                 if(!r.ok) throw new Error("Status " + r.status);
             }
             alert("Verbindung OK! ✅");
         } catch(e) { alert("Fehler: " + e.message); }
     }
-
-    function openOverlay(id) { document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'library-overlay') renderLibrary(); }
-    function closeOverlays() { document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active')); const v = document.getElementById('main-video'); if(!v.paused) v.pause(); }
-    function updateSpeedLabel(val) { playbackSpeed = parseFloat(val); document.getElementById('speed-val').innerText = playbackSpeed + "x"; const v = document.getElementById('main-video'); if(v) v.playbackRate = playbackSpeed; }
-    function saveSettings() {
-        const currentKey = document.getElementById('api-key').value.trim();
-        const currentProv = document.getElementById('ai-provider').value;
-        if (currentProv === 'gemini') localStorage.setItem('dm_gemini_key', currentKey);
-        else localStorage.setItem('dm_openai_key', currentKey);
-        localStorage.setItem('dm_ai_provider', currentProv);
-        localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
-        localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
-        localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
-        localStorage.setItem('dm_speed', playbackSpeed);
-        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
-        const inputs = document.querySelectorAll('.expert-input');
-        inputs.forEach(inp => {
-            const dance = inp.dataset.dance;
-            const type = inp.dataset.type;
-            if(expertRanges[dance]) expertRanges[dance][type] = (type === 'rhythm' ? inp.value : parseInt(inp.value));
-        });
-        localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
-        location.reload();
-    }
-    function updateSens(val) { document.getElementById('main-sens').value = val; document.getElementById('sens-val-display').innerText = val; micSens = val / 1000; localStorage.setItem('dm_sens', val); }
-    function renderPrefs() { const list = document.getElementById('pref-list'); list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join(''); }
-    function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); } }
-    function renderHistory() { const f = document.getElementById('search-hist').value.toLowerCase(); const list = document.getElementById('history-list'); let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f) || (h.artist && h.artist.toLowerCase().includes(f))); filtered.sort((a,b) => new Date(b.date.split('.').reverse().join('-')) - new Date(a.date.split('.').reverse().join('-'))); list.innerHTML = filtered.map(h => { const idx = danceHistory.indexOf(h); return `<div class="hist-card"><div class="hist-del" onclick="delHist(${idx})">✕</div><div class="hist-title">${h.title}</div><div class="hist-artist">${h.artist || 'Unbekannt'}</div><div class="hist-info"><span>${h.dance}</span><span style="color:#666;">${h.date}</span></div><div class="hist-stars">${[1,2,3,4,5].map(s => `<span class="star-btn ${s<=h.stars?'active':''}" onclick="setStar(${idx},${s})">★</span>`).join('')}</div></div>`; }).join(''); }
-    function setStar(idx, n) { danceHistory[idx].stars = n; localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); }
-    function delHist(idx) { if(confirm("Löschen?")) { danceHistory.splice(idx,1); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); } }
-    function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(danceHistory)); a.download = "tanz_db.json"; document.body.appendChild(a); a.click(); a.remove(); }
-    function importData(input) { const r = new FileReader(); r.onload = (e) => { try { danceHistory=JSON.parse(e.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); alert("Import OK!"); } catch(x){ alert("Fehler!"); } }; r.readAsText(input.files[0]); }
-    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}"><input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}"><input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
-    function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
-    function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
-    function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video vorhanden."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" style="margin-bottom:15px;" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span class="figure-play">▶</span></div>`; }); c.innerHTML = html + "</div>"; }
-    let curStart=0, curEnd=0;
-    function playVid(src, s, e, t, idx) { const o = document.getElementById('fs-video-overlay'); const v = document.getElementById('main-video'); o.classList.add('active'); currentFigIdx = idx; document.getElementById('vid-info').innerText = t; const safeStart = s + 0.1; const safeEnd = Math.max(safeStart, e - 0.2); v.src = src; v.currentTime = safeStart; curStart = safeStart; curEnd = safeEnd; v.playbackRate = playbackSpeed; v.muted = !videoSound; v.play(); v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime = curEnd; } }; }
-    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
-    function nextFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx < figs.length - 1) { const nextFig = figs[currentFigIdx + 1]; playVid(videoLibrary[currentDance].file, nextFig.start, nextFig.end, nextFig.name, currentFigIdx + 1); } }
-    function prevFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx > 0) { const prevFig = figs[currentFigIdx - 1]; playVid(videoLibrary[currentDance].file, prevFig.start, prevFig.end, prevFig.name, currentFigIdx - 1); } }
-    function testFunk() { const t = document.getElementById('ntfy-topic').value; if(!t) return alert("Topic fehlt!"); fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})}).then(() => alert("Signal gesendet!")).catch(e => alert("Funk Fehler: " + e)); }
 </script>
 </body>
-
 </html>
