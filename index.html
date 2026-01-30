@@ -3,84 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#050505">
-    
     <title>Tanz das! Ultimate</title>
-    
-    <link rel="icon" type="image/svg+xml" href="icon.svg">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-
     <style>
-        :root { 
-            --blue: #2b7cff; 
-            --red: #FF3B30; 
-            --green: #34C759; 
-            --yellow: #FFCC00; 
-            --bg: #050505; 
-            --card: #1c1c1e; 
-            --text: #e8e8e8; 
-            --muted: #9aa0a6; 
-        }
+        :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
         
         * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* --- LAYER MANAGEMENT (Wichtig für Klickbarkeit) --- */
-        /* Ebene 0: Hintergrund & Visualizer */
-        /* Ebene 10: UI Elemente (Text, Slider) */
-        /* Ebene 100: Header & Buttons */
-        /* Ebene 5000: Overlays */
-
         /* HEADER */
-        #top-bar { 
-            display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; 
-            padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; 
-            z-index: 100; /* Hoch genug über Visualizer */
-            position: relative;
-            flex-shrink: 0;
-        }
-        .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; pointer-events: auto; }
+        #top-bar { display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
+        .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
-        #mic-btn { background: #333; border: 2px solid #444; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 110px; transition: 0.2s; pointer-events: auto; }
+        #mic-btn { background: #333; border: 2px solid #444; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 110px; transition: 0.2s; }
         #mic-btn.active { background: var(--green); border-color: var(--green); box-shadow: 0 0 15px rgba(52, 199, 89, 0.4); }
         #mic-btn.ai-mode { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 15px rgba(43, 124, 255, 0.4); }
         #mic-btn.loading { opacity: 0.7; animation: pulse-load 1s infinite; }
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
-        /* MONITOR AREA */
-        #monitor { 
-            flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; 
-            z-index: 0; /* Basis Ebene */
-        }
-        
-        /* VISUALIZER (Hintergrund) */
-        #vis-wrap { 
-            width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; 
-            pointer-events: none; /* Klicks gehen durch */
-        }
+        /* MONITOR */
+        #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
+        #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
-        /* MAIN DISPLAY (Text) */
+        /* MAIN DISPLAY */
         #main-display { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; 
-            padding: 10px; width: 100%; padding-right: 60px; 
-            z-index: 10; /* Über dem Hintergrund */
-            pointer-events: none; /* Text blockiert keine Klicks */
+            padding: 10px; width: 100%; padding-right: 60px; z-index: 2; 
         }
 
-        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
+        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
         #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
-        .pulse-effect { animation: pump 0.15s ease-out; }
+        
         @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
+        .pulse-effect { animation: pump 0.15s ease-out; }
 
         .status-indicators { display: flex; gap: 15px; margin-top: 10px; align-items: flex-end; margin-bottom: 10px; width: 100%; justify-content: center; }
         .stat-box { display: flex; flex-direction: column; align-items: center; width: 80px; }
@@ -88,39 +51,27 @@
         .stat-val.active { color: #fff; }
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
 
-        /* SLIDER (Rechts fixiert) */
+        /* SLIDER SIDEBAR (Fixed Right) */
         #slider-sidebar { 
             position: absolute; right: 0; top: 80px; bottom: 0; width: 50px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            border-left: 1px solid #333; background: rgba(0,0,0,0.5); 
-            z-index: 50; /* Über allem im Monitor */
-            padding-bottom: 20px; 
-            pointer-events: auto; /* Muss klickbar sein! */
+            border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 10; padding-bottom: 20px; 
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
-        
-        input[type=range].vertical {
-            writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; 
-            outline: none; background: transparent; cursor: pointer; z-index: 2;
-        }
         #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
+        input[type=range].vertical { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* --- OVERLAYS (Ganz oben) --- */
-        .overlay { 
-            display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.95); 
-            z-index: 5000; /* Definitiv ganz oben */
-            flex-direction: column; padding: 20px; overflow-y: auto; 
-        }
+        /* OVERLAYS */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
-        /* Settings Style */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+        /* Style auch für Select */
         input[type="text"], input[type="password"], input[type="number"], select { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
         input[type="range"].horizontal { -webkit-appearance: none; width: 100%; height: 8px; background: #333; border-radius: 5px; outline: none; margin-top: 5px; }
         input[type="range"].horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--blue); border-radius: 50%; cursor: pointer; }
@@ -130,71 +81,14 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* --- DONATE STYLE (Aus RSVP Reader übernommen) --- */
-        .ctaGrid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px; }
-        @media (max-width:600px){ .ctaGrid{ grid-template-columns: 1fr; } }
-        .payCard { border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.05); border-radius: 14px; padding: 12px; }
-        .payCardHeading { color: var(--muted); font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; }
-        .payBtnBig { display:block; margin-top: 8px; border-radius: 14px; overflow:hidden; border:1px solid rgba(255,255,255,.10); }
-        .paypalImg { width:100%; height:auto; display:block; }
-        .qrImg { width: 100%; max-width: 220px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: white; padding: 5px; margin-top:10px; display: none; }
-        .addrBox { margin-top: 8px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.3); border-radius: 14px; padding: 10px; font-family: monospace; font-size: 0.8rem; word-break: break-all; color: var(--muted); }
-        .small { font-size: 12px; color: rgba(255,255,255,.75); margin-top: 5px; }
-        
-        .donate-btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .donate-mini-btn { background: #333; color: white; border: 1px solid #555; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; flex: 1; }
-
-        /* Video */
+        /* Video Library & Hist */
         .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
         .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
         .figure-play { color: var(--green); font-size: 1.8rem; }
         .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
         .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
         .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
-
-        /* Fullscreen Video */
-        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 6000; }
-        #fs-video-overlay.active { display: flex; }
-        #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
-        #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
-        #main-video { max-width: 100%; max-height: 75vh; width: auto; height: auto; object-fit: contain; background: #000; }
-        #fs-controls { margin-top: 15px; display: flex; gap: 15px; justify-content: center; width: 100%; align-items: center; }
-        .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; min-width: 100px; }
-        .nav-btn { background: #333; color: white; border: 1px solid #555; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         
-        @media (orientation: landscape) {
-            #fs-video-container { flex-direction: row; flex-wrap: wrap; }
-            #vid-info { width: 100%; position: absolute; top: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
-            #main-video { max-height: 85vh; width: auto; margin-bottom: 40px; }
-            #fs-controls { position: absolute; bottom: 10px; }
-        }
-
-        /* Tap Detector 5.0 - PRO */
-        #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
-        .tap-area { 
-            width: 220px; height: 220px; 
-            background: radial-gradient(circle, #333 0%, #111 100%); 
-            border: 4px solid #444; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 4rem; transition: 0.05s; cursor: pointer; 
-            touch-action: manipulation; color: #666; user-select: none; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        .tap-area.active { transform: scale(0.92); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
-        #tap-status { font-size: 1rem; color: #aaa; min-height: 20px; text-align:center; margin-top:10px; }
-        #tap-result { font-size: 2.5rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.4); min-height: 50px; text-align: center; }
-        .tap-viz-container { display: flex; gap: 6px; margin-top: 10px; height: 20px; align-items: center; }
-        .tap-viz-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; transition: 0.2s; }
-        .tap-viz-dot.accent { background: var(--red); box-shadow: 0 0 8px var(--red); transform: scale(1.3); }
-        .tap-viz-dot.normal { background: var(--green); box-shadow: 0 0 5px var(--green); }
-        
-        /* Expert & History */
-        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
-        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
-        .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
-        .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
-        .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
         .hist-del { position: absolute; top: 10px; right: 10px; color: #555; font-weight: bold; padding: 10px; cursor: pointer; }
@@ -204,6 +98,51 @@
         .hist-stars { display: flex; justify-content: center; gap: 10px; background: #080808; padding: 10px; border-radius: 10px; margin-top: 8px; border-top: 1px solid #222; }
         .star-btn { font-size: 1.6rem; color: #333; cursor: pointer; transition: 0.1s; }
         .star-btn.active { color: var(--yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
+
+        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
+        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
+
+        .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
+        .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
+        .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
+
+        /* Fullscreen Video */
+        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
+        #fs-video-overlay.active { display: flex; }
+        #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
+        #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
+        #main-video { max-width: 100%; max-height: 75vh; width: auto; height: auto; object-fit: contain; background: #000; }
+        #fs-controls { margin-top: 15px; display: flex; gap: 15px; justify-content: center; width: 100%; align-items: center; }
+        .vid-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 25px; cursor: pointer; backdrop-filter: blur(5px); font-weight: bold; min-width: 100px; }
+        .nav-btn { background: #333; color: white; border: 1px solid #555; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .nav-btn:active { background: var(--blue); }
+        
+        @media (orientation: landscape) {
+            #fs-video-container { flex-direction: row; flex-wrap: wrap; }
+            #vid-info { width: 100%; position: absolute; top: 10px; background: rgba(0,0,0,0.5); padding: 5px; }
+            #main-video { max-height: 85vh; width: auto; margin-bottom: 40px; }
+            #fs-controls { position: absolute; bottom: 10px; }
+        }
+
+        /* NEUER TAP DETECTOR STYLE (PRO) */
+        #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
+        .tap-area { 
+            width: 220px; height: 220px; 
+            background: radial-gradient(circle, #333 0%, #111 100%); 
+            border: 4px solid #444; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 4rem; transition: 0.05s; cursor: pointer; 
+            touch-action: manipulation; color: #666; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tap-area.active { transform: scale(0.95); border-color: var(--blue); background: var(--blue); color: white; box-shadow: 0 0 30px var(--blue); }
+        
+        #tap-result { font-size: 2rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); min-height: 40px; text-align: center; }
+        .tap-viz-container { display: flex; gap: 6px; margin-top: 10px; height: 20px; align-items: center; }
+        .tap-viz-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; transition: 0.2s; }
+        .tap-viz-dot.accent { background: var(--red); box-shadow: 0 0 8px var(--red); transform: scale(1.3); }
+        .tap-viz-dot.normal { background: var(--green); box-shadow: 0 0 5px var(--green); }
     </style>
 </head>
 <body>
@@ -212,7 +151,6 @@
     <button class="header-icon-btn" onclick="openOverlay('settings-overlay')">⚙️</button>
     <button id="mic-btn" onclick="mainAction()">START</button>
     <div style="display:flex; justify-content: flex-end; gap: 15px;">
-        <button class="header-icon-btn" onclick="openOverlay('donate-overlay')">☕️</button>
         <button class="header-icon-btn" onclick="openOverlay('tap-overlay')">🖐️</button>
         <button class="header-icon-btn" onclick="openOverlay('library-overlay')">?</button>
     </div>
@@ -248,16 +186,19 @@
 </div>
 
 <div id="settings-overlay" class="overlay">
-    <div class="overlay-header"><h2 class="overlay-title">Einstellungen</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
+    <div class="overlay-header">
+        <h2 class="overlay-title">Einstellungen</h2>
+        <button class="close-btn" onclick="closeOverlays()">✕</button>
+    </div>
     <div class="settings-group">
         <div class="row">
-            <label>KI Modell</label>
+            <label>KI Anbieter</label>
             <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
                 <option value="openai">OpenAI (GPT-5.2)</option>
                 <option value="gemini">Google Gemini (2.0 Flash)</option>
             </select>
         </div>
-        <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier einfügen..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
+        <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
         <div class="row"><label>Funk-Topic (Shazam)</label><div style="display:flex; gap:10px; width:65%;"><input type="text" id="ntfy-topic" placeholder="Topic..."><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
         <div class="row" style="margin-top:15px;"><label>Disco-Modus</label><input type="checkbox" id="disco-mode"></div>
         <div class="row"><label>Video Ton</label><input type="checkbox" id="video-audio"></div>
@@ -277,40 +218,8 @@
     </div>
 </div>
 
-<div id="donate-overlay" class="overlay">
-    <div class="overlay-header"><h2 class="overlay-title">☕️ Spenden</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
-    <div class="settings-group">
-        <p class="donate-text">Falls dir mein Tool gefällt und du mich unterstützen willst:<br><b>PayPal</b> oder <b>Bitcoin</b> – super einfach. ❤️</p>
-        
-        <div class="ctaGrid">
-            <div class="payCard">
-                <div class="payCardHeading">PayPal</div>
-                <a class="payBtnBig" href="https://paypal.me/rophko" target="_blank" rel="noopener">
-                    <img class="paypalImg" alt="PayPal" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='140' viewBox='0 0 420 140'><rect width='420' height='140' rx='24' fill='%23f5f7ff'/><text x='50%25' y='55%25' text-anchor='middle' font-family='Arial' font-size='44' fill='%23003087'>PayPal</text><text x='50%25' y='80%25' text-anchor='middle' font-family='Arial' font-size='20' fill='%23003087'>Jetzt spenden</text></svg>"/>
-                </a>
-                <div class="donate-btn-row">
-                    <button id="btnPaypalQR" type="button" class="donate-mini-btn">QR anzeigen</button>
-                </div>
-                <img id="paypalQrImg" class="qrImg" alt="PayPal QR" />
-                <div class="small">Scan → PayPal öffnet direkt.</div>
-            </div>
-
-            <div class="payCard">
-                <div class="payCardHeading">Bitcoin</div>
-                <div class="addrBox" id="btcAddr">bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f</div>
-                <div class="donate-btn-row">
-                    <button id="btnCopyBtc" type="button" class="donate-mini-btn">Kopieren</button>
-                    <button id="btnBtcQR" type="button" class="donate-mini-btn">QR anzeigen</button>
-                </div>
-                <img id="btcQrImg" class="qrImg" alt="Bitcoin QR" />
-                <div class="small">Scan → Wallet öffnet.</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div id="expert-overlay" class="overlay">
-    <div class="overlay-header"><h2 class="overlay-title">Experten</h2><button class="close-btn" onclick="openOverlay('settings-overlay')">←</button></div>
+    <div class="overlay-header"><h2 class="overlay-title">Experten-Parameter</h2><button class="close-btn" onclick="openOverlay('settings-overlay')">←</button></div>
     <div class="settings-group">
         <div style="margin-bottom:15px; text-align:right;"><button class="btn-action btn-secondary" onclick="resetExpert()" style="font-size:0.8rem;">Reset Standard</button></div>
         <div class="expert-row expert-header"><span>Tanz</span><span>Min</span><span>Max</span><span>Rhythmus</span></div>
@@ -340,8 +249,8 @@
 <div id="tap-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Klopfe den Rhythmus. Langer Druck = Starker Schlag.<br>
-        <span style="font-size:0.8rem; color:#666;">Analysiert ab 4 Taps kontinuierlich.</span>
+        Klopfe den Rhythmus. <b>Lang halten</b> = Betonung.<br>
+        <span style="font-size:0.8rem; color:#666;">Rolling Analysis (kein Reset nötig)</span>
     </div>
     <div id="tap-pad">
         <div class="tap-area" id="tapBtn" oncontextmenu="return false;">🖐️</div>
@@ -353,55 +262,20 @@
 </div>
 
 <script>
-    // LEGAL & CONSOLE
-    console.log(`%c
-  _____  _______      _______  _____                _Z_
- |  __ \\/ ____\\ \\    / /  __ \\|  __ \\              /   \\
- | |__) | (___  \\ \\  / /| |__) | |__) |___  __ _  |  O  |
- |  _  / \\___ \\  \\ \\/ / |  ___/|  _  // _ \\/ _' |  \\___/
- | | \\ \\ ____) |  \\  /  | |    | | \\ \\  __/ (_| |   |_|
- |_|  \\_\\_____/    \\/   |_|    |_|  \\_\\___|\\__,_|  /__/
-`, "color: #2b7cff; font-weight: bold;");
-    console.log("%c[System]%c Tanz das! Ultimate v3.1 - Non-Commercial Edition", "color: #34C759", "color: inherit");
-    console.log("%c[Legal]%c (c) 2026 rundskp. No derivatives allowed. Support the creator.", "color: #FF3B30; font-weight: bold;", "color: inherit");
-
-    // --- CONSTANTS ---
+    // --- CONFIG & CONSTANTS ---
     const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
-
-    // --- HELPER TO PREVENT CLICK BLOCK ---
-    function openOverlay(id) {
-        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'library-overlay') renderLibrary();
-    }
-    function closeOverlays() {
-        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
-        const v = document.getElementById('main-video');
-        if(!v.paused) v.pause();
-    }
 
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
     let lastBeat = 0, aiLocked = false;
     let micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
-    let aiProvider = "openai"; 
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     let densityLow = 0, densityHigh = 0;
     let currentDance = "", currentFigIdx = 0;
-
-    // --- VIDEO DATEN ---
-    const videoLibrary = {
-        "Cha Cha Cha": { file: "media/chacha.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.55 }, { name: "2. Wiegeschritt", start: 17.55, end: 30.48 }, { name: "3. Damensolo", start: 30.48, end: 52.88 }, { name: "4. New Yorker", start: 52.88, end: 80.30 }, { name: "5. Hand to Hand", start: 80.30, end: 103.50 }, { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 }, { name: "7. Fan & Alemana", start: 123.37, end: 141.97 }, { name: "8. Hockeystick", start: 141.97, end: 169.44 }, { name: "9. Aida", start: 169.44, end: 197.17 }] },
-        "Rumba": { file: "media/rumba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.13 }, { name: "2. Damensolo", start: 17.13, end: 36.33 }, { name: "3. Hand to Hand", start: 36.33, end: 64.93 }, { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 }, { name: "5. Fan & Alemana", start: 93.73, end: 115.33 }, { name: "6. Hockeystick", start: 115.33, end: 149.10 }, { name: "7. Aida", start: 149.10, end: 177.73 }] },
-        "Discofox": { file: "media/discofox.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 16.00 }, { name: "2. Gelaufener GS", start: 16.00, end: 26.90 }, { name: "3. Brezel", start: 26.90, end: 63.60 }, { name: "4. Körbchen", start: 63.60, end: 83.77 }, { name: "5. He goes, She goes", start: 83.77, end: 99.93 }, { name: "6. Travolta", start: 99.93, end: 119.90 }, { name: "7. Tunnel", start: 119.90, end: 138.80 }, { name: "8. Schiebetür", start: 138.80, end: 160.07 }, { name: "9. Swing In/Out", start: 160.07, end: 180.03 }, { name: "10. Knochenbrecher", start: 180.03, end: 196.43 }] },
-        "Jive": { file: "media/jive.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 12.03 }, { name: "2. Flirt", start: 12.03, end: 27.53 }, { name: "3. Platzwechsel", start: 27.53, end: 46.97 }, { name: "4. Stop'n'Go", start: 46.97, end: 64.03 }] },
-        "Boogie Woogie": { file: "media/rock.mp4", figures: [{ name: "1. 6er GS", start: 0.00, end: 12.17 }, { name: "2. 9er GS", start: 12.17, end: 21.93 }, { name: "3. Platzwechsel", start: 21.93, end: 36.37 }, { name: "4. Swing In/Out", start: 36.37, end: 59.97 }, { name: "5. Flic Flac", start: 59.97, end: 90.63 }, { name: "6. Lasso", start: 90.63, end: 104.17 }, { name: "7. Handwechsel", start: 104.17, end: 116.90 }, { name: "8. American Spin", start: 116.90, end: 126.00 }, { name: "9. Tausendfüssler", start: 126.00, end: 143.83 }, { name: "10. Grätsche", start: 143.83, end: 156.37 }] },
-        "Samba": { file: "media/samba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 25.10 }, { name: "2. Wischer", start: 25.10, end: 41.33 }, { name: "3. Damensolo", start: 41.33, end: 52.20 }, { name: "4. Promenaden", start: 52.20, end: 67.13 }, { name: "5. Side Walks", start: 67.13, end: 81.60 }, { name: "6. Botafogos", start: 81.60, end: 97.97 }] },
-        "Walzer": { file: "", figures: [] }, "Langsamer Walzer": { file: "", figures: [] }, "Wiener Walzer": { file: "", figures: [] }, "Tango Argentino": { file: "", figures: [] }, "Foxtrott": { file: "", figures: [] }, "Salsa": { file: "", figures: [] }
-    };
-
+    
+    // Default expert settings
     const defaultRanges = {
         "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "L L S" },
         "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "L L L" },
@@ -417,14 +291,26 @@
     };
     let expertRanges = JSON.parse(JSON.stringify(defaultRanges));
 
+    // Video Data
+    const videoLibrary = {
+        "Cha Cha Cha": { file: "media/chacha.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.55 }, { name: "2. Wiegeschritt", start: 17.55, end: 30.48 }, { name: "3. Damensolo", start: 30.48, end: 52.88 }, { name: "4. New Yorker", start: 52.88, end: 80.30 }, { name: "5. Hand to Hand", start: 80.30, end: 103.50 }, { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 }, { name: "7. Fan & Alemana", start: 123.37, end: 141.97 }, { name: "8. Hockeystick", start: 141.97, end: 169.44 }, { name: "9. Aida", start: 169.44, end: 197.17 }] },
+        "Rumba": { file: "media/rumba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.13 }, { name: "2. Damensolo", start: 17.13, end: 36.33 }, { name: "3. Hand to Hand", start: 36.33, end: 64.93 }, { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 }, { name: "5. Fan & Alemana", start: 93.73, end: 115.33 }, { name: "6. Hockeystick", start: 115.33, end: 149.10 }, { name: "7. Aida", start: 149.10, end: 177.73 }] },
+        "Discofox": { file: "media/discofox.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 16.00 }, { name: "2. Gelaufener GS", start: 16.00, end: 26.90 }, { name: "3. Brezel", start: 26.90, end: 63.60 }, { name: "4. Körbchen", start: 63.60, end: 83.77 }, { name: "5. He goes, She goes", start: 83.77, end: 99.93 }, { name: "6. Travolta", start: 99.93, end: 119.90 }, { name: "7. Tunnel", start: 119.90, end: 138.80 }, { name: "8. Schiebetür", start: 138.80, end: 160.07 }, { name: "9. Swing In/Out", start: 160.07, end: 180.03 }, { name: "10. Knochenbrecher", start: 180.03, end: 196.43 }] },
+        "Jive": { file: "media/jive.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 12.03 }, { name: "2. Flirt", start: 12.03, end: 27.53 }, { name: "3. Platzwechsel", start: 27.53, end: 46.97 }, { name: "4. Stop'n'Go", start: 46.97, end: 64.03 }] },
+        "Boogie Woogie": { file: "media/rock.mp4", figures: [{ name: "1. 6er GS", start: 0.00, end: 12.17 }, { name: "2. 9er GS", start: 12.17, end: 21.93 }, { name: "3. Platzwechsel", start: 21.93, end: 36.37 }, { name: "4. Swing In/Out", start: 36.37, end: 59.97 }, { name: "5. Flic Flac", start: 59.97, end: 90.63 }, { name: "6. Lasso", start: 90.63, end: 104.17 }, { name: "7. Handwechsel", start: 104.17, end: 116.90 }, { name: "8. American Spin", start: 116.90, end: 126.00 }, { name: "9. Tausendfüssler", start: 126.00, end: 143.83 }, { name: "10. Grätsche", start: 143.83, end: 156.37 }] },
+        "Samba": { file: "media/samba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 25.10 }, { name: "2. Wischer", start: 25.10, end: 41.33 }, { name: "3. Damensolo", start: 41.33, end: 52.20 }, { name: "4. Promenaden", start: 52.20, end: 67.13 }, { name: "5. Side Walks", start: 67.13, end: 81.60 }, { name: "6. Botafogos", start: 81.60, end: 97.97 }] },
+        "Walzer": { file: "", figures: [] }, "Langsamer Walzer": { file: "", figures: [] }, "Wiener Walzer": { file: "", figures: [] }, "Tango Argentino": { file: "", figures: [] }, "Foxtrott": { file: "", figures: [] }, "Salsa": { file: "", figures: [] }
+    };
+
     const canvas = document.getElementById('visualizer');
     const ctx = canvas.getContext('2d');
     
     // --- INIT ---
     window.onload = () => {
         loadData();
-        aiProvider = localStorage.getItem('dm_ai_provider') || 'openai';
-        document.getElementById('ai-provider').value = aiProvider;
+        // Load AI Settings
+        const prov = localStorage.getItem('dm_ai_provider') || 'openai';
+        document.getElementById('ai-provider').value = prov;
         loadKeyIntoInput(); 
 
         const topic = localStorage.getItem('dm_topic');
@@ -441,35 +327,14 @@
         updateSens(savedSens);
         
         renderPrefs(); renderHistory(); renderExpert();
-        
+        initTapDetector(); // Init Tap
+
         document.body.addEventListener('touchstart', function() {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }, {once:true});
-
-        // Initialize Tap Detector
-        initTapDetector();
-
-        // Donate Listeners (Secure Binding)
-        const btnPay = document.getElementById('btnPaypalQR');
-        if(btnPay) btnPay.addEventListener("click", () => {
-            const img = document.getElementById('paypalQrImg');
-            img.style.display = (img.style.display === 'block') ? 'none' : 'block';
-            if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
-        });
-        
-        const btnBtc = document.getElementById('btnBtcQR');
-        if(btnBtc) btnBtc.addEventListener("click", () => {
-            const img = document.getElementById('btcQrImg');
-            img.style.display = (img.style.display === 'block') ? 'none' : 'block';
-            if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
-        });
-        
-        const btnCopy = document.getElementById('btnCopyBtc');
-        if(btnCopy) btnCopy.addEventListener("click", () => {
-            navigator.clipboard.writeText(DONATE.btc).then(() => alert("Adresse kopiert!"));
-        });
     };
 
+    // --- LOGIC: API Keys ---
     function loadKeyIntoInput() {
         const prov = document.getElementById('ai-provider').value;
         let val = "";
@@ -477,7 +342,6 @@
         else val = localStorage.getItem('dm_openai_key') || "";
         document.getElementById('api-key').value = val;
     }
-
     function handleProviderChange() { loadKeyIntoInput(); }
 
     function loadData() {
@@ -535,7 +399,8 @@
 
             visualize();
             analyzeRhythm();
-            setInterval(updateDensityUI, 3000); 
+            // Start Density Loop
+            setInterval(updateDensityUI, 3000);
 
         } catch(e) { 
             alert("Mic Error: " + e.message); 
@@ -594,6 +459,7 @@
         const avgH = sumH / highData.length;
         const threshold = micSens * 255 * 0.8; 
 
+        // Fix Density Logic
         if(avgL > threshold) densityLow++;
         if(avgH > (threshold * 0.6)) densityHigh++;
 
@@ -685,6 +551,7 @@
         const now = Date.now();
         const duration = now - tapDownTime;
         
+        // PRESSURE CHECK (Duration Fallback)
         let isHeavy = false;
         if(e.pressure && e.pressure > 0.4) isHeavy = true;
         else if(duration > 140) isHeavy = true;
@@ -719,7 +586,6 @@
         const minInterval = Math.min(...intervals);
         const rhythmPattern = intervals.map((int, i) => {
             const isLong = int > minInterval * 1.45;
-            const type = tapBuffer[i].type; 
             return (isLong ? "L" : "S"); 
         }).join(""); 
 
@@ -888,6 +754,157 @@
             alert("Verbindung OK! ✅");
         } catch(e) { alert("Fehler: " + e.message); }
     }
+
+    /* --- HELPERS --- */
+    function openOverlay(id) {
+        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'library-overlay') renderLibrary();
+    }
+    function closeOverlays() {
+        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
+        const v = document.getElementById('main-video');
+        if(!v.paused) v.pause();
+    }
+    function updateSpeedLabel(val) {
+        playbackSpeed = parseFloat(val);
+        document.getElementById('speed-val').innerText = playbackSpeed + "x";
+        const v = document.getElementById('main-video');
+        if(v) v.playbackRate = playbackSpeed;
+    }
+    function saveSettings() {
+        const currentKey = document.getElementById('api-key').value.trim();
+        const currentProv = document.getElementById('ai-provider').value;
+        
+        if (currentProv === 'gemini') localStorage.setItem('dm_gemini_key', currentKey);
+        else localStorage.setItem('dm_openai_key', currentKey);
+        
+        localStorage.setItem('dm_ai_provider', currentProv);
+        localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
+        localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
+        localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
+        localStorage.setItem('dm_speed', playbackSpeed);
+        localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+
+        const inputs = document.querySelectorAll('.expert-input');
+        inputs.forEach(inp => {
+            const dance = inp.dataset.dance;
+            const type = inp.dataset.type;
+            if(expertRanges[dance]) expertRanges[dance][type] = (type === 'rhythm' ? inp.value : parseInt(inp.value));
+        });
+        localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+        location.reload();
+    }
+    function updateSens(val) {
+        document.getElementById('main-sens').value = val;
+        document.getElementById('sens-val-display').innerText = val;
+        micSens = val / 1000; 
+        localStorage.setItem('dm_sens', val);
+    }
+    function renderPrefs() {
+        const list = document.getElementById('pref-list');
+        list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join('');
+    }
+    function addPref() {
+        const v = document.getElementById('new-pref').value.trim();
+        if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); }
+    }
+    function renderHistory() {
+        const f = document.getElementById('search-hist').value.toLowerCase();
+        const list = document.getElementById('history-list');
+        let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f) || (h.artist && h.artist.toLowerCase().includes(f)));
+        filtered.sort((a,b) => new Date(b.date.split('.').reverse().join('-')) - new Date(a.date.split('.').reverse().join('-')));
+        list.innerHTML = filtered.map(h => {
+            const idx = danceHistory.indexOf(h);
+            return `<div class="hist-card"><div class="hist-del" onclick="delHist(${idx})">✕</div><div class="hist-title">${h.title}</div><div class="hist-artist">${h.artist || 'Unbekannt'}</div><div class="hist-info"><span>${h.dance}</span><span style="color:#666;">${h.date}</span></div><div class="hist-stars">${[1,2,3,4,5].map(s => `<span class="star-btn ${s<=h.stars?'active':''}" onclick="setStar(${idx},${s})">★</span>`).join('')}</div></div>`;
+        }).join('');
+    }
+    function setStar(idx, n) { danceHistory[idx].stars = n; localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); }
+    function delHist(idx) { if(confirm("Löschen?")) { danceHistory.splice(idx,1); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); } }
+    function exportData() {
+        const a = document.createElement('a');
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(danceHistory));
+        a.download = "tanz_db.json";
+        document.body.appendChild(a); a.click(); a.remove();
+    }
+    function importData(input) {
+        const r = new FileReader();
+        r.onload = (e) => { try { danceHistory=JSON.parse(e.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); alert("Import OK!"); } catch(x){ alert("Fehler!"); } };
+        r.readAsText(input.files[0]);
+    }
+    function renderExpert() {
+        const el = document.getElementById('expert-list');
+        el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}"><input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}"><input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}"></div>`).join('');
+    }
+    function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
+    
+    function renderLibrary() {
+        const c = document.getElementById('library-content');
+        c.innerHTML = '<div class="dance-grid"></div>';
+        const grid = c.querySelector('.dance-grid');
+        Object.keys(videoLibrary).forEach(dance => {
+            const card = document.createElement('div');
+            card.className = 'dance-card';
+            card.innerHTML = `<h3>${dance}</h3>`;
+            card.onclick = () => showFigures(dance);
+            grid.appendChild(card);
+        });
+    }
+    function showFigures(dance) {
+        const data = videoLibrary[dance];
+        if(!data.file) return alert("Kein Video vorhanden.");
+        const c = document.getElementById('library-content');
+        currentDance = dance; 
+        let html = `<button class="btn-action btn-secondary" style="margin-bottom:15px;" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`;
+        data.figures.forEach((fig, idx) => {
+            html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span class="figure-play">▶</span></div>`;
+        });
+        c.innerHTML = html + "</div>";
+    }
+    
+    let curStart=0, curEnd=0;
+    function playVid(src, s, e, t, idx) {
+        const o = document.getElementById('fs-video-overlay');
+        const v = document.getElementById('main-video');
+        o.classList.add('active');
+        currentFigIdx = idx; 
+        document.getElementById('vid-info').innerText = t;
+        const safeStart = s + 0.1;
+        const safeEnd = Math.max(safeStart, e - 0.2); 
+        v.src = src; 
+        v.currentTime = safeStart; 
+        curStart = safeStart; 
+        curEnd = safeEnd;
+        v.playbackRate = playbackSpeed;
+        v.muted = !videoSound; 
+        v.play();
+        v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime = curEnd; } };
+    }
+    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
+    
+    function nextFigure() {
+        const figs = videoLibrary[currentDance].figures;
+        if (currentFigIdx < figs.length - 1) {
+            const nextFig = figs[currentFigIdx + 1];
+            playVid(videoLibrary[currentDance].file, nextFig.start, nextFig.end, nextFig.name, currentFigIdx + 1);
+        }
+    }
+    function prevFigure() {
+        const figs = videoLibrary[currentDance].figures;
+        if (currentFigIdx > 0) {
+            const prevFig = figs[currentFigIdx - 1];
+            playVid(videoLibrary[currentDance].file, prevFig.start, prevFig.end, prevFig.name, currentFigIdx - 1);
+        }
+    }
+
+    function testFunk() { 
+        const t = document.getElementById('ntfy-topic').value;
+        if(!t) return alert("Topic fehlt!");
+        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})})
+        .then(() => alert("Signal gesendet!"))
+        .catch(e => alert("Funk Fehler: " + e));
+    }
+    
 </script>
 </body>
 </html>
