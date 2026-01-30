@@ -15,11 +15,11 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* --- HEADER (Ebene 100) --- */
+        /* HEADER (Ebene 5000) */
         #top-bar { 
             display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; 
             padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; 
-            z-index: 100; flex-shrink: 0; position: relative;
+            z-index: 5000; flex-shrink: 0; position: relative;
         }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
@@ -29,7 +29,7 @@
         #mic-btn.loading { opacity: 0.7; animation: pulse-load 1s infinite; }
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
-        /* --- MONITOR (Ebene 1) --- */
+        /* MONITOR (Ebene 1) */
         #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; z-index: 1; }
         #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         #visualizer { width: 100%; height: 100%; display: block; }
@@ -42,7 +42,6 @@
         #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
@@ -58,26 +57,27 @@
         .stat-val.active { color: #fff; }
         .stat-label { font-size: 0.6rem; letter-spacing: 1px; font-weight: bold; color: #555; margin-top: 5px; }
 
-        /* Slider Sidebar */
+        /* Slider Sidebar (Ebene 4000 - Hoch genug!) */
         #slider-sidebar { 
             position: absolute; right: 0; top: 80px; bottom: 0; width: 50px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 10; padding-bottom: 20px; 
+            border-left: 1px solid #333; background: rgba(0,0,0,0.5); 
+            z-index: 4000; padding-bottom: 20px; 
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
         input[type=range].vertical {
             writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; 
-            outline: none; background: transparent; cursor: pointer; z-index: 2;
+            outline: none; background: transparent; cursor: pointer; z-index: 4001;
         }
         #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* --- OVERLAYS (Ebene 2000 - ÜBER Header) --- */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
+        /* OVERLAYS (Ebene 6000 - Über Header) */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
-        .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; z-index: 2001; }
+        .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; z-index: 6001; }
 
         /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
@@ -130,8 +130,8 @@
         .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
         .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
 
-        /* Fullscreen Video (Ebene 3000) */
-        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
+        /* Fullscreen Video (Ebene 7000) */
+        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 7000; }
         #fs-video-overlay.active { display: flex; }
         #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
         #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
@@ -216,7 +216,7 @@
             <label>KI Modell</label>
             <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
                 <option value="openai">OpenAI (GPT-5.2)</option>
-                <option value="gemini">Google Gemini (2.0 Flash)</option>
+                <option value="gemini">Google Gemini (Flash 1.5)</option>
             </select>
         </div>
         <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier einfügen..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
@@ -305,7 +305,7 @@
 
 <script>
     // LEGAL & CONSOLE
-    console.log(`%c Tanz das! Ultimate v2.9 `, "color: #2b7cff; font-weight: bold;");
+    console.log(`%c Tanz das! Ultimate v3.0 `, "color: #2b7cff; font-weight: bold;");
 
     // --- CONSTANTS ---
     const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
@@ -372,7 +372,7 @@
         // Load Provider Setting
         aiProvider = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = aiProvider;
-        loadKeyIntoInput(); 
+        loadKeyIntoInput(); // FIX: Lade korrekten Key
 
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
@@ -698,6 +698,7 @@
 
         const resEl = document.getElementById('tap-result');
         if(matches.length > 0) {
+            // Pick Preferred Dance if available
             const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
             resEl.innerText = preferred.length > 0 ? preferred[0] : matches[0];
             resEl.style.color = preferred.length > 0 ? "var(--green)" : "var(--yellow)";
@@ -778,7 +779,7 @@
             
             if (prov === 'gemini') {
                 // FIXED GEMINI MODEL
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
                 const res = await fetch(url, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
@@ -829,7 +830,7 @@
         
         try {
             if (prov === 'gemini') {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${k}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
                 const r = await fetch(url, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
