@@ -216,7 +216,7 @@
             <label>KI Modell</label>
             <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
                 <option value="openai">OpenAI (GPT-5.2)</option>
-                <option value="gemini">Google Gemini (Flash 1.5)</option>
+                <option value="gemini">Google Gemini (Flash 2.0)</option>
             </select>
         </div>
         <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier einfügen..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
@@ -779,7 +779,7 @@
             
             if (prov === 'gemini') {
                 // FIXED GEMINI MODEL
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
                 const res = await fetch(url, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
@@ -830,7 +830,7 @@
         
         try {
             if (prov === 'gemini') {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
                 const r = await fetch(url, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
@@ -851,3 +851,4 @@
 </script>
 </body>
 </html>
+
