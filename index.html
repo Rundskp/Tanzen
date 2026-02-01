@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#050505">
     <title>Tanz das! Ultimate</title>
     
-    <link rel="icon" type="image/svg+xml" href="icon.svg">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💃</text></svg>">
+    <link rel="apple-touch-icon" href="icon.png">
 
     <style>
         :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; --muted: #9aa0a6; }
@@ -17,11 +17,7 @@
         body { display: flex; flex-direction: column; }
         
         /* HEADER */
-        #top-bar { 
-            display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; 
-            padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; 
-            z-index: 5000; position: relative; flex-shrink: 0;
-        }
+        #top-bar { display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 500; position: relative; flex-shrink: 0; }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
         #mic-btn { background: #333; border: 2px solid #444; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 110px; transition: 0.2s; }
@@ -51,6 +47,7 @@
         #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; transition: transform 0.1s; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
+        /* DISCO PULSE */
         .pulse-beat { animation: beatPop 0.15s ease-out; }
         @keyframes beatPop { 0% { transform: scale(1); } 50% { transform: scale(1.15); text-shadow: 0 0 20px rgba(255,255,255,0.8); } 100% { transform: scale(1); } }
 
@@ -67,12 +64,12 @@
             border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 50; padding-bottom: 20px; 
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
-        #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
+        #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.6); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
         input[type=range].vertical { writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
         /* OVERLAYS */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
@@ -90,7 +87,7 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* Donate Style */
+        /* Donate (RSVP Style) */
         .ctaGrid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px; }
         @media (max-width:600px){ .ctaGrid{ grid-template-columns: 1fr; } }
         .payCard { border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.05); border-radius: 14px; padding: 12px; }
@@ -105,7 +102,7 @@
         .donate-btn-row { display: flex; gap: 10px; margin-top: 10px; }
         .donate-mini-btn { background: #333; color: white; border: 1px solid #555; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; flex: 1; }
 
-        /* Other */
+        /* Lists */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
         .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
@@ -131,7 +128,7 @@
         .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
 
         /* Fullscreen Video */
-        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 7000; }
+        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
         #fs-video-overlay.active { display: flex; }
         #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
         #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
@@ -150,7 +147,7 @@
 
         /* --- DUAL TAP DETECTOR --- */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; width: 100%; }
-        .tap-row { display: flex; gap: 25px; align-items: center; justify-content: center; width: 100%; }
+        .tap-row { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; }
         
         .tap-circle { 
             width: 120px; height: 120px; border-radius: 50%; 
@@ -174,8 +171,9 @@
         #tap-status { font-size: 1rem; color: #888; min-height: 20px; text-align:center; }
         #tap-result { font-size: 2.2rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.4); min-height: 40px; text-align: center; }
         
+        /* Visualizer dots */
         .tap-viz-container { display: flex; gap: 5px; margin-top: 10px; height: 15px; align-items: center; }
-        .tap-viz-dot { width: 12px; height: 12px; background: #333; border-radius: 50%; }
+        .tap-viz-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; }
         .tap-viz-dot.heavy { background: var(--red); transform: scale(1.3); box-shadow: 0 0 5px var(--red); }
         .tap-viz-dot.light { background: #888; }
     </style>
@@ -230,7 +228,7 @@
         <div class="row">
             <label>KI Modell</label>
             <select id="ai-provider" style="width:60%;" onchange="handleProviderChange()">
-                <option value="openai">OpenAI (GPT-High)</option>
+                <option value="openai">OpenAI (GPT-5.2)</option>
                 <option value="gemini">Google Gemini (2.0 Flash)</option>
             </select>
         </div>
@@ -338,29 +336,25 @@
 </div>
 
 <script>
-    // LEGAL
-    console.log(`%c Tanz das! Ultimate v4.1 (Final Fix) `, "color: #2b7cff; font-weight: bold;");
-
-    // --- CONSTANTS ---
-    const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
-
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
     let lastBeat = 0, aiLocked = false, micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
+    // STANDARD-WERTE (FALLBACK)
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     let densityLow = 0, densityHigh = 0;
     let currentDance = "", currentFigIdx = 0;
 
-    // EXPERT RANGES
+    // EXPERT RANGES (Mit erweitertem Cha-Cha Rhythmus)
     const defaultRanges = {
         "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "L L S" },
         "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "L L L" },
         "Samba": { min: 100, max: 120, tact: "2/4", rhythm: "L S L" },
         "Rumba": { min: 100, max: 120, tact: "4/4", rhythm: "L S S" },
         "Discofox": { min: 100, max: 145, tact: "4/4", rhythm: "S S L" },
-        "Cha Cha Cha": { min: 110, max: 135, tact: "4/4", rhythm: "S S S L L" },
+        // Cha-Cha: Erlaubt jetzt SSS (ChaChaCha) und den vollen Grundschritt
+        "Cha Cha Cha": { min: 110, max: 135, tact: "4/4", rhythm: "S S S L L" }, 
         "Jive": { min: 130, max: 180, tact: "4/4", rhythm: "S S L S S L" },
         "Wiener Walzer": { min: 135, max: 180, tact: "3/4", rhythm: "L L L" },
         "Boogie Woogie": { min: 140, max: 200, tact: "4/4", rhythm: "S S L L" },
@@ -382,6 +376,7 @@
 
     const canvas = document.getElementById('visualizer');
     const ctx = canvas.getContext('2d');
+    const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
     
     // --- INIT ---
     window.onload = () => {
@@ -403,7 +398,11 @@
         const savedSens = localStorage.getItem('dm_sens') || 45;
         updateSens(savedSens);
         
-        renderPrefs(); renderHistory(); renderExpert();
+        // RENDER LISTS AFTER LOAD!
+        renderPrefs(); 
+        renderHistory(); 
+        renderExpert();
+        
         document.body.addEventListener('touchstart', function() { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, {once:true});
     };
 
@@ -420,6 +419,7 @@
     function loadData() {
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
         if(localStorage.getItem('dm_history')) danceHistory = JSON.parse(localStorage.getItem('dm_history'));
+        // Expert ranges: if in LS, load it. If not, defaults (defined above) are used.
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
@@ -471,8 +471,8 @@
             ctx.fillStyle = `rgb(${h+100},50,50)`; ctx.fillRect(x, canvas.height-h, barW, h);
             x += barW + 1;
         }
-        // Boost factor 2.5
-        document.getElementById('level-meter').style.height = Math.min(100, (sumLow/buf/50)*100) + "%";
+        // BOOSTED GAIN (Divisor 25 statt 128)
+        document.getElementById('level-meter').style.height = Math.min(100, (sumLow/buf/25)*100) + "%";
         
         x = 0;
         for(let i=0; i<buf; i++) {
@@ -510,10 +510,39 @@
             const el = document.getElementById('dance-name');
             el.classList.remove('pulse-beat'); void el.offsetWidth; el.classList.add('pulse-beat');
         }
-        // Beat Visual only
+        const bpm = Math.round(60000 / (now - lastBeat));
+        bpmBuffer.push(bpm); if(bpmBuffer.length>8) bpmBuffer.shift();
+        const avg = Math.round(bpmBuffer.reduce((a,b)=>a+b,0)/bpmBuffer.length);
+        document.getElementById('bpm-display').innerText = avg;
+        detectDance(avg);
+        lastBeat = now;
     }
 
-    // --- DUAL TAP LOGIC ---
+    function detectDance(bpm) {
+        let matches = [];
+        for(const [dance, range] of Object.entries(expertRanges)) {
+            if(bpm >= range.min && bpm <= range.max) matches.push({ name: dance, tact: range.tact, rhythm: range.rhythm });
+        }
+        if(matches.length === 0) { updateDisplay("---", "--", "", false); return; }
+        const preferredMatches = matches.filter(m => preferredDances.some(p => m.name.toLowerCase().includes(p.toLowerCase())));
+        let winner = preferredMatches.length > 0 ? preferredMatches[0] : matches[0];
+        if(preferredMatches.length > 1) {
+            const nonDisco = preferredMatches.find(m => !m.name.toLowerCase().includes("disco"));
+            if(nonDisco) winner = nonDisco;
+        }
+        updateDisplay(winner.name, winner.tact, winner.rhythm, false);
+    }
+
+    function updateDisplay(dance, tact, rhythm, verified) {
+        document.getElementById('dance-name').innerText = dance;
+        document.getElementById('takt-display').innerText = tact;
+        document.getElementById('badge-rhythm').innerText = rhythm;
+        const m = document.getElementById('dance-name');
+        if(verified) m.classList.add('verified'); else m.classList.remove('verified');
+        document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
+    }
+
+    /* --- DUAL TAP LOGIC --- */
     let tapBuffer = [];
     function handleTapInput(type) { 
         const now = Date.now();
@@ -536,14 +565,20 @@
         document.getElementById('tap-bpm').innerText = bpm + " BPM";
 
         const minI = Math.min(...intervals);
-        // Pattern: Interval based
+        // Pattern: Interval AND Type
         const pat = intervals.map(i => (i > minI * 1.45) ? "L" : "S").join("");
         
         let found = [];
         for(const [d, v] of Object.entries(expertRanges)) {
             if(bpm >= v.min-15 && bpm <= v.max+15) {
                 const target = (v.rhythm || "").replace(/[^SL]/g, '');
-                if(!target || target.includes(pat) || pat.includes(target)) found.push(d);
+                // Special Rule for Cha Cha (often tapped as S S S)
+                if (d === "Cha Cha Cha" && (pat.includes("SSS") || pat.includes("SSL"))) {
+                    found.push(d);
+                }
+                else if(!target || target.includes(pat) || pat.includes(target)) {
+                    found.push(d);
+                }
             }
         }
         
@@ -642,6 +677,7 @@
                     body: JSON.stringify({ model: "gpt-4o", messages: [{ role: "user", content: promptText }], max_tokens: 60 })
                 });
                 const json = await res.json();
+                if(json.error) throw new Error(json.error.message);
                 data = JSON.parse(json.choices[0].message.content.match(/\{[\s\S]*\}/)[0]);
             }
             danceHistory.unshift({ date: new Date().toLocaleDateString('de-DE'), title, artist, dance: data.dance, bpm: data.bpm, tact: data.tact, rhythm: data.rhythm, stars: 0 });
@@ -650,7 +686,8 @@
             updateDisplay(data.dance, data.tact, data.rhythm, true);
             document.getElementById('bpm-display').innerText = data.bpm;
         } catch(e) {
-            updateDisplay("FEHLER", "--", "!", false);
+            updateDisplay("KI-FEHLER", "--", "!", false);
+            alert(e.message);
         }
         setTimeout(() => { document.getElementById('mic-btn').classList.remove('ai-mode'); }, 1000); 
     }
@@ -675,6 +712,7 @@
             if(expertRanges[dance]) expertRanges[dance][type] = (type === 'rhythm' ? inp.value : parseInt(inp.value));
         });
         localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+        alert("Einstellungen gespeichert!"); // Feedback
         location.reload();
     }
     function updateSens(val) { document.getElementById('main-sens').value = val; document.getElementById('sens-val-display').innerText = val; micSens = val / 1000; localStorage.setItem('dm_sens', val); }
@@ -683,7 +721,7 @@
     function renderHistory() { const f = document.getElementById('search-hist').value.toLowerCase(); const list = document.getElementById('history-list'); let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f)); list.innerHTML = filtered.map(h => `<div class="hist-card"><div class="hist-title">${h.title}</div><div class="hist-info"><span>${h.dance}</span></div></div>`).join(''); }
     function exportData() { downloadBackup(); } 
     function importData(input) { loadBackup(input); }
-    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}"><input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}"><input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
+    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="text" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
     function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
     function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
     function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span>▶</span></div>`; }); c.innerHTML = html + "</div>"; }
