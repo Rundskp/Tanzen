@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050505">
     <title>Tanz das! Ultimate</title>
     
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
     <style>
-        :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; }
+        :root { --blue: #2b7cff; --red: #FF3B30; --green: #34C759; --yellow: #FFCC00; --bg: #050505; --card: #1c1c1e; --text: #e8e8e8; --muted: #9aa0a6; }
         
         * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* HEADER */
-        #top-bar { display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
+        /* HEADER (Z-Index fix) */
+        #top-bar { 
+            display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; 
+            padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; 
+            z-index: 5000; position: relative; flex-shrink: 0;
+        }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
         #mic-btn { background: #333; border: 2px solid #444; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 110px; transition: 0.2s; }
@@ -26,14 +31,14 @@
         @keyframes pulse-load { 50% { opacity: 0.3; } }
 
         /* MONITOR */
-        #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; }
-        #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
+        #monitor { flex: 1; display: flex; position: relative; width: 100%; overflow: hidden; flex-direction: column; z-index: 1; }
+        #vis-wrap { width: 100%; height: 80px; position: relative; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; pointer-events: none; }
         #visualizer { width: 100%; height: 100%; display: block; }
 
         /* MAIN DISPLAY */
         #main-display { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; 
-            padding: 10px; width: 100%; padding-right: 60px; z-index: 2; 
+            padding: 10px; width: 100%; padding-right: 60px; z-index: 10; 
         }
 
         #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; text-align: center; }
@@ -43,11 +48,12 @@
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
-        #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; }
+        #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; transition: transform 0.1s; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
-        @keyframes pump { 0% { transform: scale(1); } 30% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
-        .pulse-effect { animation: pump 0.15s ease-out; }
+        /* DISCO PULSE */
+        .pulse-beat { animation: beatPop 0.15s ease-out; }
+        @keyframes beatPop { 0% { transform: scale(1); } 50% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
 
         .status-indicators { display: flex; gap: 15px; margin-top: 10px; align-items: flex-end; margin-bottom: 10px; width: 100%; justify-content: center; }
         .stat-box { display: flex; flex-direction: column; align-items: center; width: 80px; }
@@ -59,25 +65,21 @@
         #slider-sidebar { 
             position: absolute; right: 0; top: 80px; bottom: 0; width: 50px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 10; padding-bottom: 20px; 
+            border-left: 1px solid #333; background: rgba(0,0,0,0.5); z-index: 50; padding-bottom: 20px; 
         }
         .slider-wrap { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; }
         #level-meter { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(52, 199, 89, 0.4); height: 0%; transition: height 0.05s; pointer-events: none; width: 100%; z-index: -1; }
-        
-        /* Modern Vertical Slider */
-        input[type=range].vertical { 
-            writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; 
-            outline: none; background: transparent; cursor: pointer; z-index: 2; 
-        }
+        input[type=range].vertical { writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* OVERLAYS */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; padding: 20px; overflow-y: auto; }
+        /* OVERLAYS (Höherer Z-Index) */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
         .overlay-title { font-size: 1.5rem; font-weight: 800; color: var(--blue); margin: 0; }
         .close-btn { background: #333; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; }
 
+        /* Settings CSS */
         .settings-group { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
         .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
         input[type="text"], input[type="password"], input[type="number"], select { background: #000; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-top: 5px; }
@@ -89,13 +91,29 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* Video Library */
-        .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
-        .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
-        .figure-play { color: var(--green); font-size: 1.8rem; }
-        .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
-        .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
+        /* Donate (RSVP Style) */
+        .ctaGrid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px; }
+        @media (max-width:600px){ .ctaGrid{ grid-template-columns: 1fr; } }
+        .payCard { border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.05); border-radius: 14px; padding: 12px; }
+        .payCardHeading { color: var(--muted); font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; }
+        .paypal-btn-css {
+            display: flex; align-items: center; justify-content: center;
+            background: #003087; color: white; font-weight: bold; font-size: 1.1rem;
+            border-radius: 12px; padding: 15px; text-decoration: none; width: 100%; margin-top: 10px;
+        }
+        .qrImg { width: 100%; max-width: 200px; border-radius: 14px; border:2px solid #fff; background: white; padding: 5px; margin-top:10px; display: none; }
+        .addrBox { margin-top: 8px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.3); border-radius: 14px; padding: 10px; font-family: monospace; font-size: 0.8rem; word-break: break-all; color: var(--muted); }
+        
+        .donate-btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .donate-mini-btn { background: #333; color: white; border: 1px solid #555; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; flex: 1; }
+
+        /* Other */
+        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
+        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
+        .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
+        .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
+        .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
         
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
@@ -107,16 +125,16 @@
         .star-btn { font-size: 1.6rem; color: #333; cursor: pointer; transition: 0.1s; }
         .star-btn.active { color: var(--yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
 
-        #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .tag { background: var(--blue); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: flex; align-items: center; }
-        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; opacity: 0.7; }
-
-        .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
-        .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
-        .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
+        /* Video */
+        .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
+        .figure-play { color: var(--green); font-size: 1.8rem; }
+        .dance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .dance-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
+        .dance-card:active { transform: scale(0.95); background: var(--blue); border-color: var(--blue); }
 
         /* Fullscreen Video */
-        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 3000; }
+        #fs-video-overlay { background: black; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 0; z-index: 7000; }
         #fs-video-overlay.active { display: flex; }
         #fs-video-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 20px; position: relative; }
         #vid-info { color: var(--yellow); font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 10px; padding: 0 20px; z-index: 5; }
@@ -138,30 +156,26 @@
         
         .tap-row { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; }
         
-        .tap-area { 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
+        .tap-circle { 
+            width: 120px; height: 120px; border-radius: 50%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
             font-weight: 800; cursor: pointer; user-select: none; 
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.05s, box-shadow 0.1s;
-            color: #ccc;
+            color: #ccc; border: 3px solid #444; background: #222;
         }
         
         /* Light Button */
-        #tapBtnL { 
-            width: 110px; height: 110px; 
-            background: #222; border: 4px solid #555; font-size: 1rem;
-        }
+        #tapBtnL { font-size: 1rem; }
         #tapBtnL:active { transform: scale(0.9); background: #333; border-color: #888; color: white; }
         
         /* Heavy Button */
         #tapBtnH { 
-            width: 150px; height: 150px; 
+            width: 140px; height: 140px; 
             background: radial-gradient(circle, #331111 0%, #110000 100%); 
-            border: 6px solid var(--red); font-size: 1.2rem;
-            color: var(--red);
+            border: 5px solid var(--red); font-size: 1.2rem; color: var(--red);
         }
-        #tapBtnH:active { transform: scale(0.9); background: var(--red); color: white; box-shadow: 0 0 40px var(--red); }
+        #tapBtnH:active { transform: scale(0.9); background: var(--red); color: white; box-shadow: 0 0 30px var(--red); }
 
         #tap-status { font-size: 1rem; color: #888; min-height: 20px; text-align:center; }
         #tap-result { font-size: 2.2rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.4); min-height: 40px; text-align: center; }
@@ -171,16 +185,6 @@
         .tap-viz-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; }
         .tap-viz-dot.heavy { background: var(--red); transform: scale(1.3); box-shadow: 0 0 5px var(--red); }
         .tap-viz-dot.light { background: #888; }
-
-        /* Donate Fixes */
-        .paypal-btn-css {
-            display: flex; align-items: center; justify-content: center;
-            background: #003087; color: white;
-            font-family: sans-serif; font-weight: bold; font-size: 1.2rem;
-            border-radius: 12px; padding: 20px; text-decoration: none;
-            width: 100%; margin-top: 10px;
-        }
-        .qrImg { display: none; width: 100%; max-width: 200px; margin-top: 10px; border-radius: 10px; border: 2px solid #fff; }
     </style>
 </head>
 <body>
@@ -232,17 +236,31 @@
     <div class="settings-group">
         <div class="row">
             <label>KI Modell</label>
-            <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
-                <option value="openai">OpenAI (GPT-5.2)</option>
+            <select id="ai-provider" style="width:60%;" onchange="handleProviderChange()">
+                <option value="openai">OpenAI (GPT-4o)</option>
                 <option value="gemini">Google Gemini (2.0 Flash)</option>
             </select>
         </div>
-        <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
-        <div class="row"><label>Funk-Topic (Shazam)</label><div style="display:flex; gap:10px; width:65%;"><input type="text" id="ntfy-topic" placeholder="Topic..."><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
+        <div class="row">
+            <label>API Key</label>
+            <div style="display:flex; gap:10px; width:60%;">
+                <input type="password" id="api-key" placeholder="Key..." style="flex:1">
+                <button class="btn-test-small" onclick="testAI()">TEST</button>
+            </div>
+        </div>
+        <div class="row"><label>Funk-Topic</label><div style="display:flex; gap:10px; width:60%;"><input type="text" id="ntfy-topic" placeholder="Topic..." style="flex:1"><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
         <div class="row" style="margin-top:15px;"><label>Disco-Modus</label><input type="checkbox" id="disco-mode"></div>
         <div class="row"><label>Video Ton</label><input type="checkbox" id="video-audio"></div>
-        <div class="row"><label>Video Speed</label><div style="width: 50%;"><input type="range" class="horizontal" id="video-speed" min="0.25" max="1.0" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)"><div id="speed-val" style="text-align:right; font-size:0.8rem; color:var(--blue);">1.0x</div></div></div>
-        <button class="btn-action btn-secondary" style="margin-top:20px;" onclick="openOverlay('expert-overlay')">Experten & BPM</button>
+        <div class="row"><label>Speed</label><div style="width: 50%;"><input type="range" class="horizontal" id="video-speed" min="0.25" max="1.0" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)"><div id="speed-val" style="text-align:right; font-size:0.8rem; color:var(--blue);">1.0x</div></div></div>
+        
+        <button class="btn-action btn-secondary" style="margin-top:10px;" onclick="openOverlay('expert-overlay')">Experten & BPM</button>
+        
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-action btn-secondary" onclick="downloadBackup()">Backup speichern</button>
+            <button class="btn-action btn-secondary" onclick="document.getElementById('file-backup').click()">Backup laden</button>
+            <input type="file" id="file-backup" style="display:none" onchange="loadBackup(this)">
+        </div>
+
         <button class="btn-action btn-save" onclick="saveSettings()">Speichern</button>
     </div>
     <div class="settings-group">
@@ -253,12 +271,38 @@
     <div class="settings-group">
         <div class="row"><label>Datenbank</label><input type="text" id="search-hist" placeholder="Suche..." style="width:40%;" oninput="renderHistory()"></div>
         <div id="history-list"></div>
-        <div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-action btn-secondary" onclick="exportData()">Export</button><button class="btn-action btn-secondary" onclick="document.getElementById('file-imp').click()">Import</button><input type="file" id="file-imp" style="display:none" onchange="importData(this)"></div>
+        <div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-action btn-secondary" onclick="exportData()">Export DB</button><button class="btn-action btn-secondary" onclick="document.getElementById('file-imp').click()">Import DB</button><input type="file" id="file-imp" style="display:none" onchange="importData(this)"></div>
+    </div>
+</div>
+
+<div id="donate-overlay" class="overlay">
+    <div class="overlay-header"><h2 class="overlay-title">Spenden</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
+    <div class="settings-group">
+        <p class="donate-text">Support via PayPal oder Bitcoin. ❤️</p>
+        <div class="ctaGrid">
+            <div class="payCard">
+                <div class="payCardHeading">PayPal</div>
+                <a class="paypal-btn-css" href="https://paypal.me/rophko" target="_blank" rel="noopener">PayPal öffnen</a>
+                <div class="donate-btn-row">
+                    <button id="btnPaypalQR" type="button" class="donate-mini-btn">QR anzeigen</button>
+                </div>
+                <img id="paypalQrImg" class="qrImg" />
+            </div>
+            <div class="payCard">
+                <div class="payCardHeading">Bitcoin</div>
+                <div class="addrBox" id="btcAddr">bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f</div>
+                <div class="donate-btn-row">
+                    <button id="btnCopyBtc" type="button" class="donate-mini-btn">Kopieren</button>
+                    <button id="btnBtcQR" type="button" class="donate-mini-btn">QR</button>
+                </div>
+                <img id="btcQrImg" class="qrImg" />
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="expert-overlay" class="overlay">
-    <div class="overlay-header"><h2 class="overlay-title">Experten-Parameter</h2><button class="close-btn" onclick="openOverlay('settings-overlay')">←</button></div>
+    <div class="overlay-header"><h2 class="overlay-title">Experten</h2><button class="close-btn" onclick="openOverlay('settings-overlay')">←</button></div>
     <div class="settings-group">
         <div style="margin-bottom:15px; text-align:right;"><button class="btn-action btn-secondary" onclick="resetExpert()" style="font-size:0.8rem;">Reset Standard</button></div>
         <div class="expert-row expert-header"><span>Tanz</span><span>Min</span><span>Max</span><span>Rhythmus</span></div>
@@ -288,74 +332,39 @@
 <div id="tap-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Klopfe den Rhythmus. <b>Links</b> = Leicht, <b>Rechts</b> = Betonung.
+        Links = Leicht | Rechts = Betonung<br>
+        <span style="font-size:0.8rem; color:#666;">Analysiert Tempo & Muster</span>
     </div>
     <div id="tap-pad">
         <div class="tap-row">
-            <div class="tap-area" id="tapBtnL" style="border-color:#555;">Leicht</div>
-            <div class="tap-area" id="tapBtnH" style="border-color:var(--red); color:var(--red);">Betonung</div>
+            <div id="tapL" class="tap-circle" onpointerdown="handleTapInput('L')">.</div>
+            <div id="tapH" class="tap-circle" onpointerdown="handleTapInput('H')">O</div>
         </div>
-        
         <div class="tap-viz-container" id="tap-viz"></div>
         <div id="tap-bpm" style="font-family:monospace; font-size:1.5rem; color:#666; margin-top:10px;">0 BPM</div>
-        <div id="tap-result">...</div>
+        <div id="tap-result">Starten...</div>
     </div>
     <button class="btn-action btn-secondary" onclick="resetTap()">Reset</button>
 </div>
 
-<div id="donate-overlay" class="overlay">
-    <div class="overlay-header"><h2 class="overlay-title">☕️ Spenden</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
-    <div class="settings-group">
-        <p class="donate-text">Support via PayPal oder Bitcoin. ❤️</p>
-        <div class="ctaGrid">
-            <div class="payCard">
-                <div class="payCardHeading">PayPal</div>
-                <a class="paypal-btn-css" href="https://paypal.me/rophko" target="_blank" rel="noopener">PayPal öffnen</a>
-                <div style="margin-top:10px;">
-                    <button class="btn-test-small" style="width:100%" onclick="toggleQR('paypalQrImg', 'https://paypal.me/rophko')">QR anzeigen</button>
-                </div>
-                <img id="paypalQrImg" class="qrImg" />
-            </div>
-            <div class="payCard">
-                <div class="payCardHeading">Bitcoin</div>
-                <div class="addrBox" id="btcAddr">bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f</div>
-                <div style="display:flex; gap:5px; margin-top:10px;">
-                    <button class="btn-test-small" style="flex:1" onclick="navigator.clipboard.writeText('bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f').then(()=>alert('Kopiert!'))">Kopieren</button>
-                    <button class="btn-test-small" style="flex:1" onclick="toggleQR('btcQrImg', 'bitcoin:bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f')">QR</button>
-                </div>
-                <img id="btcQrImg" class="qrImg" />
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
     // LEGAL & CONSOLE
-    console.log(`%c Tanz das! Ultimate v3.0 (Stable) `, "color: #2b7cff; font-weight: bold;");
+    console.log(`%c Tanz das! Ultimate v4.0 (FIXED) `, "color: #2b7cff; font-weight: bold;");
+
+    // --- CONSTANTS ---
+    const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
 
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
-    let lastBeat = 0, bpmBuffer = [], aiLocked = false;
+    let lastBeat = 0, aiLocked = false;
     let micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
-    
-    // Density & Video
     let densityLow = 0, densityHigh = 0;
     let currentDance = "", currentFigIdx = 0;
 
-    // --- VIDEO DATEN ---
-    const videoLibrary = {
-        "Cha Cha Cha": { file: "media/chacha.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.55 }, { name: "2. Wiegeschritt", start: 17.55, end: 30.48 }, { name: "3. Damensolo", start: 30.48, end: 52.88 }, { name: "4. New Yorker", start: 52.88, end: 80.30 }, { name: "5. Hand to Hand", start: 80.30, end: 103.50 }, { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 }, { name: "7. Fan & Alemana", start: 123.37, end: 141.97 }, { name: "8. Hockeystick", start: 141.97, end: 169.44 }, { name: "9. Aida", start: 169.44, end: 197.17 }] },
-        "Rumba": { file: "media/rumba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.13 }, { name: "2. Damensolo", start: 17.13, end: 36.33 }, { name: "3. Hand to Hand", start: 36.33, end: 64.93 }, { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 }, { name: "5. Fan & Alemana", start: 93.73, end: 115.33 }, { name: "6. Hockeystick", start: 115.33, end: 149.10 }, { name: "7. Aida", start: 149.10, end: 177.73 }] },
-        "Discofox": { file: "media/discofox.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 16.00 }, { name: "2. Gelaufener GS", start: 16.00, end: 26.90 }, { name: "3. Brezel", start: 26.90, end: 63.60 }, { name: "4. Körbchen", start: 63.60, end: 83.77 }, { name: "5. He goes, She goes", start: 83.77, end: 99.93 }, { name: "6. Travolta", start: 99.93, end: 119.90 }, { name: "7. Tunnel", start: 119.90, end: 138.80 }, { name: "8. Schiebetür", start: 138.80, end: 160.07 }, { name: "9. Swing In/Out", start: 160.07, end: 180.03 }, { name: "10. Knochenbrecher", start: 180.03, end: 196.43 }] },
-        "Jive": { file: "media/jive.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 12.03 }, { name: "2. Flirt", start: 12.03, end: 27.53 }, { name: "3. Platzwechsel", start: 27.53, end: 46.97 }, { name: "4. Stop'n'Go", start: 46.97, end: 64.03 }] },
-        "Boogie Woogie": { file: "media/rock.mp4", figures: [{ name: "1. 6er GS", start: 0.00, end: 12.17 }, { name: "2. 9er GS", start: 12.17, end: 21.93 }, { name: "3. Platzwechsel", start: 21.93, end: 36.37 }, { name: "4. Swing In/Out", start: 36.37, end: 59.97 }, { name: "5. Flic Flac", start: 59.97, end: 90.63 }, { name: "6. Lasso", start: 90.63, end: 104.17 }, { name: "7. Handwechsel", start: 104.17, end: 116.90 }, { name: "8. American Spin", start: 116.90, end: 126.00 }, { name: "9. Tausendfüssler", start: 126.00, end: 143.83 }, { name: "10. Grätsche", start: 143.83, end: 156.37 }] },
-        "Samba": { file: "media/samba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 25.10 }, { name: "2. Wischer", start: 25.10, end: 41.33 }, { name: "3. Damensolo", start: 41.33, end: 52.20 }, { name: "4. Promenaden", start: 52.20, end: 67.13 }, { name: "5. Side Walks", start: 67.13, end: 81.60 }, { name: "6. Botafogos", start: 81.60, end: 97.97 }] },
-        "Walzer": { file: "", figures: [] }, "Langsamer Walzer": { file: "", figures: [] }, "Wiener Walzer": { file: "", figures: [] }, "Tango Argentino": { file: "", figures: [] }, "Foxtrott": { file: "", figures: [] }, "Salsa": { file: "", figures: [] }
-    };
-
+    // --- EXPERT DATA ---
     const defaultRanges = {
         "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "L L S" },
         "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "L L L" },
@@ -371,17 +380,27 @@
     };
     let expertRanges = JSON.parse(JSON.stringify(defaultRanges));
 
+    // --- VIDEO LIBRARY ---
+    const videoLibrary = {
+        "Cha Cha Cha": { file: "media/chacha.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.55 }, { name: "2. Wiegeschritt", start: 17.55, end: 30.48 }, { name: "3. Damensolo", start: 30.48, end: 52.88 }, { name: "4. New Yorker", start: 52.88, end: 80.30 }, { name: "5. Hand to Hand", start: 80.30, end: 103.50 }, { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 }, { name: "7. Fan & Alemana", start: 123.37, end: 141.97 }, { name: "8. Hockeystick", start: 141.97, end: 169.44 }, { name: "9. Aida", start: 169.44, end: 197.17 }] },
+        "Rumba": { file: "media/rumba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.13 }, { name: "2. Damensolo", start: 17.13, end: 36.33 }, { name: "3. Hand to Hand", start: 36.33, end: 64.93 }, { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 }, { name: "5. Fan & Alemana", start: 93.73, end: 115.33 }, { name: "6. Hockeystick", start: 115.33, end: 149.10 }, { name: "7. Aida", start: 149.10, end: 177.73 }] },
+        "Discofox": { file: "media/discofox.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 16.00 }, { name: "2. Gelaufener GS", start: 16.00, end: 26.90 }, { name: "3. Brezel", start: 26.90, end: 63.60 }, { name: "4. Körbchen", start: 63.60, end: 83.77 }, { name: "5. He goes, She goes", start: 83.77, end: 99.93 }, { name: "6. Travolta", start: 99.93, end: 119.90 }, { name: "7. Tunnel", start: 119.90, end: 138.80 }, { name: "8. Schiebetür", start: 138.80, end: 160.07 }, { name: "9. Swing In/Out", start: 160.07, end: 180.03 }, { name: "10. Knochenbrecher", start: 180.03, end: 196.43 }] },
+        "Jive": { file: "media/jive.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 12.03 }, { name: "2. Flirt", start: 12.03, end: 27.53 }, { name: "3. Platzwechsel", start: 27.53, end: 46.97 }, { name: "4. Stop'n'Go", start: 46.97, end: 64.03 }] },
+        "Boogie Woogie": { file: "media/rock.mp4", figures: [{ name: "1. 6er GS", start: 0.00, end: 12.17 }, { name: "2. 9er GS", start: 12.17, end: 21.93 }, { name: "3. Platzwechsel", start: 21.93, end: 36.37 }, { name: "4. Swing In/Out", start: 36.37, end: 59.97 }, { name: "5. Flic Flac", start: 59.97, end: 90.63 }, { name: "6. Lasso", start: 90.63, end: 104.17 }, { name: "7. Handwechsel", start: 104.17, end: 116.90 }, { name: "8. American Spin", start: 116.90, end: 126.00 }, { name: "9. Tausendfüssler", start: 126.00, end: 143.83 }, { name: "10. Grätsche", start: 143.83, end: 156.37 }] },
+        "Samba": { file: "media/samba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 25.10 }, { name: "2. Wischer", start: 25.10, end: 41.33 }, { name: "3. Damensolo", start: 41.33, end: 52.20 }, { name: "4. Promenaden", start: 52.20, end: 67.13 }, { name: "5. Side Walks", start: 67.13, end: 81.60 }, { name: "6. Botafogos", start: 81.60, end: 97.97 }] },
+        "Walzer": { file: "", figures: [] }, "Langsamer Walzer": { file: "", figures: [] }, "Wiener Walzer": { file: "", figures: [] }, "Tango Argentino": { file: "", figures: [] }, "Foxtrott": { file: "", figures: [] }, "Salsa": { file: "", figures: [] }
+    };
+
     const canvas = document.getElementById('visualizer');
     const ctx = canvas.getContext('2d');
     
     // --- INIT ---
     window.onload = () => {
         loadData();
-        // Load Provider & Key logic
         const prov = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = prov;
         loadKeyIntoInput(); 
-
+        
         const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
         
@@ -396,13 +415,27 @@
         updateSens(savedSens);
         
         renderPrefs(); renderHistory(); renderExpert();
-        initTapDetector();
+        document.body.addEventListener('touchstart', function() { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, {once:true});
 
-        document.body.addEventListener('touchstart', function() {
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        }, {once:true});
+        // Donate
+        if(document.getElementById('btnPaypalQR')) {
+            document.getElementById('btnPaypalQR').addEventListener("click", () => {
+                const img = document.getElementById('paypalQrImg');
+                img.style.display = (img.style.display === 'block') ? 'none' : 'block';
+                if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
+            });
+            document.getElementById('btnBtcQR').addEventListener("click", () => {
+                const img = document.getElementById('btcQrImg');
+                img.style.display = (img.style.display === 'block') ? 'none' : 'block';
+                if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
+            });
+            document.getElementById('btnCopyBtc').addEventListener("click", () => {
+                navigator.clipboard.writeText(DONATE.btc).then(() => alert("Adresse kopiert!"));
+            });
+        }
     };
 
+    // --- CORE LOGIC ---
     function loadKeyIntoInput() {
         const prov = document.getElementById('ai-provider').value;
         let val = "";
@@ -418,27 +451,20 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-    /* --- AUDIO & DENSITY --- */
     function mainAction() {
         const btn = document.getElementById('mic-btn');
-        if(btn.innerText === "START") toggleMic();
-        else {
-            isListening = false;
-            if(audioCtx) audioCtx.suspend();
-            btn.innerText = "START";
-            btn.classList.remove('active', 'loading');
+        if(btn.innerText === "START") toggleMic(); else {
+            isListening = false; if(audioCtx) audioCtx.suspend();
+            btn.innerText = "START"; btn.classList.remove('active', 'loading');
             document.getElementById('level-meter').style.height = "0%";
-            bpmBuffer = []; lastBeat = 0; 
         }
     }
 
     async function toggleMic() {
-        const btn = document.getElementById('mic-btn');
-        btn.classList.add('loading');
+        const btn = document.getElementById('mic-btn'); btn.classList.add('loading');
         try {
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') await audioCtx.resume();
-
             const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false } });
             const source = audioCtx.createMediaStreamSource(stream);
             
@@ -450,337 +476,176 @@
             analyserHigh = audioCtx.createAnalyser(); analyserHigh.fftSize = 512;
             source.connect(highFilter); highFilter.connect(analyserHigh);
 
-            isListening = true;
-            btn.innerText = "STOP";
-            btn.classList.remove('loading', 'active');
-            btn.classList.add('active');
-
-            visualize();
-            analyzeRhythm();
-            setInterval(updateDensityUI, 3000); 
-
-        } catch(e) { 
-            alert("Mic Error: " + e.message); 
-            btn.classList.remove('loading');
-        }
+            isListening = true; btn.innerText = "STOP"; btn.classList.remove('loading'); btn.classList.add('active');
+            visualize(); analyzeRhythm(); setInterval(updateDensityUI, 3000); 
+        } catch(e) { alert("Mic Error: " + e.message); btn.classList.remove('loading'); }
     }
 
     function visualize() {
-        if(!isListening) return;
-        requestAnimationFrame(visualize);
-        const bufferLen = analyserLow.frequencyBinCount;
-        const lowData = new Uint8Array(bufferLen);
-        const highData = new Uint8Array(bufferLen);
-        analyserLow.getByteFrequencyData(lowData);
-        analyserHigh.getByteFrequencyData(highData);
+        if(!isListening) return; requestAnimationFrame(visualize);
+        const buf = analyserLow.frequencyBinCount;
+        const low = new Uint8Array(buf); const high = new Uint8Array(buf);
+        analyserLow.getByteFrequencyData(low); analyserHigh.getByteFrequencyData(high);
         
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        let sumLow = 0;
-        const barWidth = (canvas.width / bufferLen) * 2.5;
-        let x = 0;
-        for(let i = 0; i < bufferLen; i++) {
-            sumLow += lowData[i];
-            const barHeight = lowData[i] / 2;
-            ctx.fillStyle = `rgb(${barHeight + 100},50,50)`;
-            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-            x += barWidth + 1;
-        }
-        const avgVol = sumLow / bufferLen;
-        const volPercent = Math.min(100, (avgVol / 128) * 100); 
-        document.getElementById('level-meter').style.height = volPercent + "%";
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let sumLow = 0, x = 0, barW = (canvas.width / buf) * 2.5;
 
+        for(let i=0; i<buf; i++) {
+            sumLow += low[i];
+            const h = low[i] / 2;
+            ctx.fillStyle = `rgb(${h+100},50,50)`; ctx.fillRect(x, canvas.height-h, barW, h);
+            x += barW + 1;
+        }
+        document.getElementById('level-meter').style.height = Math.min(100, (sumLow/buf/128)*100) + "%";
+        
         x = 0;
-        for(let i = 0; i < bufferLen; i++) {
-            const barHeight = highData[i] / 2;
-            ctx.fillStyle = `rgba(50,50,${barHeight + 100}, 0.5)`;
-            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-            x += barWidth + 1;
+        for(let i=0; i<buf; i++) {
+            const h = high[i] / 2;
+            ctx.fillStyle = `rgba(50,50,${h+100},0.5)`; ctx.fillRect(x, canvas.height-h, barW, h);
+            x += barW + 1;
         }
     }
 
     function analyzeRhythm() {
-        if(!isListening) return;
-        setTimeout(analyzeRhythm, 20); 
-        const lowData = new Uint8Array(analyserLow.frequencyBinCount);
-        const highData = new Uint8Array(analyserHigh.frequencyBinCount);
-        analyserLow.getByteFrequencyData(lowData);
-        analyserHigh.getByteFrequencyData(highData);
-
-        let sumL = 0; for(let i=0; i<lowData.length; i++) sumL += lowData[i];
-        let sumH = 0; for(let i=0; i<highData.length; i++) sumH += highData[i];
+        if(!isListening) return; setTimeout(analyzeRhythm, 20);
+        const low = new Uint8Array(analyserLow.frequencyBinCount); analyserLow.getByteFrequencyData(low);
+        const high = new Uint8Array(analyserHigh.frequencyBinCount); analyserHigh.getByteFrequencyData(high);
         
-        const avgL = sumL / lowData.length;
-        const avgH = sumH / highData.length;
-        const threshold = micSens * 255 * 0.8; 
-
-        // Fix Density Logic
-        if(avgL > threshold) densityLow++;
-        if(avgH > (threshold * 0.6)) densityHigh++;
-
+        let sL = 0; for(let i of low) sL += i; let avgL = sL/low.length;
+        let sH = 0; for(let i of high) sH += i; let avgH = sH/high.length;
+        
+        const th = micSens * 255 * 0.8;
+        if(avgL > th) densityLow++; if(avgH > th*0.6) densityHigh++;
+        
         const now = Date.now();
-        if(avgL > threshold && (now - lastBeat > 280)) { 
-            processBeat(now);
-            lastBeat = now;
-        }
+        if(avgL > th && (now - lastBeat > 280)) { processBeat(now); lastBeat = now; }
     }
 
     function updateDensityUI() {
         if(!isListening) return;
-        let ratio = 0.0;
-        if(densityLow > 0) ratio = (densityHigh / densityLow).toFixed(1);
-        document.getElementById('density-display').innerText = ratio;
+        let r = densityLow > 0 ? (densityHigh/densityLow).toFixed(1) : "0.0";
+        document.getElementById('density-display').innerText = r;
         densityLow = 0; densityHigh = 0;
     }
 
     function processBeat(now) {
-        if(lastBeat > 0 && !aiLocked) {
-            if(discoEnabled) {
-                const el = document.getElementById('dance-name');
-                el.classList.remove('pulse-effect');
-                void el.offsetWidth;
-                el.classList.add('pulse-effect');
-            }
-            const bpm = Math.round(60000 / (now - lastBeat));
-            bpmBuffer.push(bpm);
-            if(bpmBuffer.length > 8) bpmBuffer.shift();
-            const avgBpm = Math.round(bpmBuffer.reduce((a,b)=>a+b,0) / bpmBuffer.length);
-            document.getElementById('bpm-display').innerText = avgBpm;
-            detectDance(avgBpm);
+        if(aiLocked) return;
+        if(discoEnabled) {
+            const el = document.getElementById('dance-name');
+            el.classList.remove('pulse-beat'); void el.offsetWidth; el.classList.add('pulse-beat');
         }
+        // BPM Auto-Calc would go here, simplified for manual Tap preference
     }
 
-    function detectDance(bpm) {
-        let matches = [];
-        for(const [dance, range] of Object.entries(expertRanges)) {
-            if(bpm >= range.min && bpm <= range.max) {
-                matches.push({ name: dance, tact: range.tact, rhythm: range.rhythm });
-            }
-        }
-        if(matches.length === 0) { updateDisplay("---", "--", "", false); return; }
-        const preferredMatches = matches.filter(m => preferredDances.some(p => m.name.toLowerCase().includes(p.toLowerCase())));
-        let winner = preferredMatches.length > 0 ? preferredMatches[0] : matches[0];
-        if(preferredMatches.length > 1) {
-            const nonDisco = preferredMatches.find(m => !m.name.toLowerCase().includes("disco"));
-            if(nonDisco) winner = nonDisco;
-        }
-        updateDisplay(winner.name, winner.tact, winner.rhythm, false);
-    }
-
-    function updateDisplay(dance, tact, rhythm, verified) {
-        document.getElementById('dance-name').innerText = dance;
-        document.getElementById('takt-display').innerText = tact;
-        document.getElementById('badge-rhythm').innerText = rhythm;
-        const m = document.getElementById('dance-name');
-        if(verified) m.classList.add('verified'); else m.classList.remove('verified');
-        document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
-    }
-
-    /* --- DUAL TAP LOGIC --- */
+    // --- DUAL TAP LOGIC ---
     let tapBuffer = [];
-
-    function initTapDetector() {
-        const btnL = document.getElementById('tapBtnL');
-        const btnH = document.getElementById('tapBtnH');
-        
-        if(btnL && btnH) {
-            btnL.addEventListener('pointerdown', (e) => handleTapInput(e, 'L'));
-            btnH.addEventListener('pointerdown', (e) => handleTapInput(e, 'H'));
-        }
-    }
-
-    function handleTapInput(e, type) {
-        e.preventDefault();
-        e.target.style.transform = "scale(0.9)";
-        setTimeout(() => e.target.style.transform = "scale(1)", 100);
-
+    function handleTapInput(type) { // 'L' or 'H'
         const now = Date.now();
-        if (tapBuffer.length > 0) {
-            const lastTap = tapBuffer[tapBuffer.length - 1].time;
-            if (now - lastTap > 2500) { resetTap(); tapBuffer = []; }
-        }
+        if(tapBuffer.length > 0 && now - tapBuffer[tapBuffer.length-1].t > 2500) resetTap();
+        
+        tapBuffer.push({ t: now, type: type });
+        if(tapBuffer.length > 12) tapBuffer.shift(); // Rolling Window
+        
+        // Visual
+        const viz = tapBuffer.map(x => `<div class="tap-viz-dot ${x.type==='H'?'heavy':'light'}"></div>`).join("");
+        document.getElementById('tap-viz').innerHTML = viz;
 
-        tapBuffer.push({ time: now, type: type });
-        if(tapBuffer.length > 12) tapBuffer.shift();
-
-        const viz = document.getElementById('tap-viz');
-        viz.innerHTML = tapBuffer.map(t => `<div class="tap-viz-dot ${t.type === 'H' ? 'heavy' : 'light'}"></div>`).join('');
-
-        if(tapBuffer.length >= 4) analyzeRollingTaps();
-        else document.getElementById('tap-result').innerText = "...";
+        if(tapBuffer.length >= 4) analyzeTapBuffer();
     }
 
-    function analyzeRollingTaps() {
+    function analyzeTapBuffer() {
         let intervals = [];
-        for(let i=1; i<tapBuffer.length; i++) intervals.push(tapBuffer[i].time - tapBuffer[i-1].time);
-        
-        const avgMs = intervals.reduce((a,b)=>a+b,0) / intervals.length;
-        const bpm = Math.round(60000/avgMs);
+        for(let i=1; i<tapBuffer.length; i++) intervals.push(tapBuffer[i].t - tapBuffer[i-1].t);
+        const avg = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+        const bpm = Math.round(60000/avg);
         document.getElementById('tap-bpm').innerText = bpm + " BPM";
 
-        const minInterval = Math.min(...intervals);
-        const rhythmPattern = intervals.map((int, i) => {
-            const isLong = int > minInterval * 1.45;
-            return (isLong ? "L" : "S"); 
-        }).join(""); 
-
-        let matches = [];
-        for(const [dance, data] of Object.entries(expertRanges)) {
-            if (bpm >= data.min - 12 && bpm <= data.max + 12) { 
-                const targetP = (data.rhythm || "").replace(/[^SL]/g, '');
-                const userP = rhythmPattern.replace(/ /g, '');
-                
-                if (targetP && (targetP.includes(userP) || userP.includes(targetP))) {
-                    matches.push(dance);
-                } else if (!targetP) {
-                    matches.push(dance + "?");
-                }
+        const minI = Math.min(...intervals);
+        // Pattern logic: Interval Length AND Tap Type
+        const pat = intervals.map((int, i) => {
+            const isLong = int > minI * 1.45;
+            // Map to S/L logic of database
+            return isLong ? "L" : "S";
+        }).join("");
+        
+        // Match
+        let found = [];
+        for(const [d, v] of Object.entries(expertRanges)) {
+            if(bpm >= v.min-15 && bpm <= v.max+15) {
+                const target = (v.rhythm || "").replace(/[^SL]/g, '');
+                // Basic substring check
+                if(!target || target.includes(pat) || pat.includes(target)) found.push(d);
             }
         }
-
-        const resEl = document.getElementById('tap-result');
-        if(matches.length > 0) {
-            const preferred = matches.filter(m => preferredDances.some(p => m.includes(p)));
-            resEl.innerText = preferred.length > 0 ? preferred[0] : matches[0];
-            resEl.style.color = preferred.length > 0 ? "var(--green)" : "var(--yellow)";
+        
+        const res = document.getElementById('tap-result');
+        if(found.length > 0) {
+            const match = found.find(f => preferredDances.some(p => f.includes(p))) || found[0];
+            res.innerText = match;
+            res.style.color = "var(--green)";
         } else {
-            resEl.innerText = "???";
-            resEl.style.color = "#666";
+            res.innerText = "???";
+            res.style.color = "var(--yellow)";
         }
     }
+    function resetTap() { tapBuffer=[]; document.getElementById('tap-bpm').innerText="0 BPM"; document.getElementById('tap-result').innerText="..."; document.getElementById('tap-viz').innerHTML=""; }
 
-    function resetTap() {
-        tapBuffer = [];
-        document.getElementById('tap-bpm').innerText = "0 BPM";
-        document.getElementById('tap-result').innerText = "---";
-        document.getElementById('tap-viz').innerHTML = "";
-    }
-
-    /* --- EXTERNAL INPUT --- */
-    function connectNtfy(topic) {
-        const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
-        es.onmessage = (e) => {
-            const d = JSON.parse(e.data);
-            if(d.message) handleExternalInput(d.message);
+    // --- BACKUP ---
+    function downloadBackup() {
+        const data = {
+            prefs: preferredDances,
+            history: danceHistory,
+            expert: expertRanges,
+            keys: { 
+                openai: localStorage.getItem('dm_openai_key'), 
+                gemini: localStorage.getItem('dm_gemini_key') 
+            }
         };
-    }
-    
-    function cleanTitle(input) {
-        if(!input) return "";
-        try {
-            if(typeof input === 'string' && (input.startsWith('{') || input.startsWith('"'))) {
-                 const parsed = JSON.parse(input); return cleanTitle(parsed); 
-            }
-            if(typeof input === 'object') {
-                if(input.body) return cleanTitle(input.body);
-                if(input.message) return cleanTitle(input.message);
-                if(input.title) return input.title;
-            }
-        } catch(e) {}
-        return input;
+        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "tanz_backup.json";
+        a.click();
     }
 
-    function handleExternalInput(rawStr) {
-        let clean = cleanTitle(rawStr);
-        if(!clean || typeof clean !== 'string' || clean.includes("Test")) return;
-        let artist = "Unbekannt", title = clean;
-        if(clean.includes("-")) {
-            const parts = clean.split("-");
-            artist = parts[0].trim();
-            title = parts.slice(1).join("-").trim();
-        }
-        document.getElementById('song-title').innerText = title;
-        document.getElementById('song-artist').innerText = artist;
-        document.getElementById('song-info').style.opacity = 1;
-        const cached = danceHistory.find(x => x.title.toLowerCase().trim() === title.toLowerCase().trim());
-        aiLocked = true; 
-        if(cached) {
-            updateDisplay(cached.dance, cached.tact || "4/4", cached.rhythm || "-", true);
-            document.getElementById('bpm-display').innerText = cached.bpm || "DB";
-            document.getElementById('badge-source').innerText = "DB";
-        } else {
-            askAI(artist, title);
-        }
+    function loadBackup(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const r = new FileReader();
+        r.onload = (e) => {
+            try {
+                const d = JSON.parse(e.target.result);
+                if(d.prefs) localStorage.setItem('dm_prefs', JSON.stringify(d.prefs));
+                if(d.history) localStorage.setItem('dm_history', JSON.stringify(d.history));
+                if(d.expert) localStorage.setItem('dm_expert', JSON.stringify(d.expert));
+                if(d.keys) {
+                    if(d.keys.openai) localStorage.setItem('dm_openai_key', d.keys.openai);
+                    if(d.keys.gemini) localStorage.setItem('dm_gemini_key', d.keys.gemini);
+                }
+                alert("Backup geladen! Neustart...");
+                location.reload();
+            } catch(err) { alert("Datei fehlerhaft!"); }
+        };
+        r.readAsText(file);
     }
 
-    async function askAI(artist, title) {
-        const prov = document.getElementById('ai-provider').value;
-        const key = document.getElementById('api-key').value.trim();
-
-        if(!key) { updateDisplay("KEY?", "--", "", false); return; }
-        
-        updateDisplay("KI DENKT...", "", "", false);
-        document.getElementById('mic-btn').classList.add('ai-mode');
-        
-        const promptText = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return ONLY JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
-
-        try {
-            let data;
-            
-            if (prov === 'gemini') {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
-                const res = await fetch(url, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                });
-                const json = await res.json();
-                if(json.error) throw new Error("Gemini: " + json.error.message);
-                const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-                const cleanJson = rawText.replace(/```json|```/g, '').trim();
-                data = JSON.parse(cleanJson);
-            } else {
-                const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                    body: JSON.stringify({ model: "gpt-5.2", messages: [{ role: "user", content: promptText }], max_tokens: 60 })
-                });
-                if(!res.ok) throw new Error("OpenAI: " + res.status);
-                const json = await res.json();
-                const raw = json.choices[0].message.content;
-                const match = raw.match(/\{[\s\S]*\}/);
-                if (!match) throw new Error("JSON Format Error");
-                data = JSON.parse(match[0]);
-            }
-
-            danceHistory.unshift({
-                date: new Date().toLocaleDateString('de-DE'),
-                title: title, artist: artist,
-                dance: data.dance, bpm: data.bpm,
-                tact: data.tact, rhythm: data.rhythm, stars: 0
-            });
-            localStorage.setItem('dm_history', JSON.stringify(danceHistory));
-            renderHistory();
-            updateDisplay(data.dance, data.tact, data.rhythm, true);
-            document.getElementById('bpm-display').innerText = data.bpm;
-
-        } catch(e) {
-            let msg = e.message.includes("401") ? "KEY FALSCH" : (e.message.includes("429") ? "LIMIT" : "NETZWERK/KI");
-            updateDisplay(msg, "--", "!", false);
-        }
-        setTimeout(() => { document.getElementById('mic-btn').classList.remove('ai-mode'); }, 1000); 
-    }
-
+    // --- API ---
     async function testAI() {
         const k = document.getElementById('api-key').value.trim();
         const prov = document.getElementById('ai-provider').value;
-        
         if(!k) return alert("Key fehlt!");
-        
+
         try {
-            if (prov === 'gemini') {
+            if(prov === 'gemini') {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
-                const r = await fetch(url, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
-                });
+                const r = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] }) });
                 const d = await r.json();
                 if(d.error) throw new Error(d.error.message);
             } else {
+                // FIXED GPT-4o
                 const r = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method:'POST', 
-                    headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
-                    body:JSON.stringify({model:"gpt-5.2", messages:[{role: "user", content: "Hi"}], max_tokens:5})
+                    method:'POST', headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
+                    body:JSON.stringify({model:"gpt-4o", messages:[{role: "user", content: "Hi"}], max_tokens:5}) 
                 });
                 if(!r.ok) throw new Error("Status " + r.status);
             }
@@ -788,162 +653,35 @@
         } catch(e) { alert("Fehler: " + e.message); }
     }
 
-    function toggleQR(imgId, url) {
-        const img = document.getElementById(imgId);
-        if (img.style.display === 'block') {
-            img.style.display = 'none';
-        } else {
-            img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(url);
-            img.style.display = 'block';
-        }
-    }
-
-    function openOverlay(id) {
-        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'library-overlay') renderLibrary();
-    }
-    function closeOverlays() {
-        document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
-        const v = document.getElementById('main-video');
-        if(!v.paused) v.pause();
-    }
-    function updateSpeedLabel(val) {
-        playbackSpeed = parseFloat(val);
-        document.getElementById('speed-val').innerText = playbackSpeed + "x";
-        const v = document.getElementById('main-video');
-        if(v) v.playbackRate = playbackSpeed;
-    }
+    // --- UI Helpers ---
+    function openOverlay(id) { document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'library-overlay') renderLibrary(); }
+    function closeOverlays() { document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active')); const v = document.getElementById('main-video'); if(!v.paused) v.pause(); }
+    function updateSpeedLabel(val) { playbackSpeed = parseFloat(val); document.getElementById('speed-val').innerText = playbackSpeed + "x"; const v = document.getElementById('main-video'); if(v) v.playbackRate = playbackSpeed; }
     function saveSettings() {
-        const currentKey = document.getElementById('api-key').value.trim();
-        const currentProv = document.getElementById('ai-provider').value;
-        if (currentProv === 'gemini') localStorage.setItem('dm_gemini_key', currentKey);
-        else localStorage.setItem('dm_openai_key', currentKey);
-        localStorage.setItem('dm_ai_provider', currentProv);
-        localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value.trim());
+        const k = document.getElementById('api-key').value.trim();
+        const p = document.getElementById('ai-provider').value;
+        if(p === 'gemini') localStorage.setItem('dm_gemini_key', k); else localStorage.setItem('dm_openai_key', k);
+        localStorage.setItem('dm_ai_provider', p);
+        localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value);
         localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
         localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
-        localStorage.setItem('dm_speed', playbackSpeed);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
-        const inputs = document.querySelectorAll('.expert-input');
-        inputs.forEach(inp => {
-            const dance = inp.dataset.dance;
-            const type = inp.dataset.type;
-            if(expertRanges[dance]) expertRanges[dance][type] = (type === 'rhythm' ? inp.value : parseInt(inp.value));
-        });
-        localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
         location.reload();
     }
-    function updateSens(val) {
-        document.getElementById('main-sens').value = val;
-        document.getElementById('sens-val-display').innerText = val;
-        micSens = val / 1000; 
-        localStorage.setItem('dm_sens', val);
-    }
-    function renderPrefs() {
-        const list = document.getElementById('pref-list');
-        list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join('');
-    }
-    function addPref() {
-        const v = document.getElementById('new-pref').value.trim();
-        if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); }
-    }
-    function renderHistory() {
-        const f = document.getElementById('search-hist').value.toLowerCase();
-        const list = document.getElementById('history-list');
-        let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f) || (h.artist && h.artist.toLowerCase().includes(f)));
-        filtered.sort((a,b) => new Date(b.date.split('.').reverse().join('-')) - new Date(a.date.split('.').reverse().join('-')));
-        list.innerHTML = filtered.map(h => {
-            const idx = danceHistory.indexOf(h);
-            return `<div class="hist-card"><div class="hist-del" onclick="delHist(${idx})">✕</div><div class="hist-title">${h.title}</div><div class="hist-artist">${h.artist || 'Unbekannt'}</div><div class="hist-info"><span>${h.dance}</span><span style="color:#666;">${h.date}</span></div><div class="hist-stars">${[1,2,3,4,5].map(s => `<span class="star-btn ${s<=h.stars?'active':''}" onclick="setStar(${idx},${s})">★</span>`).join('')}</div></div>`;
-        }).join('');
-    }
-    function setStar(idx, n) { danceHistory[idx].stars = n; localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); }
-    function delHist(idx) { if(confirm("Löschen?")) { danceHistory.splice(idx,1); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); } }
-    function exportData() {
-        const a = document.createElement('a');
-        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(danceHistory));
-        a.download = "tanz_db.json";
-        document.body.appendChild(a); a.click(); a.remove();
-    }
-    function importData(input) {
-        const r = new FileReader();
-        r.onload = (e) => { try { danceHistory=JSON.parse(e.target.result); localStorage.setItem('dm_history', JSON.stringify(danceHistory)); renderHistory(); alert("Import OK!"); } catch(x){ alert("Fehler!"); } };
-        r.readAsText(input.files[0]);
-    }
-    function renderExpert() {
-        const el = document.getElementById('expert-list');
-        el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}"><input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}"><input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}"></div>`).join('');
-    }
-    function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
-    
-    function renderLibrary() {
-        const c = document.getElementById('library-content');
-        c.innerHTML = '<div class="dance-grid"></div>';
-        const grid = c.querySelector('.dance-grid');
-        Object.keys(videoLibrary).forEach(dance => {
-            const card = document.createElement('div');
-            card.className = 'dance-card';
-            card.innerHTML = `<h3>${dance}</h3>`;
-            card.onclick = () => showFigures(dance);
-            grid.appendChild(card);
-        });
-    }
-    function showFigures(dance) {
-        const data = videoLibrary[dance];
-        if(!data.file) return alert("Kein Video vorhanden.");
-        const c = document.getElementById('library-content');
-        currentDance = dance; 
-        let html = `<button class="btn-action btn-secondary" style="margin-bottom:15px;" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`;
-        data.figures.forEach((fig, idx) => {
-            html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span class="figure-play">▶</span></div>`;
-        });
-        c.innerHTML = html + "</div>";
-    }
-    
-    let curStart=0, curEnd=0;
-    function playVid(src, s, e, t, idx) {
-        const o = document.getElementById('fs-video-overlay');
-        const v = document.getElementById('main-video');
-        o.classList.add('active');
-        currentFigIdx = idx; 
-        document.getElementById('vid-info').innerText = t;
-        const safeStart = s + 0.1;
-        const safeEnd = Math.max(safeStart, e - 0.2); 
-        v.src = src; 
-        v.currentTime = safeStart; 
-        curStart = safeStart; 
-        curEnd = safeEnd;
-        v.playbackRate = playbackSpeed;
-        v.muted = !videoSound; 
-        v.play();
-        v.ontimeupdate = () => { if(v.currentTime >= curEnd) { v.pause(); v.currentTime = curEnd; } };
-    }
-    function replayFigure() { const v = document.getElementById('main-video'); v.currentTime = curStart; v.playbackRate = playbackSpeed; v.play(); }
-    
-    function nextFigure() {
-        const figs = videoLibrary[currentDance].figures;
-        if (currentFigIdx < figs.length - 1) {
-            const nextFig = figs[currentFigIdx + 1];
-            playVid(videoLibrary[currentDance].file, nextFig.start, nextFig.end, nextFig.name, currentFigIdx + 1);
-        }
-    }
-    function prevFigure() {
-        const figs = videoLibrary[currentDance].figures;
-        if (currentFigIdx > 0) {
-            const prevFig = figs[currentFigIdx - 1];
-            playVid(videoLibrary[currentDance].file, prevFig.start, prevFig.end, prevFig.name, currentFigIdx - 1);
-        }
-    }
-
-    function testFunk() { 
-        const t = document.getElementById('ntfy-topic').value;
-        if(!t) return alert("Topic fehlt!");
-        fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test Artist - Test Title'})})
-        .then(() => alert("Signal gesendet!"))
-        .catch(e => alert("Funk Fehler: " + e));
-    }
-    
+    function updateSens(val) { document.getElementById('main-sens').value = val; document.getElementById('sens-val-display').innerText = val; micSens = val / 1000; localStorage.setItem('dm_sens', val); }
+    function renderPrefs() { const list = document.getElementById('pref-list'); list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join(''); }
+    function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); } }
+    function renderHistory() { const f = document.getElementById('search-hist').value.toLowerCase(); const list = document.getElementById('history-list'); let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f)); list.innerHTML = filtered.map(h => `<div class="hist-card"><div class="hist-title">${h.title}</div><div class="hist-info"><span>${h.dance}</span></div></div>`).join(''); }
+    function exportData() { downloadBackup(); }
+    function importData(input) { loadBackup(input); }
+    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="text" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
+    function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
+    function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span>▶</span></div>`; }); c.innerHTML = html + "</div>"; }
+    function playVid(src, s, e, t, idx) { const o = document.getElementById('fs-video-overlay'); const v = document.getElementById('main-video'); o.classList.add('active'); currentFigIdx = idx; document.getElementById('vid-info').innerText = t; v.src = src; v.currentTime = s; v.play(); }
+    function nextFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx < figs.length - 1) playVid(videoLibrary[currentDance].file, figs[currentFigIdx+1].start, figs[currentFigIdx+1].end, figs[currentFigIdx+1].name, currentFigIdx+1); }
+    function prevFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx > 0) playVid(videoLibrary[currentDance].file, figs[currentFigIdx-1].start, figs[currentFigIdx-1].end, figs[currentFigIdx-1].name, currentFigIdx-1); }
+    function replayFigure() { const v = document.getElementById('main-video'); const figs = videoLibrary[currentDance].figures; v.currentTime = figs[currentFigIdx].start; v.play(); }
+    function testFunk() { const t = document.getElementById('ntfy-topic').value; fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test'})}).then(()=>alert("OK")).catch(e=>alert(e)); }
 </script>
 </body>
 </html>
