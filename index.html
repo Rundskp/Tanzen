@@ -16,11 +16,11 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
         body { display: flex; flex-direction: column; }
         
-        /* HEADER (Z-Index fix) */
+        /* HEADER (Z-Index 5000) */
         #top-bar { 
             display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; 
             padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; 
-            z-index: 5000; position: relative; flex-shrink: 0;
+            z-index: 5000; flex-shrink: 0; position: relative;
         }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
@@ -41,19 +41,19 @@
             padding: 10px; width: 100%; padding-right: 60px; z-index: 10; 
         }
 
-        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; text-align: center; }
+        #song-info { width: 100%; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; transition: opacity 0.5s; opacity: 0; text-align: center; }
         #song-title { font-size: 1.4rem; color: var(--yellow); font-weight: 800; text-shadow: 0 0 10px rgba(255,204,0,0.3); max-width: 95%; line-height: 1.1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #song-artist { font-size: 1rem; color: #bbb; font-weight: 500; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         #ai-details { font-size: 0.8rem; color: #aaa; margin-top: 8px; display: flex; gap: 6px; }
         .detail-badge { background: #333; padding: 3px 8px; border-radius: 6px; border: 1px solid #444; font-weight: bold; letter-spacing: 0.5px; }
 
         .dance-wrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 150px; }
-        #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; transition: transform 0.1s; }
+        #dance-name { font-size: clamp(2.5rem, 11vw, 5rem); font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.9; color: #fff; text-align: center; transition: transform 0.05s; }
         #dance-name.verified { color: var(--green); text-shadow: 0 0 25px rgba(52, 199, 89, 0.6); }
         
-        /* DISCO PULSE */
-        .pulse-beat { animation: beatPop 0.15s ease-out; }
-        @keyframes beatPop { 0% { transform: scale(1); } 50% { transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.5); } 100% { transform: scale(1); } }
+        /* Disco Pulse */
+        .pulse-beat { animation: beatPop 0.1s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes beatPop { 0% { transform: scale(1); } 50% { transform: scale(1.15); text-shadow: 0 0 30px rgba(255,255,255,0.8); } 100% { transform: scale(1); } }
 
         .status-indicators { display: flex; gap: 15px; margin-top: 10px; align-items: flex-end; margin-bottom: 10px; width: 100%; justify-content: center; }
         .stat-box { display: flex; flex-direction: column; align-items: center; width: 80px; }
@@ -72,7 +72,7 @@
         input[type=range].vertical { writing-mode: vertical-lr; direction: rtl; width: 6px; height: 100%; outline: none; background: transparent; cursor: pointer; z-index: 2; }
         #sens-val-display { font-family: monospace; font-size: 0.75rem; margin-top: 10px; color: var(--blue); font-weight: bold; }
 
-        /* OVERLAYS (Höherer Z-Index) */
+        /* OVERLAYS */
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; flex-direction: column; padding: 20px; overflow-y: auto; }
         .overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
@@ -91,21 +91,17 @@
         .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
         .btn-test-small { background: #444; border: 1px solid #666; color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-left: 10px; }
 
-        /* Donate (RSVP Style) */
+        /* Donate (CSS Only Buttons) */
         .ctaGrid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px; }
-        @media (max-width:600px){ .ctaGrid{ grid-template-columns: 1fr; } }
         .payCard { border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.05); border-radius: 14px; padding: 12px; }
         .payCardHeading { color: var(--muted); font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; }
-        .paypal-btn-css {
-            display: flex; align-items: center; justify-content: center;
-            background: #003087; color: white; font-weight: bold; font-size: 1.1rem;
-            border-radius: 12px; padding: 15px; text-decoration: none; width: 100%; margin-top: 10px;
+        .paypal-btn { 
+            display: flex; align-items: center; justify-content: center; 
+            background: #0070ba; color: white; font-weight: bold; font-family: sans-serif;
+            border-radius: 20px; padding: 12px; width: 100%; text-decoration: none; margin-bottom: 10px;
         }
-        .qrImg { width: 100%; max-width: 200px; border-radius: 14px; border:2px solid #fff; background: white; padding: 5px; margin-top:10px; display: none; }
-        .addrBox { margin-top: 8px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.3); border-radius: 14px; padding: 10px; font-family: monospace; font-size: 0.8rem; word-break: break-all; color: var(--muted); }
-        
-        .donate-btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .donate-mini-btn { background: #333; color: white; border: 1px solid #555; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; flex: 1; }
+        .btc-addr { font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; font-size: 0.75rem; color: #aaa; word-break: break-all; margin-bottom: 10px; }
+        .qr-canvas { width: 100%; max-width: 150px; background: white; padding: 5px; border-radius: 8px; display: none; margin: 10px auto; }
 
         /* Other */
         #pref-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
@@ -114,7 +110,6 @@
         .expert-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr; gap: 8px; margin-bottom: 8px; align-items: center; font-size: 0.8rem; }
         .expert-row input { text-align: center; padding: 8px; font-size: 0.8rem; }
         .expert-header { font-weight: bold; color: #888; margin-bottom: 10px; }
-        
         #history-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .hist-card { background: #151515; border: 1px solid #333; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 6px; position: relative; }
         .hist-del { position: absolute; top: 10px; right: 10px; color: #555; font-weight: bold; padding: 10px; cursor: pointer; }
@@ -153,8 +148,7 @@
 
         /* --- DUAL TAP DETECTOR --- */
         #tap-pad { flex: 1; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; width: 100%; }
-        
-        .tap-row { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; }
+        .tap-row { display: flex; gap: 25px; align-items: center; justify-content: center; width: 100%; }
         
         .tap-circle { 
             width: 120px; height: 120px; border-radius: 50%; 
@@ -162,27 +156,27 @@
             font-weight: 800; cursor: pointer; user-select: none; 
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.05s, box-shadow 0.1s;
-            color: #ccc; border: 3px solid #444; background: #222;
+            color: #ccc; border: 4px solid #444; background: #222;
         }
         
         /* Light Button */
-        #tapBtnL { font-size: 1rem; }
-        #tapBtnL:active { transform: scale(0.9); background: #333; border-color: #888; color: white; }
+        #tapL { font-size: 1rem; }
+        #tapL:active { transform: scale(0.9); background: #333; border-color: #888; color: white; }
         
         /* Heavy Button */
-        #tapBtnH { 
+        #tapH { 
             width: 140px; height: 140px; 
             background: radial-gradient(circle, #331111 0%, #110000 100%); 
-            border: 5px solid var(--red); font-size: 1.2rem; color: var(--red);
+            border: 6px solid var(--red); font-size: 1.2rem; color: var(--red);
         }
-        #tapBtnH:active { transform: scale(0.9); background: var(--red); color: white; box-shadow: 0 0 30px var(--red); }
+        #tapH:active { transform: scale(0.9); background: var(--red); color: white; box-shadow: 0 0 30px var(--red); }
 
         #tap-status { font-size: 1rem; color: #888; min-height: 20px; text-align:center; }
         #tap-result { font-size: 2.2rem; font-weight: 900; color: var(--yellow); margin-top: 15px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.4); min-height: 40px; text-align: center; }
         
         /* Visualizer dots */
         .tap-viz-container { display: flex; gap: 5px; margin-top: 10px; height: 15px; align-items: center; }
-        .tap-viz-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; }
+        .tap-viz-dot { width: 12px; height: 12px; background: #333; border-radius: 50%; }
         .tap-viz-dot.heavy { background: var(--red); transform: scale(1.3); box-shadow: 0 0 5px var(--red); }
         .tap-viz-dot.light { background: #888; }
     </style>
@@ -236,19 +230,13 @@
     <div class="settings-group">
         <div class="row">
             <label>KI Modell</label>
-            <select id="ai-provider" style="width:60%;" onchange="handleProviderChange()">
-                <option value="openai">OpenAI (GPT-4o)</option>
+            <select id="ai-provider" style="width:65%;" onchange="handleProviderChange()">
+                <option value="openai">OpenAI (GPT-High/5.2)</option>
                 <option value="gemini">Google Gemini (2.0 Flash)</option>
             </select>
         </div>
-        <div class="row">
-            <label>API Key</label>
-            <div style="display:flex; gap:10px; width:60%;">
-                <input type="password" id="api-key" placeholder="Key..." style="flex:1">
-                <button class="btn-test-small" onclick="testAI()">TEST</button>
-            </div>
-        </div>
-        <div class="row"><label>Funk-Topic</label><div style="display:flex; gap:10px; width:60%;"><input type="text" id="ntfy-topic" placeholder="Topic..." style="flex:1"><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
+        <div class="row"><label>API Key</label><div style="display:flex; gap:10px; width:65%;"><input type="password" id="api-key" placeholder="Key hier..."><button class="btn-test-small" onclick="testAI()">TEST</button></div></div>
+        <div class="row"><label>Funk-Topic</label><div style="display:flex; gap:10px; width:65%;"><input type="text" id="ntfy-topic" placeholder="Topic..."><button class="btn-test-small" onclick="testFunk()">TEST</button></div></div>
         <div class="row" style="margin-top:15px;"><label>Disco-Modus</label><input type="checkbox" id="disco-mode"></div>
         <div class="row"><label>Video Ton</label><input type="checkbox" id="video-audio"></div>
         <div class="row"><label>Speed</label><div style="width: 50%;"><input type="range" class="horizontal" id="video-speed" min="0.25" max="1.0" step="0.25" value="1.0" oninput="updateSpeedLabel(this.value)"><div id="speed-val" style="text-align:right; font-size:0.8rem; color:var(--blue);">1.0x</div></div></div>
@@ -272,32 +260,6 @@
         <div class="row"><label>Datenbank</label><input type="text" id="search-hist" placeholder="Suche..." style="width:40%;" oninput="renderHistory()"></div>
         <div id="history-list"></div>
         <div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-action btn-secondary" onclick="exportData()">Export DB</button><button class="btn-action btn-secondary" onclick="document.getElementById('file-imp').click()">Import DB</button><input type="file" id="file-imp" style="display:none" onchange="importData(this)"></div>
-    </div>
-</div>
-
-<div id="donate-overlay" class="overlay">
-    <div class="overlay-header"><h2 class="overlay-title">Spenden</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
-    <div class="settings-group">
-        <p class="donate-text">Support via PayPal oder Bitcoin. ❤️</p>
-        <div class="ctaGrid">
-            <div class="payCard">
-                <div class="payCardHeading">PayPal</div>
-                <a class="paypal-btn-css" href="https://paypal.me/rophko" target="_blank" rel="noopener">PayPal öffnen</a>
-                <div class="donate-btn-row">
-                    <button id="btnPaypalQR" type="button" class="donate-mini-btn">QR anzeigen</button>
-                </div>
-                <img id="paypalQrImg" class="qrImg" />
-            </div>
-            <div class="payCard">
-                <div class="payCardHeading">Bitcoin</div>
-                <div class="addrBox" id="btcAddr">bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f</div>
-                <div class="donate-btn-row">
-                    <button id="btnCopyBtc" type="button" class="donate-mini-btn">Kopieren</button>
-                    <button id="btnBtcQR" type="button" class="donate-mini-btn">QR</button>
-                </div>
-                <img id="btcQrImg" class="qrImg" />
-            </div>
-        </div>
     </div>
 </div>
 
@@ -332,8 +294,7 @@
 <div id="tap-overlay" class="overlay">
     <div class="overlay-header"><h2 class="overlay-title">Tap Detektor</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
     <div style="text-align:center; color:#888; margin-bottom:20px;">
-        Links = Leicht | Rechts = Betonung<br>
-        <span style="font-size:0.8rem; color:#666;">Analysiert Tempo & Muster</span>
+        Klopfe den Rhythmus. Links = Leicht, Rechts = Betonung.
     </div>
     <div id="tap-pad">
         <div class="tap-row">
@@ -347,24 +308,44 @@
     <button class="btn-action btn-secondary" onclick="resetTap()">Reset</button>
 </div>
 
-<script>
-    // LEGAL & CONSOLE
-    console.log(`%c Tanz das! Ultimate v4.0 (FIXED) `, "color: #2b7cff; font-weight: bold;");
+<div id="donate-overlay" class="overlay">
+    <div class="overlay-header"><h2 class="overlay-title">Spenden</h2><button class="close-btn" onclick="closeOverlays()">✕</button></div>
+    <div class="settings-group">
+        <p class="donate-text">Support via PayPal oder Bitcoin. ❤️</p>
+        <div class="ctaGrid">
+            <div class="payCard">
+                <div class="payCardHeading">PayPal</div>
+                <a href="https://paypal.me/rophko" target="_blank" class="paypal-btn">PayPal öffnen</a>
+                <button class="btn-test-small" style="width:100%" onclick="toggleQR('paypalQrImg', 'https://paypal.me/rophko')">QR anzeigen</button>
+                <img id="paypalQrImg" class="qrImg" />
+            </div>
+            <div class="payCard">
+                <div class="payCardHeading">Bitcoin</div>
+                <div class="addrBox">bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f</div>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <button class="btn-test-small" style="flex:1" onclick="navigator.clipboard.writeText('bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f').then(()=>alert('Kopiert!'))">Kopieren</button>
+                    <button class="btn-test-small" style="flex:1" onclick="toggleQR('btcQrImg', 'bitcoin:bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f')">QR</button>
+                </div>
+                <img id="btcQrImg" class="qrImg" />
+            </div>
+        </div>
+    </div>
+</div>
 
-    // --- CONSTANTS ---
-    const DONATE = { paypal: "https://paypal.me/rophko", btc: "bc1qwr08y9ngmvplpr8tuk4w34rl4pkryur8u4cf5f" };
+<script>
+    // LEGAL
+    console.log(`%c Tanz das! Ultimate v4.0 (Final) `, "color: #2b7cff; font-weight: bold;");
 
     // --- STATE ---
     let audioCtx, analyserLow, analyserHigh, isListening = false;
-    let lastBeat = 0, aiLocked = false;
-    let micSens = 0.04; 
+    let lastBeat = 0, aiLocked = false, micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
     let densityLow = 0, densityHigh = 0;
     let currentDance = "", currentFigIdx = 0;
 
-    // --- EXPERT DATA ---
+    // EXPERT RANGES
     const defaultRanges = {
         "Tango Argentino": { min: 55, max: 65, tact: "2/4", rhythm: "L L S" },
         "Langsamer Walzer": { min: 85, max: 95, tact: "3/4", rhythm: "L L L" },
@@ -380,7 +361,7 @@
     };
     let expertRanges = JSON.parse(JSON.stringify(defaultRanges));
 
-    // --- VIDEO LIBRARY ---
+    // VIDEO LIBRARY
     const videoLibrary = {
         "Cha Cha Cha": { file: "media/chacha.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.55 }, { name: "2. Wiegeschritt", start: 17.55, end: 30.48 }, { name: "3. Damensolo", start: 30.48, end: 52.88 }, { name: "4. New Yorker", start: 52.88, end: 80.30 }, { name: "5. Hand to Hand", start: 80.30, end: 103.50 }, { name: "6. Shoulder to Shoulder", start: 103.50, end: 123.37 }, { name: "7. Fan & Alemana", start: 123.37, end: 141.97 }, { name: "8. Hockeystick", start: 141.97, end: 169.44 }, { name: "9. Aida", start: 169.44, end: 197.17 }] },
         "Rumba": { file: "media/rumba.mp4", figures: [{ name: "1. Grundschritt", start: 0.00, end: 17.13 }, { name: "2. Damensolo", start: 17.13, end: 36.33 }, { name: "3. Hand to Hand", start: 36.33, end: 64.93 }, { name: "4. Shoulder to Shoulder", start: 64.93, end: 93.73 }, { name: "5. Fan & Alemana", start: 93.73, end: 115.33 }, { name: "6. Hockeystick", start: 115.33, end: 149.10 }, { name: "7. Aida", start: 149.10, end: 177.73 }] },
@@ -416,26 +397,9 @@
         
         renderPrefs(); renderHistory(); renderExpert();
         document.body.addEventListener('touchstart', function() { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, {once:true});
-
-        // Donate
-        if(document.getElementById('btnPaypalQR')) {
-            document.getElementById('btnPaypalQR').addEventListener("click", () => {
-                const img = document.getElementById('paypalQrImg');
-                img.style.display = (img.style.display === 'block') ? 'none' : 'block';
-                if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(DONATE.paypal);
-            });
-            document.getElementById('btnBtcQR').addEventListener("click", () => {
-                const img = document.getElementById('btcQrImg');
-                img.style.display = (img.style.display === 'block') ? 'none' : 'block';
-                if(img.style.display === 'block') img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent("bitcoin:"+DONATE.btc);
-            });
-            document.getElementById('btnCopyBtc').addEventListener("click", () => {
-                navigator.clipboard.writeText(DONATE.btc).then(() => alert("Adresse kopiert!"));
-            });
-        }
     };
 
-    // --- CORE LOGIC ---
+    // --- LOGIC ---
     function loadKeyIntoInput() {
         const prov = document.getElementById('ai-provider').value;
         let val = "";
@@ -451,6 +415,9 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
+    /* --- AUDIO ENGINE --- */
+    let bpmBuffer = [];
+    
     function mainAction() {
         const btn = document.getElementById('mic-btn');
         if(btn.innerText === "START") toggleMic(); else {
@@ -534,19 +501,50 @@
             const el = document.getElementById('dance-name');
             el.classList.remove('pulse-beat'); void el.offsetWidth; el.classList.add('pulse-beat');
         }
-        // BPM Auto-Calc would go here, simplified for manual Tap preference
+        const bpm = Math.round(60000 / (now - lastBeat));
+        bpmBuffer.push(bpm);
+        if(bpmBuffer.length > 8) bpmBuffer.shift();
+        const avgBpm = Math.round(bpmBuffer.reduce((a,b)=>a+b,0) / bpmBuffer.length);
+        document.getElementById('bpm-display').innerText = avgBpm;
+        detectDance(avgBpm);
+        lastBeat = now;
     }
 
-    // --- DUAL TAP LOGIC ---
+    function detectDance(bpm) {
+        let matches = [];
+        for(const [dance, range] of Object.entries(expertRanges)) {
+            if(bpm >= range.min && bpm <= range.max) {
+                matches.push({ name: dance, tact: range.tact, rhythm: range.rhythm });
+            }
+        }
+        if(matches.length === 0) { updateDisplay("---", "--", "", false); return; }
+        const preferredMatches = matches.filter(m => preferredDances.some(p => m.name.toLowerCase().includes(p.toLowerCase())));
+        let winner = preferredMatches.length > 0 ? preferredMatches[0] : matches[0];
+        if(preferredMatches.length > 1) {
+            const nonDisco = preferredMatches.find(m => !m.name.toLowerCase().includes("disco"));
+            if(nonDisco) winner = nonDisco;
+        }
+        updateDisplay(winner.name, winner.tact, winner.rhythm, false);
+    }
+
+    function updateDisplay(dance, tact, rhythm, verified) {
+        document.getElementById('dance-name').innerText = dance;
+        document.getElementById('takt-display').innerText = tact;
+        document.getElementById('badge-rhythm').innerText = rhythm;
+        const m = document.getElementById('dance-name');
+        if(verified) m.classList.add('verified'); else m.classList.remove('verified');
+        document.getElementById('badge-source').innerText = verified ? "KI / DB" : "LOKAL";
+    }
+
+    // --- DUAL TAP LOGIC (FIXED) ---
     let tapBuffer = [];
-    function handleTapInput(type) { // 'L' or 'H'
+    function handleTapInput(type) { 
         const now = Date.now();
         if(tapBuffer.length > 0 && now - tapBuffer[tapBuffer.length-1].t > 2500) resetTap();
         
         tapBuffer.push({ t: now, type: type });
-        if(tapBuffer.length > 12) tapBuffer.shift(); // Rolling Window
+        if(tapBuffer.length > 12) tapBuffer.shift(); 
         
-        // Visual
         const viz = tapBuffer.map(x => `<div class="tap-viz-dot ${x.type==='H'?'heavy':'light'}"></div>`).join("");
         document.getElementById('tap-viz').innerHTML = viz;
 
@@ -561,19 +559,13 @@
         document.getElementById('tap-bpm').innerText = bpm + " BPM";
 
         const minI = Math.min(...intervals);
-        // Pattern logic: Interval Length AND Tap Type
-        const pat = intervals.map((int, i) => {
-            const isLong = int > minI * 1.45;
-            // Map to S/L logic of database
-            return isLong ? "L" : "S";
-        }).join("");
+        // Pattern: Interval AND Type
+        const pat = intervals.map(i => (i > minI * 1.45) ? "L" : "S").join("");
         
-        // Match
         let found = [];
         for(const [d, v] of Object.entries(expertRanges)) {
             if(bpm >= v.min-15 && bpm <= v.max+15) {
                 const target = (v.rhythm || "").replace(/[^SL]/g, '');
-                // Basic substring check
                 if(!target || target.includes(pat) || pat.includes(target)) found.push(d);
             }
         }
@@ -588,7 +580,7 @@
             res.style.color = "var(--yellow)";
         }
     }
-    function resetTap() { tapBuffer=[]; document.getElementById('tap-bpm').innerText="0 BPM"; document.getElementById('tap-result').innerText="..."; document.getElementById('tap-viz').innerHTML=""; }
+    function resetTap() { tapBuffer=[]; document.getElementById('tap-bpm').innerText="0 BPM"; document.getElementById('tap-result').innerText="Starten..."; document.getElementById('tap-viz').innerHTML=""; }
 
     // --- BACKUP ---
     function downloadBackup() {
@@ -596,10 +588,7 @@
             prefs: preferredDances,
             history: danceHistory,
             expert: expertRanges,
-            keys: { 
-                openai: localStorage.getItem('dm_openai_key'), 
-                gemini: localStorage.getItem('dm_gemini_key') 
-            }
+            keys: { openai: localStorage.getItem('dm_openai_key'), gemini: localStorage.getItem('dm_gemini_key') }
         };
         const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
         const a = document.createElement('a');
@@ -609,8 +598,7 @@
     }
 
     function loadBackup(input) {
-        const file = input.files[0];
-        if(!file) return;
+        const file = input.files[0]; if(!file) return;
         const r = new FileReader();
         r.onload = (e) => {
             try {
@@ -642,7 +630,6 @@
                 const d = await r.json();
                 if(d.error) throw new Error(d.error.message);
             } else {
-                // FIXED GPT-4o
                 const r = await fetch('https://api.openai.com/v1/chat/completions', {
                     method:'POST', headers:{'Content-Type': 'application/json', 'Authorization': `Bearer ${k}`}, 
                     body:JSON.stringify({model:"gpt-4o", messages:[{role: "user", content: "Hi"}], max_tokens:5}) 
@@ -651,6 +638,44 @@
             }
             alert("Verbindung OK! ✅");
         } catch(e) { alert("Fehler: " + e.message); }
+    }
+
+    async function askAI(artist, title) {
+        const prov = localStorage.getItem('dm_ai_provider') || 'openai';
+        let key = prov === 'gemini' ? localStorage.getItem('dm_gemini_key') : localStorage.getItem('dm_openai_key');
+        if(!key) { updateDisplay("KEY?", "--", "", false); return; }
+        
+        updateDisplay("KI DENKT...", "", "", false);
+        document.getElementById('mic-btn').classList.add('ai-mode');
+        
+        const promptText = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return ONLY JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
+
+        try {
+            let data;
+            if(prov === 'gemini') {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+                const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }) });
+                const json = await res.json();
+                if(json.error) throw new Error(json.error.message);
+                const cleanJson = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+                data = JSON.parse(cleanJson);
+            } else {
+                const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+                    body: JSON.stringify({ model: "gpt-4o", messages: [{ role: "user", content: promptText }], max_tokens: 60 })
+                });
+                const json = await res.json();
+                data = JSON.parse(json.choices[0].message.content.match(/\{[\s\S]*\}/)[0]);
+            }
+            danceHistory.unshift({ date: new Date().toLocaleDateString('de-DE'), title, artist, dance: data.dance, bpm: data.bpm, tact: data.tact, rhythm: data.rhythm, stars: 0 });
+            localStorage.setItem('dm_history', JSON.stringify(danceHistory));
+            renderHistory();
+            updateDisplay(data.dance, data.tact, data.rhythm, true);
+            document.getElementById('bpm-display').innerText = data.bpm;
+        } catch(e) {
+            updateDisplay("FEHLER", "--", "!", false);
+        }
+        setTimeout(() => { document.getElementById('mic-btn').classList.remove('ai-mode'); }, 1000); 
     }
 
     // --- UI Helpers ---
@@ -666,21 +691,34 @@
         localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
         localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
+        const inputs = document.querySelectorAll('.expert-input');
+        inputs.forEach(inp => {
+            const dance = inp.dataset.dance;
+            const type = inp.dataset.type;
+            if(expertRanges[dance]) expertRanges[dance][type] = (type === 'rhythm' ? inp.value : parseInt(inp.value));
+        });
+        localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
         location.reload();
     }
     function updateSens(val) { document.getElementById('main-sens').value = val; document.getElementById('sens-val-display').innerText = val; micSens = val / 1000; localStorage.setItem('dm_sens', val); }
     function renderPrefs() { const list = document.getElementById('pref-list'); list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join(''); }
     function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); } }
     function renderHistory() { const f = document.getElementById('search-hist').value.toLowerCase(); const list = document.getElementById('history-list'); let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f)); list.innerHTML = filtered.map(h => `<div class="hist-card"><div class="hist-title">${h.title}</div><div class="hist-info"><span>${h.dance}</span></div></div>`).join(''); }
-    function exportData() { downloadBackup(); }
+    function exportData() { downloadBackup(); } 
     function importData(input) { loadBackup(input); }
-    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="text" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
+    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="number" class="expert-input" data-dance="${d}" data-type="min" value="${expertRanges[d].min}"><input type="number" class="expert-input" data-dance="${d}" data-type="max" value="${expertRanges[d].max}"><input type="text" class="expert-input" data-dance="${d}" data-type="rhythm" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
+    function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
     function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
     function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span>▶</span></div>`; }); c.innerHTML = html + "</div>"; }
     function playVid(src, s, e, t, idx) { const o = document.getElementById('fs-video-overlay'); const v = document.getElementById('main-video'); o.classList.add('active'); currentFigIdx = idx; document.getElementById('vid-info').innerText = t; v.src = src; v.currentTime = s; v.play(); }
     function nextFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx < figs.length - 1) playVid(videoLibrary[currentDance].file, figs[currentFigIdx+1].start, figs[currentFigIdx+1].end, figs[currentFigIdx+1].name, currentFigIdx+1); }
     function prevFigure() { const figs = videoLibrary[currentDance].figures; if (currentFigIdx > 0) playVid(videoLibrary[currentDance].file, figs[currentFigIdx-1].start, figs[currentFigIdx-1].end, figs[currentFigIdx-1].name, currentFigIdx-1); }
     function replayFigure() { const v = document.getElementById('main-video'); const figs = videoLibrary[currentDance].figures; v.currentTime = figs[currentFigIdx].start; v.play(); }
+    
+    function toggleQR(imgId, url) {
+        const img = document.getElementById(imgId);
+        if (img.style.display === 'block') { img.style.display = 'none'; } else { img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(url); img.style.display = 'block'; }
+    }
     function testFunk() { const t = document.getElementById('ntfy-topic').value; fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test'})}).then(()=>alert("OK")).catch(e=>alert(e)); }
 </script>
 </body>
