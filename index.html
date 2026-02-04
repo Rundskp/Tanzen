@@ -767,6 +767,7 @@ function updateDisplay(dance, tact, rhythm, verified) {
         if(p === 'gemini') localStorage.setItem('dm_gemini_key', k); else localStorage.setItem('dm_openai_key', k);
         localStorage.setItem('dm_ai_provider', p);
         localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value);
+        try { connectNtfy(document.getElementById('ntfy-topic').value.trim()); } catch(_) {}
         localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
         localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
@@ -916,6 +917,91 @@ function exportData() { downloadBackup(); }
         if (img.style.display === 'block') { img.style.display = 'none'; } else { img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(url); img.style.display = 'block'; }
     }
     function testFunk() { const t = document.getElementById('ntfy-topic').value; fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test'})}).then(()=>alert("OK")).catch(e=>alert(e)); }
+
+// -----------------------------
+// NTFY (Funk) Subscribe + Song Handler
+// -----------------------------
+let __ntfyES = null;
+let __lastSongKey = "";
+let __lastSongAt = 0;
+
+function connectNtfy(topic) {
+    try { if(__ntfyES) __ntfyES.close(); } catch(_) {}
+    __ntfyES = null;
+
+    topic = (topic || "").trim();
+    if(!topic) return;
+
+    const url = `https://ntfy.sh/${encodeURIComponent(topic)}/sse`;
+    __ntfyES = new EventSource(url);
+
+    __ntfyES.onopen = () => console.log("ntfy connected:", topic);
+
+    __ntfyES.onerror = (e) => {
+        // EventSource reconnects automatically; keep quiet.
+        console.warn("ntfy error (will retry)", e);
+    };
+
+    __ntfyES.onmessage = (ev) => {
+        try {
+            const msg = JSON.parse(ev.data || "{}");
+            const raw = String(msg.message || "").trim();
+            if(!raw) return;
+
+            let title = "", artist = "";
+
+            // Prefer structured JSON inside message
+            if(raw.startsWith("{") && raw.endsWith("}")) {
+                try {
+                    const o = JSON.parse(raw);
+                    title  = String(o.title || o.song || "").trim();
+                    artist = String(o.artist || o.singer || o.author || "").trim();
+                } catch(_) {}
+            }
+
+            // Fallback: "Artist - Title"
+            if((!title || !artist) && raw.includes(" - ")) {
+                const parts = raw.split(" - ");
+                artist = artist || String(parts[0] || "").trim();
+                title  = title  || String(parts.slice(1).join(" - ") || "").trim();
+            }
+
+            // Fallback: plain title if only one field
+            if(!title && !artist) title = raw;
+
+            if(title || artist) onSongDetected(artist, title);
+        } catch(err) {
+            console.warn("ntfy parse failed", err);
+        }
+    };
+}
+
+function onSongDetected(artist, title) {
+    // De-dupe spam (ntfy repeats / reconnect duplicates)
+    const key = `${artist}|||${title}`;
+    const now = Date.now();
+    if(key === __lastSongKey && (now - __lastSongAt) < 5000) return;
+    __lastSongKey = key; __lastSongAt = now;
+
+    // Keep shown while track is "active"
+    const tEl = document.getElementById('song-title');
+    const aEl = document.getElementById('song-artist');
+    if(tEl) tEl.innerText = title || "Unbekannter Titel";
+    if(aEl) aEl.innerText = artist || "Unbekannter Artist";
+
+    // Trigger AI
+    askAI(artist || "Unknown", title || "Unknown");
+}
+
+// Make OpenAI parsing robust even if the model slips
+function __parseAIJson(text) {
+    const cleaned = String(text || "").replace(/```json|```/g, "").trim();
+    try { return JSON.parse(cleaned); } catch(_) {}
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("KI-Antwort enthält kein JSON: " + cleaned.slice(0,160));
+    return JSON.parse(m[0]);
+}
+
 </script>
 </body>
 </html>
