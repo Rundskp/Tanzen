@@ -783,8 +783,17 @@
                 const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }) });
                 const json = await res.json();
                 if(json.error) throw new Error(json.error.message);
-                const cleanJson = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
-                data = JSON.parse(cleanJson);
+                const text = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+                const cleanJson = String(text).replace(/```json|```/g, "").trim();
+                
+                try {
+                  data = JSON.parse(cleanJson);
+                } catch (_) {
+                  const m = cleanJson.match(/\{[\s\S]*\}/);
+                  if (!m) throw new Error("Gemini-Antwort enthält kein JSON: " + cleanJson.slice(0, 160));
+                  data = JSON.parse(m[0]);
+                }
+
             } else {
                 const res = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
@@ -792,7 +801,21 @@
                 });
                 const json = await res.json();
                 if(json.error) throw new Error(json.error.message);
-                data = JSON.parse(json.choices[0].message.content.match(/\{[\s\S]*\}/)[0]);
+                const content = json?.choices?.[0]?.message?.content ?? "";
+                const cleaned = String(content).replace(/```json|```/g, "").trim();
+                
+                // 1) Direkt versuchen
+                try {
+                  data = JSON.parse(cleaned);
+                } catch (_) {
+                  // 2) JSON-Objekt irgendwo im Text finden
+                  const m = cleaned.match(/\{[\s\S]*\}/);
+                  if (!m) {
+                    throw new Error("KI-Antwort enthält kein JSON: " + cleaned.slice(0, 160));
+                  }
+                  data = JSON.parse(m[0]);
+                }
+
             }
             danceHistory.unshift({ date: new Date().toLocaleDateString('de-DE'), title, artist, dance: data.dance, bpm: data.bpm, tact: data.tact, rhythm: data.rhythm, stars: 0 });
             localStorage.setItem('dm_history', JSON.stringify(danceHistory));
