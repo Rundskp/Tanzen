@@ -756,17 +756,6 @@ function updateDisplay(dance, tact, rhythm, verified) {
         }
         setTimeout(() => { document.getElementById('mic-btn').classList.remove('ai-mode'); }, 1000); 
     }
-            danceHistory.unshift({ date: new Date().toLocaleDateString('de-DE'), title, artist, dance: data.dance, stars: (danceHistory[0]?.stars ?? 0) ? 0 : 0 });
-            localStorage.setItem('dm_history', JSON.stringify(danceHistory));
-            renderHistory();
-            updateDisplay(data.dance, data.tact, data.rhythm, true);
-            document.getElementById('bpm-display').innerText = data.bpm;
-        } catch(e) {
-            updateDisplay("KI-FEHLER", "--", "!", false);
-            alert(e.message);
-        }
-        setTimeout(() => { document.getElementById('mic-btn').classList.remove('ai-mode'); }, 1000); 
-    }
 
     // --- UI Helpers ---
     function openOverlay(id) { document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'library-overlay') renderLibrary(); }
