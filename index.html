@@ -340,10 +340,6 @@
     let audioCtx, analyserLow, analyserHigh, isListening = false;
     let lastBeat = 0, aiLocked = false, micSens = 0.04; 
     let discoEnabled = true, playbackSpeed = 1.0, videoSound = false;
-    let meterSmooth = 0;
-    let pulseStrength = 0;
-    let _uiLastTS = performance.now();
-
     // STANDARD-WERTE (FALLBACK)
     let preferredDances = ["Walzer", "Rumba", "Cha Cha Cha", "Discofox", "Salsa", "Boogie", "Tango", "Foxtrott", "Quickstep"];
     let danceHistory = [];
@@ -385,11 +381,12 @@
     // --- INIT ---
     window.onload = () => {
         loadData();
+        normalizeExpertRanges();
         const prov = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = prov;
         loadKeyIntoInput(); 
         
-        const topic = localStorage.getItem('dm_topic') || 'Tanz_8392_Haxen_2026_XyZ';
+        const topic = localStorage.getItem('dm_topic');
         if(topic) { document.getElementById('ntfy-topic').value = topic; connectNtfy(topic); }
         
         discoEnabled = localStorage.getItem('dm_disco') !== 'false';
@@ -406,10 +403,70 @@
         renderPrefs(); 
         renderHistory(); 
         renderExpert();
-        requestAnimationFrame(animateUI);
+        startPulseLoop();
         
         document.body.addEventListener('touchstart', function() { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, {once:true});
     };
+
+    
+    // --- NTFY (Shortcut -> Web) ---
+    let _ntfyES = null;
+
+    function connectNtfy(topic) {
+        try { if (_ntfyES) _ntfyES.close(); } catch (_) {}
+        _ntfyES = null;
+
+        if(!topic) return;
+
+        // SSE stream
+        const url = `https://ntfy.sh/${encodeURIComponent(topic)}/sse`;
+        _ntfyES = new EventSource(url);
+
+        _ntfyES.onopen = () => console.log("ntfy connected:", topic);
+        _ntfyES.onerror = (e) => console.warn("ntfy error (auto-reconnect):", e);
+
+        _ntfyES.onmessage = (ev) => {
+            try {
+                const msg = JSON.parse(ev.data);
+                const raw = String(msg.message ?? "").trim();
+                if(!raw) return;
+
+                let title = "", artist = "";
+
+                // Preferred: JSON body in msg.message
+                if(raw.startsWith("{")) {
+                    const o = JSON.parse(raw);
+                    title = String(o.title ?? o.song ?? "").trim();
+                    artist = String(o.artist ?? o.singer ?? o.author ?? "").trim();
+                } 
+                // Common: "Artist - Title"
+                else if(raw.includes(" - ")) {
+                    const parts = raw.split(" - ");
+                    artist = parts[0].trim();
+                    title = parts.slice(1).join(" - ").trim();
+                } 
+                // Fallback: treat as title
+                else {
+                    title = raw;
+                }
+
+                onSongDetected(artist, title);
+            } catch(err) {
+                console.warn("ntfy parse failed:", err);
+            }
+        };
+    }
+
+    function onSongDetected(artist, title) {
+        // Update UI
+        if(title) document.getElementById('song-title').innerText = title;
+        if(artist) document.getElementById('song-artist').innerText = artist;
+
+        // Trigger AI dance detection (this was missing)
+        try { askAI(artist || "Unknown", title || "Unknown"); } 
+        catch(e) { console.warn("askAI failed:", e); }
+    }
+
 
     // --- LOGIC ---
     function loadKeyIntoInput() {
@@ -428,8 +485,27 @@
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
+
+    function normalizeExpertRanges() {
+        // Merge stored expertRanges with defaults so fields are never missing at startup
+        for (const [dance, def] of Object.entries(defaultRanges)) {
+            if (!expertRanges[dance] || typeof expertRanges[dance] !== 'object') {
+                expertRanges[dance] = { ...def };
+                continue;
+            }
+            const r = expertRanges[dance];
+            if (r.min == null || r.min === "") r.min = def.min;
+            if (r.max == null || r.max === "") r.max = def.max;
+            if (!r.tact) r.tact = def.tact;
+            if (!r.rhythm) r.rhythm = def.rhythm;
+        }
+    }
+
     /* --- AUDIO ENGINE --- */
     let bpmBuffer = [];
+    let meterSmooth = 0;
+    let pulseStrength = 0;
+    let _pulseLoopStarted = false;
     
     function mainAction() {
         const btn = document.getElementById('mic-btn');
@@ -477,8 +553,11 @@
             x += barW + 1;
         }
         // BOOSTED GAIN (Divisor 25 statt 128)
-        const _lvlTarget = Math.min(100, (sumLow/buf/18)*100);
-        meterSmooth = meterSmooth*0.82 + _lvlTarget*0.18;
+        // Smoothed + boosted meter (less fummelig)
+        const avg = (sumLow / buf) / 255; // 0..1
+        const boosted = Math.min(1, Math.sqrt(avg) * 1.8); // perceptual boost
+        const target = boosted * 100;
+        meterSmooth = meterSmooth * 0.82 + target * 0.18;
         document.getElementById('level-meter').style.height = meterSmooth.toFixed(1) + "%";
         
         x = 0;
@@ -513,39 +592,7 @@
 
     function processBeat(now) {
         if(aiLocked) return;
-
-        // Smooth disco pulse: set a peak, UI loop handles decay.
-        if(discoEnabled) pulseStrength = 1;
-
-        const bpm = Math.round(60000 / (now - lastBeat));
-        bpmBuffer.push(bpm); if(bpmBuffer.length>8) bpmBuffer.shift();
-        const avg = Math.round(bpmBuffer.reduce((a,b)=>a+b,0)/bpmBuffer.length);
-        document.getElementById('bpm-display').innerText = avg;
-        detectDance(avg);
-        lastBeat = now;
-    
-
-    // --- UI SMOOTHING LOOP (pulsing + easing) ---
-    function animateUI(ts) {
-        const dt = Math.min(0.05, (ts - _uiLastTS) / 1000);
-        _uiLastTS = ts;
-
-        // Exponential decay for disco pulse (smooth, no stutter)
-        pulseStrength *= Math.exp(-dt * 5.5);
-
-        const el = document.getElementById('dance-name');
-        if(el && discoEnabled) {
-            const s = 1 + 0.10 * pulseStrength;
-            el.style.transform = `scale(${s.toFixed(4)})`;
-            el.style.filter = `brightness(${(1 + 0.35*pulseStrength).toFixed(3)})`;
-        } else if(el) {
-            el.style.transform = '';
-            el.style.filter = '';
-        }
-
-        requestAnimationFrame(animateUI);
-    }
-}
+        if(discoEnabled) { pulseStrength = 1; }
         const bpm = Math.round(60000 / (now - lastBeat));
         bpmBuffer.push(bpm); if(bpmBuffer.length>8) bpmBuffer.shift();
         const avg = Math.round(bpmBuffer.reduce((a,b)=>a+b,0)/bpmBuffer.length);
@@ -629,6 +676,37 @@
         }
     }
     function resetTap() { tapBuffer=[]; document.getElementById('tap-bpm').innerText="0 BPM"; document.getElementById('tap-result').innerText="Starten..."; document.getElementById('tap-viz').innerHTML=""; }
+
+    
+    function startPulseLoop() {
+        if (_pulseLoopStarted) return;
+        _pulseLoopStarted = true;
+        const el = document.getElementById('dance-name');
+        let last = performance.now();
+        function frame(t) {
+            const dt = Math.min(0.05, (t - last) / 1000);
+            last = t;
+
+            // decay: smooth, frame-rate independent-ish
+            const decayPerSec = 6.5; // higher = faster decay
+            pulseStrength = Math.max(0, pulseStrength - decayPerSec * dt);
+
+            if (discoEnabled) {
+                // ease curve so it feels "soft"
+                const s = 1 + (pulseStrength * 0.12);
+                el.style.transform = `scale(${s.toFixed(4)})`;
+                // subtle glow modulation (optional but cheap)
+                el.style.filter = `drop-shadow(0 0 ${(pulseStrength*18).toFixed(1)}px rgba(255,255,255,0.35))`;
+            } else {
+                el.style.transform = "";
+                el.style.filter = "";
+            }
+
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    }
+
 
     // --- BACKUP ---
     function downloadBackup() {
@@ -751,84 +829,50 @@
         alert("Einstellungen gespeichert!"); // Feedback
         location.reload();
     }
-
-    // --- NTFY (Shortcut -> WebApp) ---
-    let _ntfyES = null;
-
-    function connectNtfy(topic) {
-        try { if(_ntfyES) _ntfyES.close(); } catch(_) {}
-        if(!topic) return;
-
-        // Server-Sent Events stream
-        const url = `https://ntfy.sh/${encodeURIComponent(topic)}/sse`;
-        _ntfyES = new EventSource(url);
-
-        _ntfyES.onopen = () => console.log("ntfy connected:", topic);
-
-        _ntfyES.onerror = (e) => {
-            console.warn("ntfy error (auto-reconnect):", e);
-        };
-
-        _ntfyES.onmessage = (ev) => {
-            try {
-                const msg = JSON.parse(ev.data);
-                const raw = String(msg.message ?? "").trim();
-                if(!raw) return;
-
-                let title = "", artist = "";
-                if(raw.startsWith("{")) {
-                    const o = JSON.parse(raw);
-                    title = String(o.title ?? o.song ?? "").trim();
-                    artist = String(o.artist ?? o.singer ?? o.author ?? "").trim();
-                } else if(raw.includes(" - ")) {
-                    const parts = raw.split(" - ");
-                    artist = parts[0].trim();
-                    title = parts.slice(1).join(" - ").trim();
-                } else {
-                    // if only one string is sent, treat it as title
-                    title = raw;
-                }
-
-                onSongDetected(artist, title);
-            } catch(err) {
-                console.warn("ntfy parse failed:", err);
-            }
-        };
-    }
-
-    function onSongDetected(artist, title) {
-        // Update UI
-        if(title) document.getElementById('song-title').innerText = title;
-        if(artist) document.getElementById('song-artist').innerText = artist;
-
-        // Trigger AI dance detection (this was missing)
-        try { askAI(artist || "Unknown", title || "Unknown"); } catch(e) { console.warn("askAI failed:", e); }
-    }
-
     function updateSens(val) { document.getElementById('main-sens').value = val; document.getElementById('sens-val-display').innerText = val; micSens = val / 1000; localStorage.setItem('dm_sens', val); }
     function renderPrefs() { const list = document.getElementById('pref-list'); list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join(''); }
     function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); } }
     function renderHistory() { const f = document.getElementById('search-hist').value.toLowerCase(); const list = document.getElementById('history-list'); let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f)); list.innerHTML = filtered.map(h => `<div class="hist-card"><div class="hist-title">${h.title}</div><div class="hist-info"><span>${h.dance}</span></div></div>`).join(''); }
     function exportData() { downloadBackup(); } 
     function importData(input) { loadBackup(input); }
+    
     function renderExpert() {
         const el = document.getElementById('expert-list');
         const dances = Object.keys(expertRanges);
-        el.innerHTML = dances.map(d => {
+        el.innerHTML = `
+          <div class="expert-head expert-row">
+            <span class="dance">Tanz</span>
+            <span class="col">Min</span>
+            <span class="col">Max</span>
+            <span class="col">Takt</span>
+            <span class="col">Rhythmus</span>
+          </div>
+        ` + dances.map(d => {
             const r = expertRanges[d] || {};
-            const min = (r.min ?? '');
-            const max = (r.max ?? '');
-            const tact = (r.tact ?? '');
-            const rhythm = (r.rhythm ?? '');
             return `
-            <div class="expert-row">
+              <div class="expert-row">
                 <span class="dance">${d}</span>
-                <input class="expert-input" data-dance="${d}" data-type="min" type="number" inputmode="numeric" value="${min}">
-                <input class="expert-input" data-dance="${d}" data-type="max" type="number" inputmode="numeric" value="${max}">
-                <input class="expert-input" data-dance="${d}" data-type="rhythm" type="text" value="${rhythm}" placeholder="z.B. L S S">
-            </div>`;
+                <input class="expert-input" data-dance="${d}" data-type="min" type="number" inputmode="numeric" value="${r.min ?? ''}">
+                <input class="expert-input" data-dance="${d}" data-type="max" type="number" inputmode="numeric" value="${r.max ?? ''}">
+                <input class="expert-input" data-dance="${d}" data-type="tact" type="text" value="${r.tact ?? ''}" placeholder="4/4">
+                <input class="expert-input" data-dance="${d}" data-type="rhythm" type="text" value="${r.rhythm ?? ''}" placeholder="z.B. L S S">
+              </div>`;
         }).join('');
-    }</span><input type="text" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
+
+        // attach change listeners
+        el.querySelectorAll('.expert-input').forEach(inp => {
+            inp.addEventListener('input', () => {
+                const dance = inp.dataset.dance;
+                const type = inp.dataset.type;
+                let v = inp.value;
+                if(type === 'min' || type === 'max') v = v === "" ? "" : Number(v);
+                expertRanges[dance] = expertRanges[dance] || {};
+                expertRanges[dance][type] = v;
+                localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+            });
+        });
+    }
+
     function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
     function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
     function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span>▶</span></div>`; }); c.innerHTML = html + "</div>"; }
