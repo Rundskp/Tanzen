@@ -194,10 +194,10 @@
 <div id="top-bar">
     <button class="header-icon-btn" onclick="openOverlay('settings-overlay')">⚙️</button>
     <button id="mic-btn" onclick="mainAction()">START</button>
+    <button id="tap-main-btn" class="header-icon-btn" title="Tap im Rhythmus" onclick="tapMain()">👆</button>
     <div style="display:flex; justify-content: flex-end; gap: 15px;">
         <button class="header-icon-btn" onclick="openOverlay('donate-overlay')">☕️</button>
-        <button class="header-icon-btn" onclick="openOverlay('tap-overlay')">🖐️</button>
-        <button class="header-icon-btn" onclick="openOverlay('library-overlay')">?</button>
+                <button class="header-icon-btn" onclick="openOverlay('library-overlay')">?</button>
     </div>
 </div>
 
@@ -579,6 +579,31 @@ function updateDisplay(dance, tact, rhythm, verified) {
         if(tapBuffer.length >= 4) analyzeTapBuffer();
     }
 
+
+    // MAIN SCREEN single-tap helper:
+    // User taps ONE button in rhythm. If there was a longer pause, that tap is treated as emphasized.
+    function tapMain() {
+        const now = Date.now();
+        // Estimate whether this tap is emphasized based on pause length
+        let type = 'L';
+        if (tapBuffer.length === 0) type = 'H';
+        else {
+            const last = tapBuffer[tapBuffer.length-1].t;
+            const gap = now - last;
+
+            // Use recent median interval as baseline if we have enough taps
+            let base = 500;
+            if (tapBuffer.length >= 3) {
+                const ints = [];
+                for(let i=1;i<tapBuffer.length;i++) ints.push(tapBuffer[i].t - tapBuffer[i-1].t);
+                ints.sort((a,b)=>a-b);
+                base = ints[Math.floor(ints.length/2)] || base;
+            }
+            if (gap > base * 1.6) type = 'H';  // longer pause => emphasized
+        }
+        handleTapInput(type);
+    }
+
     function analyzeTapBuffer() {
         let intervals = [];
         for(let i=1; i<tapBuffer.length; i++) intervals.push(tapBuffer[i].t - tapBuffer[i-1].t);
@@ -903,8 +928,52 @@ function saveHistoryEdit(i) {
 
 function exportData() { downloadBackup(); } 
     function importData(input) { loadBackup(input); }
-    function renderExpert() { const el = document.getElementById('expert-list'); el.innerHTML = Object.keys(expertRanges).map(d => `<div class="expert-row"><span>${d}</span><input type="text" value="${expertRanges[d].rhythm || '-'}"></div>`).join(''); }
-    function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
+    
+function renderExpert() {
+    const el = document.getElementById('expert-list');
+    if(!el) return;
+
+    const dances = Object.keys(expertRanges || {});
+    el.innerHTML = dances.map(d => {
+        const v = expertRanges[d] || {};
+        const min = (v.min ?? "");
+        const max = (v.max ?? "");
+        const rhythm = (v.rhythm ?? "");
+        return `
+          <div class="expert-row" data-dance="${escapeHtml(d)}">
+            <span>${escapeHtml(d)}</span>
+            <input class="expert-input" data-k="min" type="number" inputmode="numeric" value="${min}">
+            <input class="expert-input" data-k="max" type="number" inputmode="numeric" value="${max}">
+            <input class="expert-input" data-k="rhythm" type="text" value="${escapeHtml(rhythm)}" placeholder="z.B. LLSS">
+          </div>`;
+    }).join('');
+
+    el.querySelectorAll('.expert-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+            const row = inp.closest('.expert-row');
+            const dance = row ? row.getAttribute('data-dance') : null;
+            const k = inp.getAttribute('data-k');
+            if(!dance || !k) return;
+
+            expertRanges[dance] = expertRanges[dance] || {};
+            if(k === 'min' || k === 'max') {
+                const n = Number(inp.value);
+                expertRanges[dance][k] = Number.isFinite(n) ? n : 0;
+            } else {
+                expertRanges[dance][k] = String(inp.value || "").trim();
+            }
+            localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+        }, { passive: true });
+    });
+}
+
+function resetExpert() {
+    if(!confirm("Expertenwerte auf Standard zurücksetzen?")) return;
+    expertRanges = JSON.parse(JSON.stringify(defaultRanges));
+    localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+    renderExpert();
+}
+
     function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
     function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span>▶</span></div>`; }); c.innerHTML = html + "</div>"; }
     function playVid(src, s, e, t, idx) { const o = document.getElementById('fs-video-overlay'); const v = document.getElementById('main-video'); o.classList.add('active'); currentFigIdx = idx; document.getElementById('vid-info').innerText = t; v.src = src; v.currentTime = s; v.play(); }
@@ -945,29 +1014,41 @@ function connectNtfy(topic) {
     __ntfyES.onmessage = (ev) => {
         try {
             const msg = JSON.parse(ev.data || "{}");
-            const raw = String(msg.message || "").trim();
-            if(!raw) return;
 
-            let title = "", artist = "";
+            // ntfy SSE event fields include: {message, title, ...}
+            // Your Shortcut currently POSTs JSON: {"message":"ARTIST - TITLE","title":"Tanz Das!"}
+            // That arrives as a STRING inside msg.message, so we unwrap it here.
+            let raw = String(msg.message || "").trim();
 
-            // Prefer structured JSON inside message
+            let title = "";
+            let artist = "";
+
+            // If the message itself is JSON, unwrap common shapes
             if(raw.startsWith("{") && raw.endsWith("}")) {
                 try {
                     const o = JSON.parse(raw);
-                    title  = String(o.title || o.song || "").trim();
+
+                    // Preferred shape: {"artist":"...","title":"..."}
+                    title  = String(o.title  || o.song   || "").trim();
                     artist = String(o.artist || o.singer || o.author || "").trim();
+
+                    // Shortcut shape: {"message":"Artist - Title","title":"Tanz Das!"}
+                    if(o.message) raw = String(o.message).trim();
+
+                    // Optional explicit song fields (future-proof)
+                    if(o.songTitle && !title) title = String(o.songTitle).trim();
+                    if(o.songArtist && !artist) artist = String(o.songArtist).trim();
                 } catch(_) {}
             }
 
-            // Fallback: "Artist - Title"
+            // Parse "Artist - Title"
             if((!title || !artist) && raw.includes(" - ")) {
                 const parts = raw.split(" - ");
                 artist = artist || String(parts[0] || "").trim();
                 title  = title  || String(parts.slice(1).join(" - ") || "").trim();
             }
 
-            // Fallback: plain title if only one field
-            if(!title && !artist) title = raw;
+            if(!title && raw) title = raw;
 
             if(title || artist) onSongDetected(artist, title);
         } catch(err) {
