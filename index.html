@@ -17,7 +17,9 @@
         body { display: flex; flex-direction: column; }
         
         /* HEADER */
-        #top-bar { display: grid; grid-template-columns: 60px 1fr 120px; align-items: center; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 500; position: relative; flex-shrink: 0; }
+        #top-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333; z-index: 500; position: relative; flex-shrink: 0; flex-wrap: nowrap; }
+#top-left, #top-right { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+#mic-btn { flex: 1 1 auto; min-width: 140px; max-width: 520px; justify-self: center; }
         .header-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text); padding: 5px; }
         
         #mic-btn { background: #333; border: 2px solid #444; color: white; padding: 10px 10px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; justify-self: center; width: 110px; transition: 0.2s; }
@@ -119,7 +121,18 @@
         .star-btn { font-size: 1.6rem; color: #333; cursor: pointer; transition: 0.1s; }
         .star-btn.active { color: var(--yellow); text-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
 
-        /* Video */
+        
+        .btn-mini { background:#222; border:1px solid #444; color:#ddd; padding:6px 10px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; }
+        .btn-mini:hover { border-color:#666; }
+        .hist-edit { display:none; gap:8px; flex-direction:column; margin-top:10px; }
+        .hist-edit input { width:100%; background:#0f0f0f; border:1px solid #333; color:#fff; border-radius:10px; padding:10px; font-size:0.95rem; }
+        .hist-edit .row { display:flex; gap:8px; }
+        .hist-edit .row .btn-mini { flex:1; }
+        .hist-mainline { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+        .hist-date { color:#888; font-size:0.85rem; font-weight:600; }
+        .dance-chip { background:#0b2236; border:1px solid rgba(90,180,255,0.35); color:var(--blue); padding:6px 10px; border-radius:999px; font-weight:800; }
+
+/* Video */
         .figure-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
         .figure-item { background: #222; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; min-height: 60px; }
         .figure-play { color: var(--green); font-size: 1.8rem; }
@@ -176,18 +189,38 @@
         .tap-viz-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; }
         .tap-viz-dot.heavy { background: var(--red); transform: scale(1.3); box-shadow: 0 0 5px var(--red); }
         .tap-viz-dot.light { background: #888; }
-    </style>
+    
+/* TOPBAR MOBILE FIX */
+@media (max-width: 520px) {
+  #top-bar { padding: 8px 10px; gap: 8px; }
+  .header-icon-btn { width: 42px; height: 42px; font-size: 18px; }
+  #mic-btn { min-width: 120px; font-size: 15px; padding: 10px 12px; }
+}
+
+
+
+.tap-main-area { margin: 14px auto 0; width: min(620px, 92vw); text-align: center; }
+.tap-btn { width: 100%; border-radius: 14px; padding: 14px 16px; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #fff; }
+.tap-btn:active { transform: scale(0.98); }
+.tap-hint { margin-top: 8px; color: rgba(255,255,255,0.65); font-size: 12px; }
+.tap-pattern { margin-top: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 14px; letter-spacing: 2px; color: rgba(255,255,255,0.85); min-height: 18px; }
+
+</style>
 </head>
 <body>
 
 <div id="top-bar">
-    <button class="header-icon-btn" onclick="openOverlay('settings-overlay')">⚙️</button>
-    <button id="mic-btn" onclick="mainAction()">START</button>
-    <div style="display:flex; justify-content: flex-end; gap: 15px;">
-        <button class="header-icon-btn" onclick="openOverlay('donate-overlay')">☕️</button>
-        <button class="header-icon-btn" onclick="openOverlay('tap-overlay')">🖐️</button>
-        <button class="header-icon-btn" onclick="openOverlay('library-overlay')">?</button>
-    </div>
+  <div id="top-left">
+    <button class="header-icon-btn" onclick="openOverlay('settings-overlay')" aria-label="Einstellungen">⚙️</button>
+  </div>
+
+  <button id="mic-btn" onclick="mainAction()">START</button>
+
+  <div id="top-right">
+    <button class="header-icon-btn" onclick="openOverlay('donate-overlay')" aria-label="Spenden">☕️</button>
+    <button class="header-icon-btn" onclick="openOverlay('library-overlay')" aria-label="Hilfe">?</button>
+  </div>
+</div>
 </div>
 
 <div id="monitor">
@@ -209,6 +242,12 @@
             <div class="stat-box"><div id="takt-display" class="stat-val">--</div><div class="stat-label">TAKT</div></div>
             <div class="stat-box"><div id="density-display" class="stat-val" style="font-size:1.5rem; color:#888;">0.0</div><div class="stat-label">DICHTE</div></div>
         </div>
+        <div class="tap-main-area">
+            <button id="tap-btn" class="tap-btn" onclick="tapMain()">TAP</button>
+            <div id="tap-hint" class="tap-hint">Im Rhythmus draufklopfen. Lange Pause = betont.</div>
+            <div id="tap-pattern" class="tap-pattern" aria-label="Tap-Muster"></div>
+        </div>
+
     </div>
     <div id="slider-sidebar">
         <div class="slider-wrap">
@@ -381,7 +420,6 @@
     // --- INIT ---
     window.onload = () => {
         loadData();
-        normalizeExpertRanges();
         const prov = localStorage.getItem('dm_ai_provider') || 'openai';
         document.getElementById('ai-provider').value = prov;
         loadKeyIntoInput(); 
@@ -403,70 +441,9 @@
         renderPrefs(); 
         renderHistory(); 
         renderExpert();
-        startPulseLoop();
         
         document.body.addEventListener('touchstart', function() { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, {once:true});
     };
-
-    
-    // --- NTFY (Shortcut -> Web) ---
-    let _ntfyES = null;
-
-    function connectNtfy(topic) {
-        try { if (_ntfyES) _ntfyES.close(); } catch (_) {}
-        _ntfyES = null;
-
-        if(!topic) return;
-
-        // SSE stream
-        const url = `https://ntfy.sh/${encodeURIComponent(topic)}/sse`;
-        _ntfyES = new EventSource(url);
-
-        _ntfyES.onopen = () => console.log("ntfy connected:", topic);
-        _ntfyES.onerror = (e) => console.warn("ntfy error (auto-reconnect):", e);
-
-        _ntfyES.onmessage = (ev) => {
-            try {
-                const msg = JSON.parse(ev.data);
-                const raw = String(msg.message ?? "").trim();
-                if(!raw) return;
-
-                let title = "", artist = "";
-
-                // Preferred: JSON body in msg.message
-                if(raw.startsWith("{")) {
-                    const o = JSON.parse(raw);
-                    title = String(o.title ?? o.song ?? "").trim();
-                    artist = String(o.artist ?? o.singer ?? o.author ?? "").trim();
-                } 
-                // Common: "Artist - Title"
-                else if(raw.includes(" - ")) {
-                    const parts = raw.split(" - ");
-                    artist = parts[0].trim();
-                    title = parts.slice(1).join(" - ").trim();
-                } 
-                // Fallback: treat as title
-                else {
-                    title = raw;
-                }
-
-                onSongDetected(artist, title);
-            } catch(err) {
-                console.warn("ntfy parse failed:", err);
-            }
-        };
-    }
-
-    function onSongDetected(artist, title) {
-        // Update UI
-        if(title) document.getElementById('song-title').innerText = title;
-        if(artist) document.getElementById('song-artist').innerText = artist;
-
-        // Trigger AI dance detection (this was missing)
-        try { askAI(artist || "Unknown", title || "Unknown"); } 
-        catch(e) { console.warn("askAI failed:", e); }
-    }
-
 
     // --- LOGIC ---
     function loadKeyIntoInput() {
@@ -481,31 +458,13 @@
     function loadData() {
         if(localStorage.getItem('dm_prefs')) preferredDances = JSON.parse(localStorage.getItem('dm_prefs'));
         if(localStorage.getItem('dm_history')) danceHistory = JSON.parse(localStorage.getItem('dm_history'));
+        migrateHistory();
         // Expert ranges: if in LS, load it. If not, defaults (defined above) are used.
         if(localStorage.getItem('dm_expert')) expertRanges = JSON.parse(localStorage.getItem('dm_expert'));
     }
 
-
-    function normalizeExpertRanges() {
-        // Merge stored expertRanges with defaults so fields are never missing at startup
-        for (const [dance, def] of Object.entries(defaultRanges)) {
-            if (!expertRanges[dance] || typeof expertRanges[dance] !== 'object') {
-                expertRanges[dance] = { ...def };
-                continue;
-            }
-            const r = expertRanges[dance];
-            if (r.min == null || r.min === "") r.min = def.min;
-            if (r.max == null || r.max === "") r.max = def.max;
-            if (!r.tact) r.tact = def.tact;
-            if (!r.rhythm) r.rhythm = def.rhythm;
-        }
-    }
-
     /* --- AUDIO ENGINE --- */
     let bpmBuffer = [];
-    let meterSmooth = 0;
-    let pulseStrength = 0;
-    let _pulseLoopStarted = false;
     
     function mainAction() {
         const btn = document.getElementById('mic-btn');
@@ -553,12 +512,7 @@
             x += barW + 1;
         }
         // BOOSTED GAIN (Divisor 25 statt 128)
-        // Smoothed + boosted meter (less fummelig)
-        const avg = (sumLow / buf) / 255; // 0..1
-        const boosted = Math.min(1, Math.sqrt(avg) * 1.8); // perceptual boost
-        const target = boosted * 100;
-        meterSmooth = meterSmooth * 0.82 + target * 0.18;
-        document.getElementById('level-meter').style.height = meterSmooth.toFixed(1) + "%";
+        document.getElementById('level-meter').style.height = Math.min(100, (sumLow/buf/25)*100) + "%";
         
         x = 0;
         for(let i=0; i<buf; i++) {
@@ -592,7 +546,10 @@
 
     function processBeat(now) {
         if(aiLocked) return;
-        if(discoEnabled) { pulseStrength = 1; }
+        if(discoEnabled) {
+            const el = document.getElementById('dance-name');
+            el.classList.remove('pulse-beat'); void el.offsetWidth; el.classList.add('pulse-beat');
+        }
         const bpm = Math.round(60000 / (now - lastBeat));
         bpmBuffer.push(bpm); if(bpmBuffer.length>8) bpmBuffer.shift();
         const avg = Math.round(bpmBuffer.reduce((a,b)=>a+b,0)/bpmBuffer.length);
@@ -616,7 +573,17 @@
         updateDisplay(winner.name, winner.tact, winner.rhythm, false);
     }
 
-    function updateDisplay(dance, tact, rhythm, verified) {
+    
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#39;");
+}
+
+function updateDisplay(dance, tact, rhythm, verified) {
         document.getElementById('dance-name').innerText = dance;
         document.getElementById('takt-display').innerText = tact;
         document.getElementById('badge-rhythm').innerText = rhythm;
@@ -639,6 +606,37 @@
 
         if(tapBuffer.length >= 4) analyzeTapBuffer();
     }
+
+
+    // MAIN SCREEN single-tap helper:
+    // User taps ONE button in rhythm. If there was a longer pause, that tap is treated as emphasized.
+    function tapMain() {
+        const now = Date.now();
+        // Estimate whether this tap is emphasized based on pause length
+        let type = 'L';
+        if (tapBuffer.length === 0) type = 'H';
+        else {
+            const last = tapBuffer[tapBuffer.length-1].t;
+            const gap = now - last;
+
+            // Use recent median interval as baseline if we have enough taps
+            let base = 500;
+            if (tapBuffer.length >= 3) {
+                const ints = [];
+                for(let i=1;i<tapBuffer.length;i++) ints.push(tapBuffer[i].t - tapBuffer[i-1].t);
+                ints.sort((a,b)=>a-b);
+                base = ints[Math.floor(ints.length/2)] || base;
+            }
+            if (gap > base * 1.6) type = 'H';  // longer pause => emphasized
+        }
+        handleTapInput(type);
+    
+  try {
+    const el = document.getElementById('tap-pattern');
+    if (el && window.__tapPatternStr) el.textContent = window.__tapPatternStr;
+  } catch(_) {}
+
+}
 
     function analyzeTapBuffer() {
         let intervals = [];
@@ -676,37 +674,6 @@
         }
     }
     function resetTap() { tapBuffer=[]; document.getElementById('tap-bpm').innerText="0 BPM"; document.getElementById('tap-result').innerText="Starten..."; document.getElementById('tap-viz').innerHTML=""; }
-
-    
-    function startPulseLoop() {
-        if (_pulseLoopStarted) return;
-        _pulseLoopStarted = true;
-        const el = document.getElementById('dance-name');
-        let last = performance.now();
-        function frame(t) {
-            const dt = Math.min(0.05, (t - last) / 1000);
-            last = t;
-
-            // decay: smooth, frame-rate independent-ish
-            const decayPerSec = 6.5; // higher = faster decay
-            pulseStrength = Math.max(0, pulseStrength - decayPerSec * dt);
-
-            if (discoEnabled) {
-                // ease curve so it feels "soft"
-                const s = 1 + (pulseStrength * 0.12);
-                el.style.transform = `scale(${s.toFixed(4)})`;
-                // subtle glow modulation (optional but cheap)
-                el.style.filter = `drop-shadow(0 0 ${(pulseStrength*18).toFixed(1)}px rgba(255,255,255,0.35))`;
-            } else {
-                el.style.transform = "";
-                el.style.filter = "";
-            }
-
-            requestAnimationFrame(frame);
-        }
-        requestAnimationFrame(frame);
-    }
-
 
     // --- BACKUP ---
     function downloadBackup() {
@@ -770,35 +737,78 @@
         const prov = localStorage.getItem('dm_ai_provider') || 'openai';
         let key = prov === 'gemini' ? localStorage.getItem('dm_gemini_key') : localStorage.getItem('dm_openai_key');
         if(!key) { updateDisplay("KEY?", "--", "", false); return; }
-        
+
+        // keep showing current track while KI works
+        const tEl = document.getElementById('song-title');
+        const aEl = document.getElementById('song-artist');
+        if (tEl) tEl.innerText = title || "—";
+        if (aEl) aEl.innerText = artist || "—";
+
         updateDisplay("KI DENKT...", "", "", false);
         document.getElementById('mic-btn').classList.add('ai-mode');
-        
-        const promptText = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return ONLY JSON: {"dance": "Name", "bpm": number, "tact": "4/4", "rhythm": "string"}`;
+
+        const promptText = `Song: "${title}" by "${artist}". Pick best dance from: ${preferredDances.join(", ")}. Return ONLY JSON object with keys: dance (string), bpm (number), tact (string like 4/4), rhythm (string).`;
 
         try {
             let data;
             if(prov === 'gemini') {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
-                const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }) });
-                const json = await res.json();
-                if(json.error) throw new Error(json.error.message);
-                const cleanJson = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
-                data = JSON.parse(cleanJson);
-            } else {
-                const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                    body: JSON.stringify({ model: "gpt-4o", messages: [{ role: "user", content: promptText }], max_tokens: 60 })
+                const res = await fetch(url, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    contents: [{ parts: [{ text: promptText }] }],
+                    generationConfig: { temperature: 0.2 }
+                  })
                 });
                 const json = await res.json();
                 if(json.error) throw new Error(json.error.message);
-                data = JSON.parse(json.choices[0].message.content.match(/\{[\s\S]*\}/)[0]);
+
+                const text = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+                const cleaned = String(text).replace(/```json|```/g, '').trim();
+
+                try {
+                  data = JSON.parse(cleaned);
+                } catch (_) {
+                  const mm = cleaned.match(/\{[\s\S]*\}/);
+                  if (!mm) throw new Error("Gemini: Antwort enthält kein JSON: " + cleaned.slice(0,160));
+                  data = JSON.parse(mm[0]);
+                }
+            } else {
+                const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${key}`
+                    },
+                    body: JSON.stringify({
+                      model: "gpt-4o",
+                      messages: [{ role: "user", content: promptText }],
+                      response_format: { type: "json_object" },
+                      max_tokens: 120
+                    })
+                });
+                const json = await res.json();
+                if(json.error) throw new Error(json.error.message);
+
+                const content = json?.choices?.[0]?.message?.content ?? "";
+                if (!content) throw new Error("OpenAI: Leere Antwort.");
+                data = JSON.parse(String(content).trim());
             }
-            danceHistory.unshift({ date: new Date().toLocaleDateString('de-DE'), title, artist, dance: data.dance, bpm: data.bpm, tact: data.tact, rhythm: data.rhythm, stars: 0 });
-            localStorage.setItem('dm_history', JSON.stringify(danceHistory));
+
+            // History: date + artist + title + dance (+ stars)
+            danceHistory.unshift({
+              date: new Date().toLocaleDateString('de-DE'),
+              title: title || "",
+              artist: artist || "",
+              dance: data?.dance || "—",
+              stars: 0
+            });
+            saveHistory();
             renderHistory();
-            updateDisplay(data.dance, data.tact, data.rhythm, true);
-            document.getElementById('bpm-display').innerText = data.bpm;
+
+            updateDisplay(data?.dance || "—", data?.tact || "--", data?.rhythm || "", true);
+            document.getElementById('bpm-display').innerText = data?.bpm ?? "--";
         } catch(e) {
             updateDisplay("KI-FEHLER", "--", "!", false);
             alert(e.message);
@@ -816,6 +826,7 @@
         if(p === 'gemini') localStorage.setItem('dm_gemini_key', k); else localStorage.setItem('dm_openai_key', k);
         localStorage.setItem('dm_ai_provider', p);
         localStorage.setItem('dm_topic', document.getElementById('ntfy-topic').value);
+        try { connectNtfy(document.getElementById('ntfy-topic').value.trim()); } catch(_) {}
         localStorage.setItem('dm_disco', document.getElementById('disco-mode').checked);
         localStorage.setItem('dm_vid_sound', document.getElementById('video-audio').checked);
         localStorage.setItem('dm_prefs', JSON.stringify(preferredDances));
@@ -832,48 +843,171 @@
     function updateSens(val) { document.getElementById('main-sens').value = val; document.getElementById('sens-val-display').innerText = val; micSens = val / 1000; localStorage.setItem('dm_sens', val); }
     function renderPrefs() { const list = document.getElementById('pref-list'); list.innerHTML = preferredDances.map((d,i) => `<div class="tag">${d}<span onclick="preferredDances.splice(${i},1);renderPrefs()">✕</span></div>`).join(''); }
     function addPref() { const v = document.getElementById('new-pref').value.trim(); if(v && !preferredDances.includes(v)) { preferredDances.push(v); document.getElementById('new-pref').value = ""; renderPrefs(); } }
-    function renderHistory() { const f = document.getElementById('search-hist').value.toLowerCase(); const list = document.getElementById('history-list'); let filtered = danceHistory.filter(h => h.title.toLowerCase().includes(f)); list.innerHTML = filtered.map(h => `<div class="hist-card"><div class="hist-title">${h.title}</div><div class="hist-info"><span>${h.dance}</span></div></div>`).join(''); }
-    function exportData() { downloadBackup(); } 
+    
+function renderHistory() {
+  const f = (document.getElementById('search-hist')?.value || "").toLowerCase().trim();
+  const list = document.getElementById('history-list');
+  if (!list) return;
+
+  const idxs = [];
+  for (let i = 0; i < danceHistory.length; i++) {
+    const h = danceHistory[i] || {};
+    const hay = `${h.title||""} ${h.artist||""} ${h.dance||""} ${h.date||""}`.toLowerCase();
+    if (!f || hay.includes(f)) idxs.push(i);
+  }
+
+  list.innerHTML = idxs.map(i => {
+    const h = danceHistory[i] || {};
+    const title = escapeHtml(h.title || "—");
+    const artist = escapeHtml(h.artist || "—");
+    const dance = escapeHtml(h.dance || "—");
+    const date = escapeHtml(h.date || "");
+
+    const stars = Number(h.stars || 0);
+    const starBtns = [1,2,3,4,5].map(n =>
+      `<span class="star-btn ${n<=stars?'active':''}" onclick="setHistoryStars(${i},${n})">★</span>`
+    ).join('');
+
+    return `
+      <div class="hist-card" data-i="${i}">
+        <div class="hist-del" title="Löschen" onclick="deleteHistory(${i})">×</div>
+
+        <div class="hist-mainline">
+          <div class="hist-date">${date}</div>
+          <div class="dance-chip" id="hist-dance-${i}">${dance}</div>
+          <button class="btn-mini" onclick="toggleHistoryEdit(${i}, true)">Edit</button>
+        </div>
+
+        <div class="hist-title" id="hist-title-${i}">${title}</div>
+        <div class="hist-artist" id="hist-artist-${i}">${artist}</div>
+
+        <div class="hist-edit" id="hist-edit-${i}">
+          <input id="hist-in-title-${i}" value="${title.replace(/"/g,'&quot;')}" placeholder="Titel">
+          <input id="hist-in-artist-${i}" value="${artist.replace(/"/g,'&quot;')}" placeholder="Artist">
+          <input id="hist-in-dance-${i}" value="${dance.replace(/"/g,'&quot;')}" placeholder="Tanz">
+          <div class="row">
+            <button class="btn-mini" onclick="saveHistoryEdit(${i})">Speichern</button>
+            <button class="btn-mini" onclick="toggleHistoryEdit(${i}, false)">Abbrechen</button>
+          </div>
+        </div>
+
+        <div class="hist-stars">${starBtns}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (!idxs.length) list.innerHTML = `<div style="color:#777; text-align:center; padding:20px;">Keine Treffer.</div>`;
+}
+
+function migrateHistory() {
+  // Backwards compatible: if history entries are strings or missing fields.
+  for (let i = 0; i < danceHistory.length; i++) {
+    const h = danceHistory[i];
+    if (typeof h === "string") {
+      danceHistory[i] = { date: "", title: "", artist: "", dance: h, stars: 0 };
+      continue;
+    }
+    if (!h || typeof h !== "object") {
+      danceHistory[i] = { date: "", title: "", artist: "", dance: "—", stars: 0 };
+      continue;
+    }
+    h.date = h.date ?? "";
+    h.title = h.title ?? "";
+    h.artist = h.artist ?? "";
+    h.dance = h.dance ?? "—";
+    h.stars = Number(h.stars ?? 0);
+    // drop huge legacy fields? we simply ignore them.
+  }
+  saveHistory();
+}
+
+function saveHistory() {
+  localStorage.setItem('dm_history', JSON.stringify(danceHistory));
+}
+
+function deleteHistory(i) {
+  if (!confirm("Eintrag löschen?")) return;
+  danceHistory.splice(i, 1);
+  saveHistory();
+  renderHistory();
+}
+
+function setHistoryStars(i, n) {
+  danceHistory[i] = danceHistory[i] || {};
+  danceHistory[i].stars = n;
+  saveHistory();
+  renderHistory();
+}
+
+function toggleHistoryEdit(i, on) {
+  const box = document.getElementById(`hist-edit-${i}`);
+  if (!box) return;
+  box.style.display = on ? "flex" : "none";
+}
+
+function saveHistoryEdit(i) {
+  const t = document.getElementById(`hist-in-title-${i}`)?.value ?? "";
+  const a = document.getElementById(`hist-in-artist-${i}`)?.value ?? "";
+  const d = document.getElementById(`hist-in-dance-${i}`)?.value ?? "";
+
+  danceHistory[i] = danceHistory[i] || {};
+  danceHistory[i].title = t.trim();
+  danceHistory[i].artist = a.trim();
+  danceHistory[i].dance = d.trim();
+
+  // update visible fields without full rerender feels nice, but rerender is simpler/stable
+  saveHistory();
+  renderHistory();
+}
+
+function exportData() { downloadBackup(); } 
     function importData(input) { loadBackup(input); }
     
-    function renderExpert() {
-        const el = document.getElementById('expert-list');
-        const dances = Object.keys(expertRanges);
-        el.innerHTML = `
-          <div class="expert-head expert-row">
-            <span class="dance">Tanz</span>
-            <span class="col">Min</span>
-            <span class="col">Max</span>
-            <span class="col">Takt</span>
-            <span class="col">Rhythmus</span>
-          </div>
-        ` + dances.map(d => {
-            const r = expertRanges[d] || {};
-            return `
-              <div class="expert-row">
-                <span class="dance">${d}</span>
-                <input class="expert-input" data-dance="${d}" data-type="min" type="number" inputmode="numeric" value="${r.min ?? ''}">
-                <input class="expert-input" data-dance="${d}" data-type="max" type="number" inputmode="numeric" value="${r.max ?? ''}">
-                <input class="expert-input" data-dance="${d}" data-type="tact" type="text" value="${r.tact ?? ''}" placeholder="4/4">
-                <input class="expert-input" data-dance="${d}" data-type="rhythm" type="text" value="${r.rhythm ?? ''}" placeholder="z.B. L S S">
-              </div>`;
-        }).join('');
+function renderExpert() {
+    const el = document.getElementById('expert-list');
+    if(!el) return;
 
-        // attach change listeners
-        el.querySelectorAll('.expert-input').forEach(inp => {
-            inp.addEventListener('input', () => {
-                const dance = inp.dataset.dance;
-                const type = inp.dataset.type;
-                let v = inp.value;
-                if(type === 'min' || type === 'max') v = v === "" ? "" : Number(v);
-                expertRanges[dance] = expertRanges[dance] || {};
-                expertRanges[dance][type] = v;
-                localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
-            });
-        });
-    }
+    const dances = Object.keys(expertRanges || {});
+    el.innerHTML = dances.map(d => {
+        const v = expertRanges[d] || {};
+        const min = (v.min ?? "");
+        const max = (v.max ?? "");
+        const rhythm = (v.rhythm ?? "");
+        return `
+          <div class="expert-row" data-dance="${escapeHtml(d)}">
+            <span>${escapeHtml(d)}</span>
+            <input class="expert-input" data-k="min" type="number" inputmode="numeric" value="${min}">
+            <input class="expert-input" data-k="max" type="number" inputmode="numeric" value="${max}">
+            <input class="expert-input" data-k="rhythm" type="text" value="${escapeHtml(rhythm)}" placeholder="z.B. LLSS">
+          </div>`;
+    }).join('');
 
-    function resetExpert() { if(confirm("Reset?")) { expertRanges = JSON.parse(JSON.stringify(defaultRanges)); renderExpert(); } }
+    el.querySelectorAll('.expert-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+            const row = inp.closest('.expert-row');
+            const dance = row ? row.getAttribute('data-dance') : null;
+            const k = inp.getAttribute('data-k');
+            if(!dance || !k) return;
+
+            expertRanges[dance] = expertRanges[dance] || {};
+            if(k === 'min' || k === 'max') {
+                const n = Number(inp.value);
+                expertRanges[dance][k] = Number.isFinite(n) ? n : 0;
+            } else {
+                expertRanges[dance][k] = String(inp.value || "").trim();
+            }
+            localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+        }, { passive: true });
+    });
+}
+
+function resetExpert() {
+    if(!confirm("Expertenwerte auf Standard zurücksetzen?")) return;
+    expertRanges = JSON.parse(JSON.stringify(defaultRanges));
+    localStorage.setItem('dm_expert', JSON.stringify(expertRanges));
+    renderExpert();
+}
+
     function renderLibrary() { const c = document.getElementById('library-content'); c.innerHTML = '<div class="dance-grid"></div>'; const grid = c.querySelector('.dance-grid'); Object.keys(videoLibrary).forEach(dance => { const card = document.createElement('div'); card.className = 'dance-card'; card.innerHTML = `<h3>${dance}</h3>`; card.onclick = () => showFigures(dance); grid.appendChild(card); }); }
     function showFigures(dance) { const data = videoLibrary[dance]; if(!data.file) return alert("Kein Video."); const c = document.getElementById('library-content'); currentDance = dance; let html = `<button class="btn-action btn-secondary" onclick="renderLibrary()">← Zurück</button><div class="figure-list">`; data.figures.forEach((fig, idx) => { html += `<div class="figure-item" onclick="playVid('${data.file}', ${fig.start}, ${fig.end}, '${fig.name}', ${idx})"><span>${fig.name}</span><span>▶</span></div>`; }); c.innerHTML = html + "</div>"; }
     function playVid(src, s, e, t, idx) { const o = document.getElementById('fs-video-overlay'); const v = document.getElementById('main-video'); o.classList.add('active'); currentFigIdx = idx; document.getElementById('vid-info').innerText = t; v.src = src; v.currentTime = s; v.play(); }
@@ -886,6 +1020,103 @@
         if (img.style.display === 'block') { img.style.display = 'none'; } else { img.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(url); img.style.display = 'block'; }
     }
     function testFunk() { const t = document.getElementById('ntfy-topic').value; fetch(`https://ntfy.sh/${t}`, {method:'POST', body: JSON.stringify({message: 'Test'})}).then(()=>alert("OK")).catch(e=>alert(e)); }
+
+// -----------------------------
+// NTFY (Funk) Subscribe + Song Handler
+// -----------------------------
+let __ntfyES = null;
+let __lastSongKey = "";
+let __lastSongAt = 0;
+
+function connectNtfy(topic) {
+    try { if(__ntfyES) __ntfyES.close(); } catch(_) {}
+    __ntfyES = null;
+
+    topic = (topic || "").trim();
+    if(!topic) return;
+
+    const url = `https://ntfy.sh/${encodeURIComponent(topic)}/sse`;
+    __ntfyES = new EventSource(url);
+
+    __ntfyES.onopen = () => console.log("ntfy connected:", topic);
+
+    __ntfyES.onerror = (e) => {
+        // EventSource reconnects automatically; keep quiet.
+        console.warn("ntfy error (will retry)", e);
+    };
+
+    __ntfyES.onmessage = (ev) => {
+        try {
+            const msg = JSON.parse(ev.data || "{}");
+
+            // ntfy SSE event fields include: {message, title, ...}
+            // Your Shortcut currently POSTs JSON: {"message":"ARTIST - TITLE","title":"Tanz Das!"}
+            // That arrives as a STRING inside msg.message, so we unwrap it here.
+            let raw = String(msg.message || "").trim();
+
+            let title = "";
+            let artist = "";
+
+            // If the message itself is JSON, unwrap common shapes
+            if(raw.startsWith("{") && raw.endsWith("}")) {
+                try {
+                    const o = JSON.parse(raw);
+
+                    // Preferred shape: {"artist":"...","title":"..."}
+                    title  = String(o.title  || o.song   || "").trim();
+                    artist = String(o.artist || o.singer || o.author || "").trim();
+
+                    // Shortcut shape: {"message":"Artist - Title","title":"Tanz Das!"}
+                    if(o.message) raw = String(o.message).trim();
+
+                    // Optional explicit song fields (future-proof)
+                    if(o.songTitle && !title) title = String(o.songTitle).trim();
+                    if(o.songArtist && !artist) artist = String(o.songArtist).trim();
+                } catch(_) {}
+            }
+
+            // Parse "Artist - Title"
+            if((!title || !artist) && raw.includes(" - ")) {
+                const parts = raw.split(" - ");
+                artist = artist || String(parts[0] || "").trim();
+                title  = title  || String(parts.slice(1).join(" - ") || "").trim();
+            }
+
+            if(!title && raw) title = raw;
+
+            if(title || artist) onSongDetected(artist, title);
+        } catch(err) {
+            console.warn("ntfy parse failed", err);
+        }
+    };
+}
+
+function onSongDetected(artist, title) {
+    // De-dupe spam (ntfy repeats / reconnect duplicates)
+    const key = `${artist}|||${title}`;
+    const now = Date.now();
+    if(key === __lastSongKey && (now - __lastSongAt) < 5000) return;
+    __lastSongKey = key; __lastSongAt = now;
+
+    // Keep shown while track is "active"
+    const tEl = document.getElementById('song-title');
+    const aEl = document.getElementById('song-artist');
+    if(tEl) tEl.innerText = title || "Unbekannter Titel";
+    if(aEl) aEl.innerText = artist || "Unbekannter Artist";
+
+    // Trigger AI
+    askAI(artist || "Unknown", title || "Unknown");
+}
+
+// Make OpenAI parsing robust even if the model slips
+function __parseAIJson(text) {
+    const cleaned = String(text || "").replace(/```json|```/g, "").trim();
+    try { return JSON.parse(cleaned); } catch(_) {}
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("KI-Antwort enthält kein JSON: " + cleaned.slice(0,160));
+    return JSON.parse(m[0]);
+}
+
 </script>
 </body>
 </html>
