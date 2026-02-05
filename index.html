@@ -202,6 +202,7 @@
 .tap-main-area { margin: 14px auto 0; width: min(620px, 92vw); text-align: center; }
 .tap-btn { width: 100%; border-radius: 14px; padding: 14px 16px; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #fff; }
 .tap-btn:active { transform: scale(0.98); }
+.tap-btn.tap-flash { box-shadow: 0 0 0 3px rgba(255,255,255,0.18), 0 0 18px rgba(255,255,255,0.25); }
 .tap-hint { margin-top: 8px; color: rgba(255,255,255,0.65); font-size: 12px; }
 .tap-pattern { margin-top: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 14px; letter-spacing: 2px; color: rgba(255,255,255,0.85); min-height: 18px; }
 
@@ -232,6 +233,7 @@
             <div id="ai-details">
                 <span class="detail-badge" id="badge-source">LOKAL</span>
                 <span class="detail-badge" id="badge-rhythm"></span>
+                <span class="detail-badge" id="badge-ntfy">NTFY</span>
             </div>
         </div>
         <div class="dance-wrap">
@@ -544,12 +546,34 @@
         densityLow = 0; densityHigh = 0;
     }
 
-    function processBeat(now) {
+    
+function triggerPulse(strength, source) {
+    if(!discoEnabled) return;
+    const el = document.getElementById('dance-name');
+    if(!el) return;
+
+    // Strength 0..1
+    const s = Math.max(0, Math.min(1, strength ?? 0.6));
+    const scale = 1 + 0.06 + s*0.12;
+
+    try {
+        el.animate(
+            [
+                { transform: "scale(1)", filter: "brightness(1)" },
+                { transform: `scale(${scale})`, filter: `brightness(${1.05 + 0.35*s})` },
+                { transform: "scale(1)", filter: "brightness(1)" }
+            ],
+            { duration: 220 + s*180, easing: "cubic-bezier(.2,.9,.2,1)" }
+        );
+    } catch(_) {
+        // fallback: class pulse
+        el.classList.remove('pulse-beat'); void el.offsetWidth; el.classList.add('pulse-beat');
+    }
+}
+
+function processBeat(now) {
         if(aiLocked) return;
-        if(discoEnabled) {
-            const el = document.getElementById('dance-name');
-            el.classList.remove('pulse-beat'); void el.offsetWidth; el.classList.add('pulse-beat');
-        }
+        if(discoEnabled) { triggerPulse(0.65, 'audio'); }
         const bpm = Math.round(60000 / (now - lastBeat));
         bpmBuffer.push(bpm); if(bpmBuffer.length>8) bpmBuffer.shift();
         const avg = Math.round(bpmBuffer.reduce((a,b)=>a+b,0)/bpmBuffer.length);
@@ -612,6 +636,11 @@ function updateDisplay(dance, tact, rhythm, verified) {
     // User taps ONE button in rhythm. If there was a longer pause, that tap is treated as emphasized.
     function tapMain() {
         const now = Date.now();
+        // visual feedback
+        try {
+            const b = document.getElementById('tap-btn');
+            if(b) { b.classList.add('tap-flash'); setTimeout(()=>b.classList.remove('tap-flash'), 120); }
+        } catch(_) {}
         // Estimate whether this tap is emphasized based on pause length
         let type = 'L';
         if (tapBuffer.length === 0) type = 'H';
@@ -630,6 +659,7 @@ function updateDisplay(dance, tact, rhythm, verified) {
             if (gap > base * 1.6) type = 'H';  // longer pause => emphasized
         }
         handleTapInput(type);
+        try { triggerPulse(type==='H'?1.0:0.45, 'tap'); } catch(_) {}
     
   try {
     const el = document.getElementById('tap-pattern');
@@ -1024,72 +1054,145 @@ function resetExpert() {
 // -----------------------------
 // NTFY (Funk) Subscribe + Song Handler
 // -----------------------------
+
+function setNtfyStatus(txt) {
+    try {
+        const el = document.getElementById('badge-ntfy');
+        if(!el) return;
+        el.textContent = String(txt || "NTFY");
+    } catch(_) {}
+}
+
 let __ntfyES = null;
 let __lastSongKey = "";
 let __lastSongAt = 0;
 
-function connectNtfy(topic) {
-    try { if(__ntfyES) __ntfyES.close(); } catch(_) {}
-    __ntfyES = null;
 
+function connectNtfy(topic) {
     topic = (topic || "").trim();
     if(!topic) return;
 
-    const url = `https://ntfy.sh/${encodeURIComponent(topic)}/sse`;
-    __ntfyES = new EventSource(url);
+    // close previous
+    try { if(__ntfyES) __ntfyES.close(); } catch(_) {}
+    __ntfyES = null;
+    try { if(window.__ntfyPollAbort) window.__ntfyPollAbort.abort(); } catch(_) {}
+    window.__ntfyPollAbort = null;
 
-    __ntfyES.onopen = () => console.log("ntfy connected:", topic);
+    const sseUrl  = `https://ntfy.sh/${encodeURIComponent(topic)}/sse`;
+    const pollUrl = `https://ntfy.sh/${encodeURIComponent(topic)}/json?poll=1&since=`; // since=latest or last id
 
-    __ntfyES.onerror = (e) => {
-        // EventSource reconnects automatically; keep quiet.
-        console.warn("ntfy error (will retry)", e);
-    };
+    // small helper: parse incoming ntfy message payload into {artist,title}
+    function parseSongFromNtfyMessage(msgObj) {
+        // msgObj fields: message (string), title (string), ...
+        let raw = String(msgObj?.message || "").trim();
 
-    __ntfyES.onmessage = (ev) => {
-        try {
-            const msg = JSON.parse(ev.data || "{}");
-
-            // ntfy SSE event fields include: {message, title, ...}
-            // Your Shortcut currently POSTs JSON: {"message":"ARTIST - TITLE","title":"Tanz Das!"}
-            // That arrives as a STRING inside msg.message, so we unwrap it here.
-            let raw = String(msg.message || "").trim();
-
-            let title = "";
-            let artist = "";
-
-            // If the message itself is JSON, unwrap common shapes
-            if(raw.startsWith("{") && raw.endsWith("}")) {
-                try {
-                    const o = JSON.parse(raw);
-
-                    // Preferred shape: {"artist":"...","title":"..."}
-                    title  = String(o.title  || o.song   || "").trim();
-                    artist = String(o.artist || o.singer || o.author || "").trim();
-
-                    // Shortcut shape: {"message":"Artist - Title","title":"Tanz Das!"}
-                    if(o.message) raw = String(o.message).trim();
-
-                    // Optional explicit song fields (future-proof)
-                    if(o.songTitle && !title) title = String(o.songTitle).trim();
-                    if(o.songArtist && !artist) artist = String(o.songArtist).trim();
-                } catch(_) {}
-            }
-
-            // Parse "Artist - Title"
-            if((!title || !artist) && raw.includes(" - ")) {
-                const parts = raw.split(" - ");
-                artist = artist || String(parts[0] || "").trim();
-                title  = title  || String(parts.slice(1).join(" - ") || "").trim();
-            }
-
-            if(!title && raw) title = raw;
-
-            if(title || artist) onSongDetected(artist, title);
-        } catch(err) {
-            console.warn("ntfy parse failed", err);
+        // If Shortcut posts JSON body, ntfy will store JSON text in .message.
+        // Example: {"message":"Herbert Grönemeyer- Halt mich","title":"Tanz Das!"}
+        if(raw.startsWith("{") && raw.endsWith("}")) {
+            try {
+                const o = JSON.parse(raw);
+                // If the JSON has a "message" field with the song text, use that.
+                if(o && typeof o === "object") {
+                    if(typeof o.message === "string") raw = o.message.trim();
+                    // Sometimes people send explicit artist/title:
+                    const artist = String(o.artist || o.singer || o.author || o.songArtist || "").trim();
+                    const title  = String(o.songTitle || o.song || "").trim();
+                    if(artist || title) return { artist, title };
+                    // If o.title is just "Tanz Das!" (notification title), ignore it.
+                }
+            } catch(_) {}
         }
-    };
+
+        // Now raw is expected to be "Artist - Title" or "Artist- Title" etc.
+        let artist = "";
+        let title = "";
+
+        // Split on first hyphen, allowing spaces around it.
+        const mm = raw.match(/^(.+?)\s*-\s*(.+)$/);
+        if(mm) {
+            artist = String(mm[1] || "").trim();
+            title  = String(mm[2] || "").trim();
+        } else {
+            // If we can't split, treat as title only.
+            title = raw;
+        }
+
+        return { artist, title };
+    }
+
+    function handleNtfyObject(obj) {
+        if(!obj || obj.event !== "message") return;
+        const { artist, title } = parseSongFromNtfyMessage(obj);
+        if(title || artist) onSongDetected(artist, title);
+    }
+
+    // --- 1) Try SSE/EventSource first (best UX)
+    let sseWorking = false;
+    try {
+        __ntfyES = new EventSource(sseUrl);
+        __ntfyES.onopen = () => {
+            sseWorking = true;
+            console.log("ntfy SSE connected:", topic);
+            setNtfyStatus?.("SSE ✓");
+        };
+        __ntfyES.onerror = (e) => {
+            console.warn("ntfy SSE error", e);
+            setNtfyStatus?.("SSE …");
+            // If SSE never managed to open (common on some mobile networks/iOS quirks), fall back to polling.
+            if(!sseWorking) {
+                try { __ntfyES.close(); } catch(_) {}
+                __ntfyES = null;
+                startPoll("latest");
+            }
+        };
+        __ntfyES.onmessage = (ev) => {
+            try { handleNtfyObject(JSON.parse(ev.data || "{}")); }
+            catch(err){ console.warn("ntfy SSE parse failed", err); }
+        };
+    } catch(err) {
+        console.warn("ntfy SSE init failed", err);
+        startPoll("latest");
+    }
+
+    // --- 2) Poll fallback (works even if SSE is blocked)
+    async function startPoll(since) {
+        setNtfyStatus?.("POLL …");
+        const ac = new AbortController();
+        window.__ntfyPollAbort = ac;
+
+        let last = since || "latest";
+
+        while(!ac.signal.aborted) {
+            try {
+                const res = await fetch(pollUrl + encodeURIComponent(last), {
+                    method: "GET",
+                    headers: { "Accept": "application/x-ndjson" },
+                    cache: "no-store",
+                    signal: ac.signal
+                });
+                if(!res.ok) throw new Error("poll http " + res.status);
+
+                const txt = await res.text(); // poll ends after available messages
+                // ndjson can contain multiple lines
+                const lines = txt.split("\n").map(l => l.trim()).filter(Boolean);
+                for(const line of lines) {
+                    let obj = null;
+                    try { obj = JSON.parse(line); } catch(_) { continue; }
+                    if(obj?.id) last = obj.id;
+                    handleNtfyObject(obj);
+                }
+                setNtfyStatus?.("POLL ✓");
+            } catch(err) {
+                if(ac.signal.aborted) break;
+                console.warn("ntfy poll failed", err);
+                setNtfyStatus?.("POLL !");
+                // backoff
+                await new Promise(r => setTimeout(r, 1500));
+            }
+        }
+    }
 }
+
 
 function onSongDetected(artist, title) {
     // De-dupe spam (ntfy repeats / reconnect duplicates)
